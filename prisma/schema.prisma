@@ -1,0 +1,291 @@
+// MbôláMusic - Esquema de base de datos
+// Documentación: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------------------
+// ENUMS
+// ------------------------------------------------------------------
+
+enum Role {
+  LISTENER
+  ARTIST
+  ADMIN
+}
+
+enum SubscriptionType {
+  ARTIST_MONTHLY     // 10.000 FCFA/mes
+  LISTENER_FREE      // 1 mes gratis
+  LISTENER_MONTHLY   // 2.000 FCFA/mes
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  PENDING
+}
+
+enum PaymentMethod {
+  SIM_BALANCE        // Saldo SIM / Mobile Money
+  BANK_TRANSFER      // Transferencia bancaria
+  CARD               // Tarjeta Visa/Mastercard
+  WALLET             // Monedero interno
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  VERIFYING          // transferencia en revisión
+}
+
+enum PaymentPurpose {
+  ARTIST_SUBSCRIPTION
+  LISTENER_SUBSCRIPTION
+  PER_PLAY
+  PER_DOWNLOAD
+  WALLET_TOPUP
+}
+
+// ------------------------------------------------------------------
+// USUARIOS
+// ------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(uuid())
+  email         String?   @unique
+  phone         String?   @unique
+  passwordHash  String
+  role          Role      @default(LISTENER)
+
+  username      String    @unique
+  country       String    @default("Guinea Ecuatorial")
+  city          String?
+  avatarUrl     String?
+  favoriteGenres String[]  @default([])
+
+  walletBalance Int       @default(0) // saldo monedero en FCFA
+
+  isVerified    Boolean   @default(false) // email/phone verificado
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  artistProfile ArtistProfile?
+  subscriptions Subscription[]
+  payments      Payment[]
+  plays         Play[]
+  downloads     Download[]
+  playlists     Playlist[]
+  following      Follow[]       @relation("Follower")
+  followers      Follow[]       @relation("Following")
+  referralsMade  Referral[]     @relation("Referrer")
+  referralUsed   Referral?      @relation("Referred")
+  notifications  Notification[]
+
+  @@index([role])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // NEW_FOLLOWER | NEW_TRACK | PAYMENT_CONFIRMED | PAYMENT_REJECTED
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+}
+
+model ArtistProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  artistName      String
+  realName        String?
+  bio             String?
+  idDocumentUrl   String?  // documento de identidad para verificación
+  idVerified      Boolean  @default(false)
+
+  totalEarnings   Int      @default(0) // ganancias acumuladas en FCFA (no retiradas)
+
+  tracks          Track[]
+  createdAt       DateTime @default(now())
+}
+
+// ------------------------------------------------------------------
+// MÚSICA
+// ------------------------------------------------------------------
+
+model Track {
+  id            String   @id @default(uuid())
+  artistId      String
+  artist        ArtistProfile @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  title         String
+  genre         String
+  coverUrl      String?
+  audioUrl      String
+  lyrics        String?
+  album         String?
+  durationSec   Int      @default(0)
+  releaseDate   DateTime @default(now())
+
+  // Si el artista no paga su suscripción, su música se oculta (no se borra)
+  isPublished   Boolean  @default(true)
+
+  playCount     Int      @default(0)
+  downloadCount Int      @default(0)
+
+  plays         Play[]
+  downloads     Download[]
+  playlistItems PlaylistItem[]
+
+  createdAt     DateTime @default(now())
+
+  @@index([genre])
+  @@index([isPublished])
+}
+
+// ------------------------------------------------------------------
+// SUSCRIPCIONES
+// ------------------------------------------------------------------
+
+model Subscription {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type        SubscriptionType
+  status      SubscriptionStatus @default(ACTIVE)
+  startDate   DateTime @default(now())
+  endDate     DateTime
+  autoRenew   Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId, status])
+}
+
+// ------------------------------------------------------------------
+// PAGOS
+// ------------------------------------------------------------------
+
+model Payment {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  amount        Int      // en FCFA
+  method        PaymentMethod
+  status        PaymentStatus  @default(PENDING)
+  purpose       PaymentPurpose
+
+  // Referencia externa de la pasarela o comprobante de transferencia
+  externalRef   String?
+  // Para pay-per-use: a qué track se asocia
+  trackId       String?
+  // Reparto calculado
+  artistShare   Int      @default(0)
+  platformShare Int      @default(0)
+
+  createdAt     DateTime @default(now())
+  completedAt   DateTime?
+
+  @@index([userId])
+  @@index([status])
+}
+
+// ------------------------------------------------------------------
+// REPRODUCCIONES Y DESCARGAS
+// ------------------------------------------------------------------
+
+model Play {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackId   String
+  track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  // true si fue cubierta por suscripción, false si fue pago por reproducción
+  bySubscription Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([trackId])
+}
+
+model Download {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackId   String
+  track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([trackId])
+}
+
+// ------------------------------------------------------------------
+// LISTAS DE REPRODUCCIÓN
+// ------------------------------------------------------------------
+
+model Playlist {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  items     PlaylistItem[]
+  createdAt DateTime @default(now())
+}
+
+model PlaylistItem {
+  id         String   @id @default(uuid())
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  trackId    String
+  track      Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  addedAt    DateTime @default(now())
+
+  @@unique([playlistId, trackId])
+}
+
+// ------------------------------------------------------------------
+// SOCIAL
+// ------------------------------------------------------------------
+
+model Follow {
+  id          String @id @default(uuid())
+  followerId  String
+  follower    User   @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User   @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+}
+
+// ------------------------------------------------------------------
+// REFERIDOS (icono de regalo)
+// ------------------------------------------------------------------
+
+model Referral {
+  id          String @id @default(uuid())
+  code        String @unique
+  referrerId  String
+  referrer    User   @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referredId  String? @unique
+  referred    User?   @relation("Referred", fields: [referredId], references: [id])
+  rewardGiven Boolean @default(false)
+  createdAt   DateTime @default(now())
+}

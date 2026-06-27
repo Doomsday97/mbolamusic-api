@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mbolamusic
+      POSTGRES_USER: mbola
+      POSTGRES_PASSWORD: mbola_secret
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgresql://mbola:mbola_secret@db:5432/mbolamusic
+      JWT_SECRET: change_me_in_production
+      PORT: 4000
+      STORAGE_PROVIDER: local
+      # Para S3 descomenta:
+      # STORAGE_PROVIDER: s3
+      # S3_BUCKET: tu-bucket
+      # S3_REGION: us-east-1
+      # S3_ACCESS_KEY: ...
+      # S3_SECRET_KEY: ...
+      # S3_ENDPOINT: https://...
+      # CDN_BASE_URL: https://cdn.tudominio.com
+      # Flutterwave
+      # FLW_SECRET_KEY: FLWSECK_TEST-...
+      # FLW_WEBHOOK_HASH: ...
+    volumes:
+      - uploads:/app/uploads
+
+volumes:
+  pgdata:
+  uploads:

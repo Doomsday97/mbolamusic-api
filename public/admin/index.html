@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MbôláMusic · Admin</title>
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #1a1a1a; --surface2: #262626;
+    --accent: #f5a623; --text: #fff; --muted: #b0b0b0;
+    --success: #30a46c; --error: #e5484d; --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; min-height: 100vh; }
+  a { color: var(--accent); text-decoration: none; }
+
+  /* ── Login ── */
+  #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .login-card { background: var(--surface); padding: 40px; border-radius: var(--radius); width: 340px; }
+  .login-card h1 { color: var(--accent); font-size: 22px; margin-bottom: 4px; }
+  .login-card p { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+  input { width: 100%; padding: 12px; background: var(--surface2); border: none; border-radius: 8px;
+          color: var(--text); font-size: 15px; margin-bottom: 12px; }
+  input:focus { outline: 2px solid var(--accent); }
+  button { width: 100%; padding: 12px; background: var(--accent); color: #000;
+           border: none; border-radius: 24px; font-weight: bold; font-size: 15px; cursor: pointer; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  .error-msg { color: var(--error); font-size: 13px; margin-top: 8px; text-align: center; }
+
+  /* ── Shell ── */
+  #app { display: none; }
+  header { background: var(--surface); padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
+  header h1 { color: var(--accent); font-size: 18px; flex: 1; }
+  header span { color: var(--muted); font-size: 13px; }
+  nav { display: flex; gap: 4px; background: var(--surface); padding: 0 24px; border-bottom: 1px solid var(--surface2); }
+  nav button { background: none; color: var(--muted); border: none; border-bottom: 3px solid transparent;
+               padding: 12px 16px; cursor: pointer; font-size: 14px; border-radius: 0; width: auto; }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+  main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+
+  /* ── Stats cards ── */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .card { background: var(--surface); padding: 20px; border-radius: var(--radius); }
+  .card .val { font-size: 28px; font-weight: bold; color: var(--accent); }
+  .card .lbl { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+  /* ── Tables ── */
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .section-header h2 { font-size: 16px; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+  .filters select, .filters input[type=text] {
+    padding: 8px 12px; background: var(--surface2); border: none;
+    border-radius: 8px; color: var(--text); font-size: 13px; width: auto; margin: 0;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--surface2); }
+  th { color: var(--muted); font-weight: 600; }
+  tr:hover td { background: var(--surface2); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+  .badge-pending  { background: #3a2a00; color: var(--accent); }
+  .badge-done     { background: #0a2a18; color: var(--success); }
+  .badge-failed   { background: #2a0a0a; color: var(--error); }
+  .badge-artist   { background: #1a1040; color: #a07af5; }
+  .badge-listener { background: #0a1a2a; color: #60a0f5; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 6px; width: auto;
+            cursor: pointer; border: none; font-weight: bold; }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-danger  { background: var(--error);   color: #fff; }
+  .btn-warn    { background: #7a4400;        color: var(--accent); }
+  .pager { display: flex; gap: 8px; align-items: center; margin-top: 16px; justify-content: flex-end; }
+  .pager button { width: auto; padding: 6px 14px; font-size: 13px; background: var(--surface2); color: var(--text); border-radius: 6px; }
+  .loading { color: var(--muted); text-align: center; padding: 32px; }
+  .empty   { color: var(--muted); text-align: center; padding: 32px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1>MbôláMusic</h1>
+    <p>Panel de administración</p>
+    <input id="login-id" type="text" placeholder="Email, teléfono o usuario" />
+    <input id="login-pw" type="password" placeholder="Contraseña" />
+    <button id="login-btn" onclick="doLogin()">Entrar</button>
+    <div id="login-err" class="error-msg"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <h1>🎵 MbôláMusic Admin</h1>
+    <span id="admin-name"></span>
+    <button onclick="logout()" style="width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;">Salir</button>
+  </header>
+  <nav>
+    <button class="active" onclick="showTab('stats', this)">Estadísticas</button>
+    <button onclick="showTab('users', this)">Usuarios</button>
+    <button onclick="showTab('payments', this)">Pagos pendientes</button>
+  </nav>
+  <main>
+    <div id="tab-stats"></div>
+    <div id="tab-users" style="display:none"></div>
+    <div id="tab-payments" style="display:none"></div>
+  </main>
+</div>
+
+<script>
+const API = '/api';
+let _token = localStorage.getItem('adminToken');
+let _user  = null;
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const id = document.getElementById('login-id').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-err');
+  err.textContent = '';
+  btn.disabled = true;
+  try {
+    const r = await apiFetch('/auth/login', 'POST', { identifier: id, password: pw }, false);
+    if (r.user.role !== 'ADMIN') throw new Error('No tienes rol de administrador');
+    _token = r.token;
+    _user  = r.user;
+    localStorage.setItem('adminToken', _token);
+    showApp();
+  } catch (e) {
+    err.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function logout() {
+  localStorage.removeItem('adminToken');
+  location.reload();
+}
+
+async function tryAutoLogin() {
+  if (!_token) return;
+  try {
+    const r = await apiFetch('/auth/me', 'GET');
+    if (r.user.role !== 'ADMIN') { localStorage.removeItem('adminToken'); return; }
+    _user = r.user;
+    showApp();
+  } catch { localStorage.removeItem('adminToken'); }
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('admin-name').textContent = _user?.username || '';
+  loadStats();
+}
+
+// ── API helper ────────────────────────────────────────────────────────────────
+async function apiFetch(path, method = 'GET', body = null, auth = true) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (auth && _token) headers['Authorization'] = 'Bearer ' + _token;
+  const opts = { method, headers };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  const json = await res.json();
+  if (!json.success) throw new Error(json.error || 'Error');
+  return json.data;
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function showTab(name, btn) {
+  ['stats','users','payments'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
+  });
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (name === 'stats')    loadStats();
+  if (name === 'users')    loadUsers(1);
+  if (name === 'payments') loadPayments(1);
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+async function loadStats() {
+  const el = document.getElementById('tab-stats');
+  el.innerHTML = '<div class="loading">Cargando…</div>';
+  try {
+    const d = await apiFetch('/admin/stats');
+    el.innerHTML = `
+      <div class="cards">
+        <div class="card"><div class="val">${fmt(d.totalUsers)}</div><div class="lbl">Usuarios totales</div></div>
+        <div class="card"><div class="val">${fmt(d.totalArtists)}</div><div class="lbl">Artistas</div></div>
+        <div class="card"><div class="val">${fmt(d.totalTracks)}</div><div class="lbl">Canciones publicadas</div></div>
+        <div class="card"><div class="val">${fmt(d.totalPlays)}</div><div class="lbl">Reproducciones</div></div>
+        <div class="card"><div class="val">${fmt(d.totalDownloads)}</div><div class="lbl">Descargas</div></div>
+        <div class="card"><div class="val">${fmt(d.pendingPayments)}</div><div class="lbl">Pagos pendientes</div></div>
+        <div class="card"><div class="val">${fmt(d.totalRevenue)}</div><div class="lbl">Ingresos totales (FCFA)</div></div>
+        <div class="card"><div class="val">${fmt(d.platformRevenue)}</div><div class="lbl">Plataforma (FCFA)</div></div>
+        <div class="card"><div class="val">${fmt(d.artistRevenue)}</div><div class="lbl">Artistas (FCFA)</div></div>
+      </div>`;
+  } catch (e) {
+    el.innerHTML = `<div class="empty">${e.message}</div>`;
+  }
+}
+
+// ── Users ─────────────────────────────────────────────────────────────────────
+let _uPage = 1, _uRole = '';
+async function loadUsers(page = 1) {
+  _uPage = page;
+  const el = document.getElementById('tab-users');
+  el.innerHTML = `
+    <div class="section-header">
+      <h2>Usuarios</h2>
+      <div class="filters">
+        <select onchange="filterUsers(this.value)">
+          <option value="">Todos</option>
+          <option value="ARTIST" ${_uRole==='ARTIST'?'selected':''}>Artistas</option>
+          <option value="LISTENER" ${_uRole==='LISTENER'?'selected':''}>Oyentes</option>
+          <option value="ADMIN" ${_uRole==='ADMIN'?'selected':''}>Admin</option>
+        </select>
+      </div>
+    </div>
+    <div class="loading">Cargando…</div>`;
+  try {
+    const qs = `?page=${page}&limit=20${_uRole ? '&role=' + _uRole : ''}`;
+    const d = await apiFetch('/admin/users' + qs);
+    let rows = d.users.map(u => `
+      <tr>
+        <td>${esc(u.username)}</td>
+        <td>${esc(u.email || u.phone || '—')}</td>
+        <td><span class="badge badge-${u.role.toLowerCase()}">${u.role}</span></td>
+        <td>${esc(u.artistProfile?.artistName || '—')}</td>
+        <td>${fmt(u.walletBalance)} FCFA</td>
+        <td>${new Date(u.createdAt).toLocaleDateString('es')}</td>
+        <td>
+          ${u.role === 'ARTIST' ? `
+            <button class="btn-sm btn-warn" onclick="blockUser('${u.id}', '${esc(u.username)}')">Ocultar</button>
+            <button class="btn-sm btn-success" onclick="unblockUser('${u.id}')">Restaurar</button>
+          ` : '—'}
+        </td>
+      </tr>`).join('');
+    el.querySelector('.loading, .empty')?.remove();
+    el.innerHTML = `
+      <div class="section-header">
+        <h2>Usuarios <small style="color:var(--muted)">(${d.total})</small></h2>
+        <div class="filters">
+          <select onchange="filterUsers(this.value)">
+            <option value="">Todos</option>
+            <option value="ARTIST" ${_uRole==='ARTIST'?'selected':''}>Artistas</option>
+            <option value="LISTENER" ${_uRole==='LISTENER'?'selected':''}>Oyentes</option>
+            <option value="ADMIN" ${_uRole==='ADMIN'?'selected':''}>Admin</option>
+          </select>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Usuario</th><th>Contacto</th><th>Rol</th><th>Nombre artístico</th><th>Monedero</th><th>Registro</th><th>Acciones</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="7" class="empty">Sin resultados</td></tr>'}</tbody>
+      </table>
+      <div class="pager">
+        <button onclick="loadUsers(${page-1})" ${page<=1?'disabled':''}>← Anterior</button>
+        <span style="color:var(--muted);font-size:13px">Página ${page} / ${d.pages}</span>
+        <button onclick="loadUsers(${page+1})" ${page>=d.pages?'disabled':''}>Siguiente →</button>
+      </div>`;
+  } catch (e) {
+    el.innerHTML += `<div class="empty">${e.message}</div>`;
+  }
+}
+
+function filterUsers(role) { _uRole = role; loadUsers(1); }
+
+async function blockUser(id, name) {
+  if (!confirm(`¿Ocultar toda la música de ${name}?`)) return;
+  try { await apiFetch('/admin/users/' + id + '/block', 'POST'); loadUsers(_uPage); }
+  catch (e) { alert(e.message); }
+}
+async function unblockUser(id) {
+  try { await apiFetch('/admin/users/' + id + '/unblock', 'POST'); loadUsers(_uPage); }
+  catch (e) { alert(e.message); }
+}
+
+// ── Payments ──────────────────────────────────────────────────────────────────
+let _pPage = 1, _pStatus = 'VERIFYING';
+async function loadPayments(page = 1) {
+  _pPage = page;
+  const el = document.getElementById('tab-payments');
+  el.innerHTML = `
+    <div class="section-header">
+      <h2>Pagos</h2>
+      <div class="filters">
+        <select onchange="filterPayments(this.value)">
+          <option value="VERIFYING" ${_pStatus==='VERIFYING'?'selected':''}>Pendientes de verificar</option>
+          <option value="PENDING"   ${_pStatus==='PENDING'  ?'selected':''}>Pendientes</option>
+          <option value="COMPLETED" ${_pStatus==='COMPLETED'?'selected':''}>Completados</option>
+          <option value="FAILED"    ${_pStatus==='FAILED'   ?'selected':''}>Fallidos</option>
+          <option value=""          ${_pStatus===''         ?'selected':''}>Todos</option>
+        </select>
+      </div>
+    </div>
+    <div class="loading">Cargando…</div>`;
+  try {
+    const qs = `?page=${page}&limit=20${_pStatus ? '&status=' + _pStatus : ''}`;
+    const d = await apiFetch('/admin/payments' + qs);
+    const statusBadge = s => {
+      const cls = { VERIFYING:'pending', PENDING:'pending', COMPLETED:'done', FAILED:'failed' }[s] || 'pending';
+      return `<span class="badge badge-${cls}">${s}</span>`;
+    };
+    let rows = d.payments.map(p => `
+      <tr>
+        <td>${new Date(p.createdAt).toLocaleString('es')}</td>
+        <td>${esc(p.user?.username || '—')}</td>
+        <td>${fmt(p.amount)} FCFA</td>
+        <td>${p.method}</td>
+        <td>${p.purpose}</td>
+        <td>${statusBadge(p.status)}</td>
+        <td>${esc(p.externalRef || '—')}</td>
+        <td>
+          ${(p.status === 'VERIFYING' || p.status === 'PENDING') ? `
+            <button class="btn-sm btn-success" onclick="confirmPay('${p.id}')">✓ Confirmar</button>
+            <button class="btn-sm btn-danger"  onclick="rejectPay('${p.id}')">✗ Rechazar</button>
+          ` : '—'}
+        </td>
+      </tr>`).join('');
+    el.innerHTML = `
+      <div class="section-header">
+        <h2>Pagos <small style="color:var(--muted)">(${d.total})</small></h2>
+        <div class="filters">
+          <select onchange="filterPayments(this.value)">
+            <option value="VERIFYING" ${_pStatus==='VERIFYING'?'selected':''}>Pendientes de verificar</option>
+            <option value="PENDING"   ${_pStatus==='PENDING'  ?'selected':''}>Pendientes</option>
+            <option value="COMPLETED" ${_pStatus==='COMPLETED'?'selected':''}>Completados</option>
+            <option value="FAILED"    ${_pStatus==='FAILED'   ?'selected':''}>Fallidos</option>
+            <option value=""          ${_pStatus===''         ?'selected':''}>Todos</option>
+          </select>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Fecha</th><th>Usuario</th><th>Importe</th><th>Método</th><th>Concepto</th><th>Estado</th><th>Ref</th><th>Acciones</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="8" class="empty">Sin resultados</td></tr>'}</tbody>
+      </table>
+      <div class="pager">
+        <button onclick="loadPayments(${page-1})" ${page<=1?'disabled':''}>← Anterior</button>
+        <span style="color:var(--muted);font-size:13px">Página ${page} / ${d.pages}</span>
+        <button onclick="loadPayments(${page+1})" ${page>=d.pages?'disabled':''}>Siguiente →</button>
+      </div>`;
+  } catch (e) {
+    el.innerHTML += `<div class="empty">${e.message}</div>`;
+  }
+}
+
+function filterPayments(status) { _pStatus = status; loadPayments(1); }
+
+async function confirmPay(id) {
+  try { await apiFetch('/payments/' + id + '/confirm', 'POST'); loadPayments(_pPage); }
+  catch (e) { alert(e.message); }
+}
+async function rejectPay(id) {
+  if (!confirm('¿Rechazar este pago?')) return;
+  try { await apiFetch('/payments/' + id + '/reject', 'POST'); loadPayments(_pPage); }
+  catch (e) { alert(e.message); }
+}
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function fmt(n) { return Number(n || 0).toLocaleString('es'); }
+function esc(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+tryAutoLogin();
+document.getElementById('login-pw').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>

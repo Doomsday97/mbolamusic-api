@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: mbolamusic-api
+    runtime: node
+    region: frankfurt
+    plan: free
+    buildCommand: npm ci && npx prisma generate && npx prisma migrate deploy
+    startCommand: node src/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 30d
+      - key: PAYMENT_PROVIDER
+        value: mock
+      - key: STORAGE_PROVIDER
+        value: local
+      - key: UPLOAD_DIR
+        value: uploads
+      - key: BANK_NAME
+        value: BGFI Bank Guinea Ecuatorial
+      - key: BANK_ACCOUNT_NAME
+        value: MbôláMusic SARL
+      - key: BANK_ACCOUNT_NUMBER
+        value: 000000000000
+
