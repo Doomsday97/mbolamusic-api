@@ -1,6 +1,7 @@
 const { verifyToken } = require('../utils/jwt');
 const { fail } = require('../utils/response');
 const prisma = require('../config/prisma');
+const onlineTracker = require('./onlineTracker');
 
 // Verifica el JWT y carga el usuario en req.user
 async function authenticate(req, res, next) {
@@ -17,6 +18,7 @@ async function authenticate(req, res, next) {
     if (!user) return fail(res, 'Usuario no encontrado', 401);
 
     req.user = user;
+    onlineTracker.track(req); // registrar presencia
     next();
   } catch (e) {
     return fail(res, 'Token inválido o expirado', 401);

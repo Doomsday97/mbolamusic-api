@@ -206,7 +206,20 @@ async function deleteTrack(req, res) {
   return ok(res, { deleted: true });
 }
 
+// GET /api/tracks/:id  -> info pública de una canción (player page)
+async function getTrack(req, res) {
+  const track = await prisma.track.findFirst({
+    where: { id: req.params.id, isPublished: true },
+    include: {
+      artist: { select: { artistName: true, userId: true } },
+      _count: { select: { plays: true, downloads: true } },
+    },
+  });
+  if (!track) return fail(res, 'Canción no encontrada', 404);
+  return ok(res, { track });
+}
+
 module.exports = {
   uploadTrack, listTracks, charts, myTracks, playTrack, deleteTrack,
-  feed, followArtist, unfollowArtist, myFollowing,
+  feed, followArtist, unfollowArtist, myFollowing, getTrack,
 };

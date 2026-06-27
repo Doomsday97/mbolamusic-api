@@ -24,4 +24,7 @@ router.post('/tracks',
 router.delete('/tracks/:id',               admin.adminDeleteTrack);
 router.patch('/tracks/:id/toggle',         admin.togglePublish);
 
+// Usuarios conectados
+router.get('/online',                      admin.onlineUsers);
+
 module.exports = router;

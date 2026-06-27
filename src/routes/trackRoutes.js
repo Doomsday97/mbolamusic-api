@@ -3,7 +3,7 @@ const tracks = require('../controllers/trackController');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { upload } = require('../config/upload');
 
-// Públicas
+// Públicas (rutas con nombre ANTES de /:id)
 router.get('/',       tracks.listTracks);
 router.get('/charts', tracks.charts);
 
@@ -26,5 +26,8 @@ router.delete('/:id', authenticate, requireRole('ARTIST'), tracks.deleteTrack);
 
 // Reproducción (oyente)
 router.post('/:id/play', authenticate, tracks.playTrack);
+
+// Info pública de una canción — DEBE ir al final para no interceptar rutas con nombre
+router.get('/:id', tracks.getTrack);
 
 module.exports = router;

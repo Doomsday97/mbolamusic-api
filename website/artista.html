@@ -269,7 +269,7 @@ async function loadMyTracks() {
         </div>
         <span class="${t.isPublished ? 'badge-pub' : 'badge-hidden'}">${t.isPublished ? 'Publicada' : 'Oculta'}</span>
         <div class="track-actions">
-          <button class="btn-sm btn-play" onclick="playTrack('${encodeURIComponent(t.audioUrl)}','${esc(t.title)}','${esc(_user.username||'')}')">▶ Play</button>
+          <button class="btn-sm btn-play" onclick="window.location.href='/player.html?id=${t.id}'">▶ Player</button>
           <button class="btn-sm btn-delete" onclick="deleteTrack('${t.id}','${esc(t.title)}')">🗑 Borrar</button>
         </div>
       </div>`).join('');

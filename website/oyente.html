@@ -220,7 +220,7 @@ async function loadTracks() {
     const tracks = d?.data?.tracks || d?.data || [];
     if (!tracks.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">No hay canciones disponibles aún.</div>'; return; }
     grid.innerHTML = tracks.map((t, i) => `
-      <div class="track-card" onclick="playTrack('${encodeURIComponent(t.audioUrl)}','${esc(t.title)}','${esc(t.artist?.artistName||'')}')">
+      <div class="track-card" onclick="window.location.href='/player.html?id=${t.id}'">
         <div class="track-thumb" style="background:${BG_COLORS[i%4]};">
           🎵
           ${t.coverUrl ? `<img src="${t.coverUrl}" onerror="this.remove()">` : ''}

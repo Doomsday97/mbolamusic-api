@@ -644,7 +644,7 @@ document.addEventListener('DOMContentLoaded', updateNavAuth);
       const tracks = j?.data?.tracks || j?.data || [];
       if (!tracks.length) { el.innerHTML = '<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;">No hay canciones disponibles aún.</p>'; return; }
       el.innerHTML = tracks.map((t,i) => `
-        <div onclick="playTrack('${encodeURIComponent(t.audioUrl)}','${encodeURIComponent(t.title)}','${encodeURIComponent(t.artist?.artistName||'')}')"
+        <div onclick="window.location.href='/player.html?id=${t.id}'"
              style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s;"
              onmouseover="this.style.borderColor='rgba(245,158,11,0.5)';this.style.transform='translateY(-3px)'"
              onmouseout="this.style.borderColor='rgba(255,255,255,0.06)';this.style.transform='translateY(0)'">
@@ -769,10 +769,10 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
       <div class="footer-col">
         <h4>Legal</h4>
         <ul>
-          <li><a href="#">Términos de uso</a></li>
-          <li><a href="#">Privacidad</a></li>
-          <li><a href="#">Cookies</a></li>
-          <li><a href="#">Licencias</a></li>
+          <li><a href="/terminos.html">Términos de uso</a></li>
+          <li><a href="/privacidad.html">Privacidad (RGPD)</a></li>
+          <li><a href="/privacidad.html#cookies">Cookies</a></li>
+          <li><a href="/terminos.html">Licencias</a></li>
         </ul>
       </div>
       <div class="footer-col">

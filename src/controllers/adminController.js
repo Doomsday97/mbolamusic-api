@@ -201,7 +201,14 @@ async function togglePublish(req, res) {
   return ok(res, { track: updated });
 }
 
+// GET /api/admin/online  -> usuarios activos (últimos 5 min)
+const onlineTracker = require('../middleware/onlineTracker');
+async function onlineUsers(req, res) {
+  return ok(res, { users: onlineTracker.getOnline() });
+}
+
 module.exports = {
   stats, listUsers, blockArtist, unblockArtist, listPayments,
   listAllTracks, listArtists, adminUploadTrack, adminDeleteTrack, togglePublish,
+  onlineUsers,
 };

@@ -20,10 +20,26 @@ services:
         value: 30d
       - key: PAYMENT_PROVIDER
         value: mock
+      # STORAGE: cambia a "s3" cuando tengas las credenciales de Cloudflare R2
       - key: STORAGE_PROVIDER
         value: local
       - key: UPLOAD_DIR
         value: uploads
+      # Cloudflare R2 / AWS S3 (solo necesario si STORAGE_PROVIDER=s3)
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_ACCESS_KEY
+        sync: false
+      - key: S3_SECRET_KEY
+        sync: false
+      - key: CDN_BASE_URL
+        sync: false
+      - key: S3_REGION
+        value: auto
+      - key: S3_ACL
+        value: public-read
       - key: BANK_NAME
         value: BGFI Bank Guinea Ecuatorial
       - key: BANK_ACCOUNT_NAME

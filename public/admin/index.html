@@ -128,12 +128,14 @@
     <button onclick="showTab('users', this)">Usuarios</button>
     <button onclick="showTab('payments', this)">Pagos pendientes</button>
     <button onclick="showTab('tracks', this)">🎵 Canciones</button>
+    <button onclick="showTab('online', this)" id="online-tab-btn">🟢 En línea <span id="online-badge" style="background:var(--success);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
   </nav>
   <main>
     <div id="tab-stats"></div>
     <div id="tab-users" style="display:none"></div>
     <div id="tab-payments" style="display:none"></div>
     <div id="tab-tracks" style="display:none"></div>
+    <div id="tab-online" style="display:none"></div>
   </main>
 </div>
 
@@ -210,7 +212,7 @@ async function apiFetch(path, method = 'GET', body = null, auth = true) {
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 function showTab(name, btn) {
-  ['stats','users','payments','tracks'].forEach(t => {
+  ['stats','users','payments','tracks','online'].forEach(t => {
     document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
   });
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -219,6 +221,7 @@ function showTab(name, btn) {
   if (name === 'users')    loadUsers(1);
   if (name === 'payments') loadPayments(1);
   if (name === 'tracks')   loadTracks();
+  if (name === 'online')   loadOnlineUsers();
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
@@ -568,6 +571,61 @@ function closeMiniPlayer() {
   document.getElementById('mini-player').classList.remove('visible');
 }
 
+// ── Online users ──────────────────────────────────────────────────────────────
+async function loadOnlineUsers() {
+  const el = document.getElementById('tab-online');
+  el.innerHTML = '<div class="loading">Cargando usuarios en línea…</div>';
+  try {
+    const d = await apiFetch('/admin/online');
+    const badge = document.getElementById('online-badge');
+    if (badge) badge.textContent = d.users.length || '';
+    if (!d.users.length) {
+      el.innerHTML = `<div class="section-header"><h2>Usuarios en línea ahora</h2></div>
+        <div class="empty">No hay usuarios activos en los últimos 5 minutos.</div>`;
+      return;
+    }
+    const roleBadge = r => {
+      const cls = { ADMIN:'done', ARTIST:'pending', LISTENER:'pending' }[r] || 'pending';
+      return `<span class="badge badge-${cls}">${r}</span>`;
+    };
+    const timeAgo = ts => {
+      const s = Math.floor((Date.now() - ts) / 1000);
+      if (s < 60) return `hace ${s}s`;
+      return `hace ${Math.floor(s/60)}min`;
+    };
+    const rows = d.users.map(u => `
+      <tr>
+        <td>${esc(u.username)}</td>
+        <td>${esc(u.email || '—')}</td>
+        <td>${roleBadge(u.role)}</td>
+        <td><span style="background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.3);border-radius:6px;padding:2px 8px;font-size:12px;">${esc(u.platform)}</span></td>
+        <td style="color:var(--muted);font-size:13px;">${timeAgo(u.lastSeen)}</td>
+      </tr>`).join('');
+    el.innerHTML = `
+      <div class="section-header">
+        <h2>Usuarios en línea <small style="color:var(--muted)">(${d.users.length} activos)</small></h2>
+        <button class="btn-sm btn-success" onclick="loadOnlineUsers()" style="width:auto;">↺ Actualizar</button>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Usuarios que han realizado alguna acción en los últimos 5 minutos.</p>
+      <table>
+        <thead><tr><th>Usuario</th><th>Email</th><th>Rol</th><th>Plataforma</th><th>Última acción</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  } catch(e) {
+    document.getElementById('tab-online').innerHTML = `<div class="empty">${e.message}</div>`;
+  }
+}
+
+// Actualiza el badge de En línea cada 60s en background
+async function refreshOnlineBadge() {
+  if (!_token) return;
+  try {
+    const d = await apiFetch('/admin/online');
+    const badge = document.getElementById('online-badge');
+    if (badge) badge.textContent = d.users.length || '';
+  } catch {}
+}
+
 // ── Utils ─────────────────────────────────────────────────────────────────────
 function fmt(n) { return Number(n || 0).toLocaleString('es'); }
 function esc(s) {
@@ -581,6 +639,8 @@ tryAutoLogin();
 document.getElementById('login-pw').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
 });
+// Refresca el badge de usuarios en línea cada 60 segundos
+setInterval(refreshOnlineBadge, 60000);
 </script>
 </body>
 </html>
