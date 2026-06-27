@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MbôláMusic — Mi cuenta</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --amber: #F59E0B; --amber-dark: #D97706; --amber-light: #FCD34D;
+    --bg: #080808; --bg2: #111; --bg3: #1a1a1a;
+    --text: #F0F0F0; --text2: #A0A0A0;
+    --border: rgba(255,255,255,0.08);
+    --green: #22c55e; --red: #ef4444;
+  }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
+
+  nav { background: rgba(8,8,8,0.95); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
+  .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 700; }
+  .logo-icon { width: 34px; height: 34px; background: var(--amber); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+  .nav-actions { display: flex; align-items: center; gap: 10px; }
+  .btn-outline { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--text2); padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; }
+
+  /* SUB CARD */
+  .sub-card { border-radius: 14px; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+  .sub-active   { background: rgba(34,197,94,0.08);  border: 1px solid rgba(34,197,94,0.3); }
+  .sub-inactive { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.3); }
+  .sub-free     { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); }
+  .sub-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
+  .sub-card p  { font-size: 0.85rem; color: var(--text2); }
+  .btn-subscribe { background: var(--amber); border: none; color: #000; padding: 10px 22px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.9rem; }
+  .btn-subscribe:disabled { opacity: .5; cursor: default; }
+
+  /* PRICING */
+  .pricing-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .price-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; text-align: center; }
+  .price-card .amount { font-size: 1.6rem; font-weight: 800; color: var(--amber); }
+  .price-card .period { font-size: 0.78rem; color: var(--text2); }
+  .price-card .desc { font-size: 0.85rem; margin-top: 8px; color: var(--text2); }
+
+  /* TRACKS */
+  .track-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+  .track-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer; transition: border-color .2s, transform .15s; }
+  .track-card:hover { border-color: rgba(245,158,11,.5); transform: translateY(-3px); }
+  .track-thumb { height: 120px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; position: relative; }
+  .track-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .play-btn { position: absolute; bottom: 8px; right: 8px; background: var(--amber); border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+  .track-card-info { padding: 12px; }
+  .track-card-info strong { display: block; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track-card-info span { font-size: 0.75rem; color: var(--text2); }
+  .genre-tag { font-size: 0.7rem; color: rgba(245,158,11,.8); text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; display: block; }
+
+  /* MINI PLAYER */
+  #mini-player { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.97); border-top: 1px solid rgba(245,158,11,0.3); padding: 12px 1.5rem; z-index: 9999; backdrop-filter: blur(12px); }
+  .mp-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .mp-info { flex: 1; min-width: 100px; }
+  .mp-info strong { display: block; font-size: 0.9rem; }
+  .mp-info span { font-size: 0.75rem; color: var(--text2); }
+
+  .empty { color: var(--text2); text-align: center; padding: 3rem; opacity: .6; }
+  @media(max-width:500px) { .pricing-row { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="logo" href="/"><div class="logo-icon">🎵</div> MbôláMusic</a>
+    <div class="nav-actions">
+      <span id="nav-name" style="font-size:0.85rem;color:var(--text2);"></span>
+      <button class="btn-outline" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- Subscription status -->
+  <div id="sub-card" class="sub-card sub-inactive">
+    <div>
+      <h3 id="sub-title">Cargando…</h3>
+      <p  id="sub-detail"></p>
+    </div>
+    <button class="btn-subscribe" id="sub-btn" onclick="subscribe()" style="display:none;">🎵 Suscribirme — 2.000 FCFA/mes</button>
+  </div>
+
+  <!-- Pricing reminder -->
+  <div class="pricing-row" id="pricing-row" style="display:none;">
+    <div class="price-card">
+      <div class="amount">2.000</div>
+      <div class="period">FCFA / mes</div>
+      <div class="desc">Suscripción mensual. Escucha ilimitada y descargas incluidas.</div>
+    </div>
+    <div class="price-card">
+      <div class="amount">50</div>
+      <div class="period">FCFA / reproducción</div>
+      <div class="desc">Paga solo por lo que escuchas sin suscripción.</div>
+    </div>
+    <div class="price-card">
+      <div class="amount">200</div>
+      <div class="period">FCFA / descarga</div>
+      <div class="desc">Descarga para escuchar sin conexión desde la app.</div>
+    </div>
+  </div>
+
+  <!-- Catalog -->
+  <div class="card">
+    <div class="section-title">🎶 Catálogo — Escuchar ahora</div>
+    <div id="track-grid" class="track-grid">
+      <div class="empty" style="grid-column:1/-1;">Cargando canciones…</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Mini player -->
+<div id="mini-player">
+  <div class="mp-inner">
+    <div class="mp-info">
+      <strong id="mp-title">—</strong>
+      <span id="mp-artist">—</span>
+    </div>
+    <audio id="mp-audio" controls style="flex:2;min-width:200px;height:36px;"></audio>
+    <button class="btn-outline" style="font-size:0.8rem;padding:6px 12px;" onclick="closePlayer()">✕</button>
+  </div>
+</div>
+
+<script>
+const API = 'https://mbolamusic-api-1.onrender.com/api';
+let _token = '';
+let _user  = {};
+
+function init() {
+  _token = localStorage.getItem('mbola_token') || '';
+  _user  = JSON.parse(localStorage.getItem('mbola_user') || '{}');
+  if (!_token) { window.location.href = '/'; return; }
+  // ADMIN y ARTIST tienen sus propias páginas
+  if (_user.role === 'ADMIN')   { window.location.href = '/admin'; return; }
+  if (_user.role === 'ARTIST')  { window.location.href = '/artista.html'; return; }
+  document.getElementById('nav-name').textContent = _user.username + ' (oyente)';
+  loadSubscription();
+  loadTracks();
+}
+
+function logout() {
+  localStorage.removeItem('mbola_token');
+  localStorage.removeItem('mbola_user');
+  window.location.href = '/';
+}
+
+// ── Subscription ──────────────────────────────────────────────────────────────
+async function loadSubscription() {
+  try {
+    const r = await apiFetch('/auth/me');
+    const user = r.user;
+    const card   = document.getElementById('sub-card');
+    const title  = document.getElementById('sub-title');
+    const detail = document.getElementById('sub-detail');
+    const btn    = document.getElementById('sub-btn');
+    const pricing = document.getElementById('pricing-row');
+
+    // Check active sub: query payments or rely on me response
+    // Use a separate call to payments to get subscription status
+    const pays = await apiFetch('/payments?limit=10');
+    const activeSub = (pays.payments || []).find(p =>
+      p.purpose === 'LISTENER_SUBSCRIPTION' && p.status === 'COMPLETED' &&
+      new Date(p.createdAt) > new Date(Date.now() - 32 * 24 * 3600 * 1000)
+    );
+    const isFree = user.wallet >= 0 && !activeSub; // rough check
+
+    if (activeSub) {
+      card.className = 'sub-card sub-active';
+      title.textContent  = '✅ Suscripción activa';
+      const end = new Date(new Date(activeSub.createdAt).getTime() + 30*24*3600*1000).toLocaleDateString('es');
+      detail.textContent = 'Válida aproximadamente hasta: ' + end;
+      btn.style.display  = 'none';
+      pricing.style.display = 'none';
+    } else {
+      card.className = 'sub-card sub-free';
+      title.textContent  = '🆓 Sin suscripción activa';
+      detail.textContent = 'Suscríbete por 2.000 FCFA/mes para escucha ilimitada, o paga 50 FCFA por reproducción desde la app.';
+      btn.style.display  = '';
+      pricing.style.display = '';
+    }
+  } catch(e) {
+    document.getElementById('sub-title').textContent = 'No se pudo cargar la suscripción';
+  }
+}
+
+async function subscribe() {
+  const btn = document.getElementById('sub-btn');
+  btn.disabled = true;
+  btn.textContent = 'Procesando…';
+  try {
+    await apiFetch('/payments/listener-subscription', 'POST', { method: 'MOCK' });
+    await loadSubscription();
+  } catch(e) {
+    alert('Error al procesar: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🎵 Suscribirme — 2.000 FCFA/mes';
+  }
+}
+
+// ── Catalog ───────────────────────────────────────────────────────────────────
+const BG_COLORS = [
+  'rgba(245,158,11,0.12)', 'rgba(63,81,181,0.18)',
+  'rgba(0,154,68,0.12)',   'rgba(239,68,68,0.12)',
+];
+
+async function loadTracks() {
+  const grid = document.getElementById('track-grid');
+  try {
+    const d = await fetch(API + '/tracks?limit=48').then(r => r.json());
+    const tracks = d?.data?.tracks || d?.data || [];
+    if (!tracks.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">No hay canciones disponibles aún.</div>'; return; }
+    grid.innerHTML = tracks.map((t, i) => `
+      <div class="track-card" onclick="playTrack('${encodeURIComponent(t.audioUrl)}','${esc(t.title)}','${esc(t.artist?.artistName||'')}')">
+        <div class="track-thumb" style="background:${BG_COLORS[i%4]};">
+          🎵
+          ${t.coverUrl ? `<img src="${t.coverUrl}" onerror="this.remove()">` : ''}
+          <div class="play-btn">▶</div>
+        </div>
+        <div class="track-card-info">
+          <strong>${esc(t.title)}</strong>
+          <span>${esc(t.artist?.artistName||'')}</span>
+          <span class="genre-tag">${esc(t.genre)}</span>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">Error al cargar canciones.</div>';
+  }
+}
+
+// ── Player ────────────────────────────────────────────────────────────────────
+function playTrack(urlEnc, title, artist) {
+  const audio = document.getElementById('mp-audio');
+  document.getElementById('mp-title').textContent  = title;
+  document.getElementById('mp-artist').textContent = artist;
+  audio.src = decodeURIComponent(urlEnc);
+  audio.play().catch(()=>{});
+  document.getElementById('mini-player').style.display = '';
+}
+
+function closePlayer() {
+  document.getElementById('mp-audio').pause();
+  document.getElementById('mini-player').style.display = 'none';
+}
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+async function apiFetch(path, method='GET', body=null) {
+  const opts = { method, headers: { 'Authorization': 'Bearer ' + _token } };
+  if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  const r = await fetch(API + path, opts);
+  const j = await r.json();
+  if (!j.success) throw new Error(j.error || 'Error del servidor');
+  return j.data;
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+init();
+</script>
+</body>
+</html>

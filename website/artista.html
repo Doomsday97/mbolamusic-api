@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MbôláMusic — Mi perfil artista</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --amber: #F59E0B; --amber-dark: #D97706; --amber-light: #FCD34D;
+    --bg: #080808; --bg2: #111; --bg3: #1a1a1a;
+    --text: #F0F0F0; --text2: #A0A0A0;
+    --border: rgba(255,255,255,0.08);
+    --green: #22c55e; --red: #ef4444;
+  }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
+
+  /* NAV */
+  nav { background: rgba(8,8,8,0.95); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
+  .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 700; }
+  .logo-icon { width: 34px; height: 34px; background: var(--amber); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+  .nav-actions { display: flex; align-items: center; gap: 10px; }
+  .btn-outline { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--text2); padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+  .btn-amber  { background: var(--amber); border: none; color: #000; padding: 7px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; }
+
+  /* LAYOUT */
+  .page { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+
+  /* CARDS */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .stat-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; text-align: center; }
+  .stat-card .val { font-size: 1.8rem; font-weight: 800; color: var(--amber); }
+  .stat-card .lbl { font-size: 0.78rem; color: var(--text2); margin-top: 4px; text-transform: uppercase; letter-spacing: .04em; }
+
+  /* SUBSCRIPTION BANNER */
+  .sub-banner { border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .sub-active  { background: rgba(34,197,94,0.1);  border: 1px solid rgba(34,197,94,0.3); }
+  .sub-inactive { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); }
+  .sub-banner h3 { font-size: 1rem; font-weight: 700; }
+  .sub-banner p  { font-size: 0.82rem; color: var(--text2); margin-top: 2px; }
+  .btn-pay { background: var(--amber); border: none; color: #000; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.9rem; }
+
+  /* UPLOAD FORM */
+  .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .fg { display: flex; flex-direction: column; gap: 6px; }
+  .fg label { font-size: 0.72rem; color: var(--text2); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+  .fg input, .fg select { background: var(--bg3); border: 1px solid #333; border-radius: 9px; color: var(--text); padding: 10px 13px; font-size: 0.92rem; width: 100%; }
+  .fg input:focus, .fg select:focus { outline: 1px solid var(--amber); }
+  .fg input[type=file] { padding: 8px; }
+  .full { grid-column: 1 / -1; }
+  .btn-upload { background: var(--amber); border: none; color: #000; padding: 11px 28px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; }
+  .btn-upload:disabled { opacity: .5; cursor: default; }
+  .upload-msg { font-size: 0.85rem; margin-top: 8px; }
+
+  /* TRACK LIST */
+  .track-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .track-row:last-child { border-bottom: none; }
+  .track-cover { width: 44px; height: 44px; border-radius: 8px; background: var(--bg3); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+  .track-cover img { width: 100%; height: 100%; object-fit: cover; }
+  .track-info { flex: 1; min-width: 0; }
+  .track-info strong { display: block; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track-info span { font-size: 0.78rem; color: var(--text2); }
+  .badge-pub   { background: rgba(34,197,94,0.15);  color: var(--green); border: 1px solid rgba(34,197,94,0.3);  border-radius: 6px; padding: 2px 8px; font-size: 0.72rem; font-weight: 600; }
+  .badge-hidden { background: rgba(239,68,68,0.15); color: var(--red);   border: 1px solid rgba(239,68,68,0.3);   border-radius: 6px; padding: 2px 8px; font-size: 0.72rem; font-weight: 600; }
+  .track-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn-sm { padding: 6px 12px; border: none; border-radius: 7px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+  .btn-play   { background: rgba(245,158,11,0.2); color: var(--amber); }
+  .btn-delete { background: rgba(239,68,68,0.15); color: var(--red); }
+
+  /* MINI PLAYER */
+  #mini-player { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.97); border-top: 1px solid rgba(245,158,11,0.3); padding: 12px 1.5rem; z-index: 9999; backdrop-filter: blur(12px); }
+  .mp-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .mp-info { flex: 1; min-width: 100px; }
+  .mp-info strong { display: block; font-size: 0.9rem; }
+  .mp-info span { font-size: 0.75rem; color: var(--text2); }
+
+  /* SECTIONS */
+  .section { margin-bottom: 2rem; }
+
+  /* EMPTY */
+  .empty { color: var(--text2); text-align: center; padding: 3rem; opacity: .6; }
+
+  @media(max-width:640px) {
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .full { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="logo" href="/"><div class="logo-icon">🎵</div> MbôláMusic</a>
+    <div class="nav-actions">
+      <span id="nav-name" style="font-size:0.85rem;color:var(--text2);"></span>
+      <button class="btn-outline" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- Subscription banner -->
+  <div id="sub-banner" class="sub-banner sub-inactive">
+    <div>
+      <h3 id="sub-title">Cargando estado de suscripción…</h3>
+      <p id="sub-detail"></p>
+    </div>
+    <button class="btn-pay" id="sub-btn" onclick="paySubscription()" style="display:none;">💳 Pagar suscripción — 10.000 FCFA</button>
+  </div>
+
+  <!-- Stats row -->
+  <div class="grid-3" id="stats-row">
+    <div class="stat-card"><div class="val" id="st-tracks">—</div><div class="lbl">Canciones</div></div>
+    <div class="stat-card"><div class="val" id="st-plays">—</div><div class="lbl">Reproducciones</div></div>
+    <div class="stat-card"><div class="val" id="st-earn">—</div><div class="lbl">Ganancias FCFA</div></div>
+  </div>
+
+  <!-- Upload form -->
+  <div class="section card">
+    <div class="section-title">➕ Subir nueva canción</div>
+    <div class="form-grid">
+      <div class="fg">
+        <label>Título *</label>
+        <input id="up-title" type="text" placeholder="Nombre de la canción">
+      </div>
+      <div class="fg">
+        <label>Género *</label>
+        <select id="up-genre">
+          <option value="afrobeat">Afrobeat</option>
+          <option value="reggaeton">Reggaeton</option>
+          <option value="gospel">Gospel</option>
+          <option value="ndombolo">Ndombolo</option>
+          <option value="hiphop">Hip-Hop</option>
+          <option value="pop">Pop</option>
+          <option value="tradicional">Tradicional</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Archivo de audio (MP3/AAC) *</label>
+        <input id="up-audio" type="file" accept="audio/*">
+      </div>
+      <div class="fg">
+        <label>Portada (imagen)</label>
+        <input id="up-cover" type="file" accept="image/*">
+      </div>
+      <div class="fg full">
+        <label>Álbum (opcional)</label>
+        <input id="up-album" type="text" placeholder="Nombre del álbum">
+      </div>
+    </div>
+    <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <button class="btn-upload" id="up-btn" onclick="uploadTrack()">⬆ Subir canción</button>
+      <span class="upload-msg" id="up-msg"></span>
+    </div>
+  </div>
+
+  <!-- My tracks -->
+  <div class="section card">
+    <div class="section-title">🎵 Mis canciones</div>
+    <div id="track-list"><div class="empty">Cargando…</div></div>
+  </div>
+
+</div>
+
+<!-- Mini player -->
+<div id="mini-player">
+  <div class="mp-inner">
+    <div class="mp-info">
+      <strong id="mp-title">—</strong>
+      <span id="mp-artist">—</span>
+    </div>
+    <audio id="mp-audio" controls style="flex:2;min-width:200px;height:36px;"></audio>
+    <button class="btn-outline" style="font-size:0.8rem;padding:6px 12px;" onclick="closePlayer()">✕</button>
+  </div>
+</div>
+
+<script>
+const API = 'https://mbolamusic-api-1.onrender.com/api';
+let _token = '';
+let _user  = {};
+
+// ── Auth guard ────────────────────────────────────────────────────────────────
+function init() {
+  _token = localStorage.getItem('mbola_token') || '';
+  _user  = JSON.parse(localStorage.getItem('mbola_user') || '{}');
+  if (!_token || _user.role !== 'ARTIST') {
+    window.location.href = '/';
+    return;
+  }
+  document.getElementById('nav-name').textContent = _user.username + ' (artista)';
+  loadDashboard();
+  loadMyTracks();
+}
+
+function logout() {
+  localStorage.removeItem('mbola_token');
+  localStorage.removeItem('mbola_user');
+  window.location.href = '/';
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const r = await apiFetch('/artist/dashboard');
+    document.getElementById('st-tracks').textContent  = r.totalTracks;
+    document.getElementById('st-plays').textContent   = fmt(r.totalPlays);
+    document.getElementById('st-earn').textContent    = fmt(r.totalEarnings);
+
+    const banner = document.getElementById('sub-banner');
+    const title  = document.getElementById('sub-title');
+    const detail = document.getElementById('sub-detail');
+    const btn    = document.getElementById('sub-btn');
+
+    if (r.subscriptionActive) {
+      banner.className = 'sub-banner sub-active';
+      title.textContent  = '✅ Suscripción activa';
+      const end = r.subscriptionEndsAt ? new Date(r.subscriptionEndsAt).toLocaleDateString('es') : '—';
+      detail.textContent = 'Válida hasta: ' + end + ' · Puedes publicar y subir música';
+      btn.style.display = 'none';
+    } else {
+      banner.className = 'sub-banner sub-inactive';
+      title.textContent  = '⚠️ Sin suscripción activa';
+      detail.textContent = 'Paga 10.000 FCFA/mes para publicar y subir música';
+      btn.style.display  = '';
+    }
+  } catch(e) {
+    document.getElementById('sub-title').textContent = 'Error al cargar';
+  }
+}
+
+// ── Subscription ──────────────────────────────────────────────────────────────
+async function paySubscription() {
+  const btn = document.getElementById('sub-btn');
+  btn.disabled = true;
+  btn.textContent = 'Procesando…';
+  try {
+    await apiFetch('/payments/artist-subscription', 'POST', { method: 'MOCK' });
+    loadDashboard();
+    loadMyTracks();
+  } catch(e) {
+    alert('Error al procesar pago: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💳 Pagar suscripción — 10.000 FCFA';
+  }
+}
+
+// ── My tracks ─────────────────────────────────────────────────────────────────
+async function loadMyTracks() {
+  const el = document.getElementById('track-list');
+  try {
+    const d = await apiFetch('/tracks/mine');
+    const tracks = d.tracks || [];
+    if (!tracks.length) { el.innerHTML = '<div class="empty">No tienes canciones subidas aún.</div>'; return; }
+    el.innerHTML = tracks.map(t => `
+      <div class="track-row" id="tr-${t.id}">
+        <div class="track-cover">
+          ${t.coverUrl ? `<img src="${t.coverUrl}" onerror="this.style.display='none'">` : '🎵'}
+        </div>
+        <div class="track-info">
+          <strong>${esc(t.title)}</strong>
+          <span>${esc(t.genre)} · ${t.playCount||0} plays · ${t.downloadCount||0} descargas</span>
+        </div>
+        <span class="${t.isPublished ? 'badge-pub' : 'badge-hidden'}">${t.isPublished ? 'Publicada' : 'Oculta'}</span>
+        <div class="track-actions">
+          <button class="btn-sm btn-play" onclick="playTrack('${encodeURIComponent(t.audioUrl)}','${esc(t.title)}','${esc(_user.username||'')}')">▶ Play</button>
+          <button class="btn-sm btn-delete" onclick="deleteTrack('${t.id}','${esc(t.title)}')">🗑 Borrar</button>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="empty">' + e.message + '</div>';
+  }
+}
+
+// ── Upload ────────────────────────────────────────────────────────────────────
+async function uploadTrack() {
+  const title = document.getElementById('up-title').value.trim();
+  const genre = document.getElementById('up-genre').value;
+  const album = document.getElementById('up-album').value.trim();
+  const audio = document.getElementById('up-audio').files[0];
+  const cover = document.getElementById('up-cover').files[0];
+  const msg   = document.getElementById('up-msg');
+  const btn   = document.getElementById('up-btn');
+
+  if (!title) { showMsg(msg, '❌ Escribe un título', 'red'); return; }
+  if (!audio) { showMsg(msg, '❌ Selecciona un archivo de audio', 'red'); return; }
+
+  btn.disabled = true;
+  showMsg(msg, 'Subiendo…', 'gray');
+
+  try {
+    const fd = new FormData();
+    fd.append('title', title);
+    fd.append('genre', genre);
+    if (album) fd.append('album', album);
+    fd.append('audio', audio);
+    if (cover) fd.append('cover', cover);
+
+    const r = await fetch(API + '/tracks', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + _token },
+      body: fd,
+    });
+    const j = await r.json();
+    if (!j.success) throw new Error(j.error || 'Error al subir');
+    showMsg(msg, '✅ "' + j.data.track.title + '" subida correctamente', 'green');
+    document.getElementById('up-title').value = '';
+    document.getElementById('up-audio').value = '';
+    document.getElementById('up-cover').value = '';
+    loadMyTracks();
+  } catch(e) {
+    showMsg(msg, '❌ ' + e.message, 'red');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function showMsg(el, text, color) {
+  el.textContent = text;
+  el.style.color = color === 'green' ? 'var(--green)' : color === 'red' ? 'var(--red)' : 'var(--text2)';
+}
+
+// ── Delete ────────────────────────────────────────────────────────────────────
+async function deleteTrack(id, title) {
+  if (!confirm('¿Eliminar "' + title + '"? Esta acción no se puede deshacer.')) return;
+  try {
+    await apiFetch('/tracks/' + id, 'DELETE');
+    const row = document.getElementById('tr-' + id);
+    if (row) row.remove();
+  } catch(e) { alert(e.message); }
+}
+
+// ── Player ────────────────────────────────────────────────────────────────────
+function playTrack(urlEnc, title, artist) {
+  const audio = document.getElementById('mp-audio');
+  document.getElementById('mp-title').textContent  = title;
+  document.getElementById('mp-artist').textContent = artist;
+  audio.src = decodeURIComponent(urlEnc);
+  audio.play().catch(()=>{});
+  document.getElementById('mini-player').style.display = '';
+}
+
+function closePlayer() {
+  document.getElementById('mp-audio').pause();
+  document.getElementById('mini-player').style.display = 'none';
+}
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+async function apiFetch(path, method='GET', body=null) {
+  const opts = { method, headers: { 'Authorization': 'Bearer ' + _token } };
+  if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  const r = await fetch(API + path, opts);
+  const j = await r.json();
+  if (!j.success) throw new Error(j.error || 'Error del servidor');
+  return j.data;
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function fmt(n) { return Number(n||0).toLocaleString('es'); }
+
+init();
+</script>
+</body>
+</html>

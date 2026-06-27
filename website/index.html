@@ -211,12 +211,172 @@
       <li><a href="#descargar">Descargar</a></li>
       <li><a href="#admin">Admin</a></li>
     </ul>
-    <a class="nav-cta" href="#descargar">Descargar APK</a>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div id="nav-user" style="display:none;align-items:center;gap:10px;">
+        <span id="nav-username" style="font-size:0.85rem;color:var(--text2);"></span>
+        <button onclick="goToMyPage()" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);color:var(--amber);padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;">Mi perfil</button>
+        <button onclick="logoutWeb()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text2);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;font-size:0.82rem;">Salir</button>
+      </div>
+      <button id="nav-login-btn" onclick="openModal('login')" class="nav-cta" style="display:none;">Iniciar sesión</button>
+      <a class="nav-cta" href="#descargar" id="nav-download-btn">Descargar APK</a>
+    </div>
     <button class="hamburger" onclick="document.querySelector('.nav-links').style.display='flex';document.querySelector('.nav-links').style.flexDirection='column';" aria-label="Menú">
       <span></span><span></span><span></span>
     </button>
   </div>
 </nav>
+
+<!-- MODAL LOGIN / REGISTRO -->
+<div id="auth-overlay" onclick="if(event.target===this)closeModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:420px;position:relative;">
+    <button onclick="closeModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;line-height:1;">✕</button>
+
+    <!-- Tabs -->
+    <div style="display:flex;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:1.5rem;">
+      <button id="tab-login-btn"    onclick="switchTab('login')"    style="flex:1;padding:0.75rem;background:none;border:none;font-size:0.95rem;font-weight:600;cursor:pointer;border-bottom:2px solid var(--amber);color:var(--amber);">Iniciar sesión</button>
+      <button id="tab-register-btn" onclick="switchTab('register')" style="flex:1;padding:0.75rem;background:none;border:none;font-size:0.95rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);">Registrarse</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="panel-login">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div><label style="font-size:0.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Email, teléfono o usuario</label>
+          <input id="li-id" type="text" placeholder="tu@email.com" style="width:100%;padding:11px 14px;background:#1f1f1f;border:1px solid #333;border-radius:10px;color:#fff;font-size:0.95rem;"></div>
+        <div><label style="font-size:0.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Contraseña</label>
+          <input id="li-pw" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')doLoginWeb()" style="width:100%;padding:11px 14px;background:#1f1f1f;border:1px solid #333;border-radius:10px;color:#fff;font-size:0.95rem;"></div>
+        <div id="li-err" style="color:#f87171;font-size:0.85rem;display:none;"></div>
+        <button onclick="doLoginWeb()" style="background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;">Entrar →</button>
+      </div>
+    </div>
+
+    <!-- REGISTRO -->
+    <div id="panel-register" style="display:none;">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Usuario *</label>
+            <input id="rg-user" type="text" placeholder="juanito" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;"></div>
+          <div><label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Tipo de cuenta *</label>
+            <select id="rg-role" onchange="toggleArtistField()" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;">
+              <option value="LISTENER">Oyente</option>
+              <option value="ARTIST">Artista</option>
+            </select></div>
+        </div>
+        <div><label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Email</label>
+          <input id="rg-email" type="email" placeholder="tu@email.com" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;"></div>
+        <div id="rg-artist-row" style="display:none;"><label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Nombre artístico *</label>
+          <input id="rg-artist" type="text" placeholder="Tu nombre artístico" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;"></div>
+        <div><label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Contraseña *</label>
+          <input id="rg-pw" type="password" placeholder="mínimo 6 caracteres" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;"></div>
+        <div id="rg-err" style="color:#f87171;font-size:0.85rem;display:none;"></div>
+        <button onclick="doRegisterWeb()" style="background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;">Crear cuenta →</button>
+        <p style="font-size:0.78rem;color:var(--text2);text-align:center;">Oyentes: 1 mes gratis · Artistas: 10.000 FCFA/mes</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'https://mbolamusic-api-1.onrender.com/api';
+
+function openModal(tab) {
+  document.getElementById('auth-overlay').style.display = 'flex';
+  switchTab(tab || 'login');
+}
+function closeModal() { document.getElementById('auth-overlay').style.display = 'none'; }
+function switchTab(t) {
+  document.getElementById('panel-login').style.display    = t === 'login' ? '' : 'none';
+  document.getElementById('panel-register').style.display = t === 'register' ? '' : 'none';
+  document.getElementById('tab-login-btn').style.borderBottomColor    = t === 'login' ? 'var(--amber)' : 'transparent';
+  document.getElementById('tab-login-btn').style.color    = t === 'login' ? 'var(--amber)' : 'var(--text2)';
+  document.getElementById('tab-register-btn').style.borderBottomColor = t === 'register' ? 'var(--amber)' : 'transparent';
+  document.getElementById('tab-register-btn').style.color = t === 'register' ? 'var(--amber)' : 'var(--text2)';
+}
+function toggleArtistField() {
+  const isArtist = document.getElementById('rg-role').value === 'ARTIST';
+  document.getElementById('rg-artist-row').style.display = isArtist ? '' : 'none';
+}
+
+async function doLoginWeb() {
+  const identifier = document.getElementById('li-id').value.trim();
+  const password   = document.getElementById('li-pw').value;
+  const err = document.getElementById('li-err');
+  err.style.display = 'none';
+  try {
+    const r = await fetch(API_BASE + '/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ identifier, password })
+    });
+    const j = await r.json();
+    if (!j.success) { err.textContent = j.error || 'Error al iniciar sesión'; err.style.display = ''; return; }
+    localStorage.setItem('mbola_token', j.data.token);
+    localStorage.setItem('mbola_user',  JSON.stringify(j.data.user));
+    closeModal();
+    redirectByRole(j.data.user);
+  } catch(e) { err.textContent = 'Error de conexión con el servidor'; err.style.display = ''; }
+}
+
+async function doRegisterWeb() {
+  const username   = document.getElementById('rg-user').value.trim();
+  const email      = document.getElementById('rg-email').value.trim();
+  const password   = document.getElementById('rg-pw').value;
+  const role       = document.getElementById('rg-role').value;
+  const artistName = document.getElementById('rg-artist').value.trim();
+  const err = document.getElementById('rg-err');
+  err.style.display = 'none';
+  const body = { username, email, password, role };
+  if (role === 'ARTIST') body.artistName = artistName;
+  try {
+    const r = await fetch(API_BASE + '/auth/register', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+    });
+    const j = await r.json();
+    if (!j.success) { err.textContent = j.error || 'Error al registrarse'; err.style.display = ''; return; }
+    localStorage.setItem('mbola_token', j.data.token);
+    localStorage.setItem('mbola_user',  JSON.stringify(j.data.user));
+    closeModal();
+    redirectByRole(j.data.user);
+  } catch(e) { err.textContent = 'Error de conexión con el servidor'; err.style.display = ''; }
+}
+
+function redirectByRole(user) {
+  if (user.role === 'ADMIN')    { window.location.href = '/admin'; return; }
+  if (user.role === 'ARTIST')   { window.location.href = '/artista.html'; return; }
+  window.location.href = '/oyente.html';
+}
+
+function logoutWeb() {
+  localStorage.removeItem('mbola_token');
+  localStorage.removeItem('mbola_user');
+  updateNavAuth();
+}
+
+function goToMyPage() {
+  const user = JSON.parse(localStorage.getItem('mbola_user') || '{}');
+  if (user.role === 'ADMIN')  { window.location.href = '/admin'; return; }
+  if (user.role === 'ARTIST') { window.location.href = '/artista.html'; return; }
+  window.location.href = '/oyente.html';
+}
+
+function updateNavAuth() {
+  const token = localStorage.getItem('mbola_token');
+  const user  = JSON.parse(localStorage.getItem('mbola_user') || '{}');
+  const navUser = document.getElementById('nav-user');
+  const navLogin = document.getElementById('nav-login-btn');
+  const navDownload = document.getElementById('nav-download-btn');
+  if (token && user.username) {
+    navUser.style.display = 'flex';
+    navLogin.style.display = 'none';
+    navDownload.style.display = 'none';
+    document.getElementById('nav-username').textContent = user.username;
+  } else {
+    navUser.style.display = 'none';
+    navLogin.style.display = '';
+    navDownload.style.display = '';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', updateNavAuth);
+</script>
 
 <!-- HERO -->
 <section class="hero" id="inicio">
