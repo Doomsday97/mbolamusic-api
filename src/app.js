@@ -26,9 +26,6 @@ app.use(express.urlencoded({ extended: true }));
 // Panel de administración (HTML estático)
 app.use('/admin', express.static(path.join(__dirname, '../public/admin')));
 
-// Sitio web (landing page)
-app.use('/', express.static(path.join(__dirname, '../../website')));
-
 // Servir archivos subidos (audio/carátulas) solo en modo local
 if (process.env.STORAGE_PROVIDER !== 's3') {
   app.use('/uploads', express.static(path.join(process.cwd(), UPLOAD_DIR)));
@@ -39,6 +36,9 @@ app.use('/api', routes);
 
 // Salud
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// Sitio web (al final para no interferir con /api ni /admin)
+app.use('/', express.static(path.join(__dirname, '../website')));
 
 // Manejador de errores (al final)
 app.use(errorHandler);
