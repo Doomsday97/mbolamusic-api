@@ -8,12 +8,14 @@ const { UPLOAD_DIR } = require('./services/storage');
 const app = express();
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:3001', 'http://localhost:3000', 'http://192.168.1.9:3001'];
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+  : null;
 
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || allowedOrigins.some(o => origin.startsWith(o))) return cb(null, true);
+    if (!origin) return cb(null, true);
+    if (!allowedOrigins) return cb(null, true);
+    if (allowedOrigins.some(o => origin.startsWith(o))) return cb(null, true);
     cb(new Error('CORS no permitido'));
   },
   credentials: true,
