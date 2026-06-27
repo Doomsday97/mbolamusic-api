@@ -206,6 +206,7 @@
     <ul class="nav-links">
       <li><a href="#caracteristicas">Características</a></li>
       <li><a href="#precios">Precios</a></li>
+      <li><a href="#escuchar">🎵 Escuchar</a></li>
       <li><a href="#artistas">Artistas</a></li>
       <li><a href="#descargar">Descargar</a></li>
       <li><a href="#admin">Admin</a></li>
@@ -445,6 +446,74 @@
     </div>
   </div>
 </section>
+
+<!-- PLAYER -->
+<section id="escuchar" style="background:var(--bg);padding:5rem 1.5rem;">
+  <div class="section-inner">
+    <p class="section-label">Escuchar ahora</p>
+    <h2 class="section-title">Las canciones más recientes</h2>
+    <p class="section-sub">Escucha directamente desde el navegador, sin instalar nada.</p>
+
+    <div id="track-list" style="margin-top:2.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem;">
+      <div style="color:var(--text2);padding:2rem;text-align:center;grid-column:1/-1;opacity:.6;">Cargando canciones…</div>
+    </div>
+  </div>
+</section>
+
+<!-- Mini player web (fijo abajo) -->
+<div id="web-player" style="display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,10,0.97);border-top:1px solid rgba(245,158,11,0.3);padding:12px 1.5rem;z-index:9999;backdrop-filter:blur(12px);">
+  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+    <div id="wp-cover-wrap" style="width:44px;height:44px;border-radius:8px;background:var(--amber);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">🎵</div>
+    <div style="flex:1;min-width:120px;overflow:hidden;">
+      <div id="wp-title" style="font-weight:700;font-size:0.9rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
+      <div id="wp-artist" style="font-size:0.75rem;color:var(--text2);">—</div>
+    </div>
+    <audio id="web-audio" controls style="flex:2;min-width:200px;height:36px;"></audio>
+    <button onclick="document.getElementById('web-player').style.display='none';document.getElementById('web-audio').pause();"
+      style="background:rgba(255,255,255,0.1);border:none;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:0.85rem;flex-shrink:0;">✕</button>
+  </div>
+</div>
+
+<script>
+(function loadTracks() {
+  const API = 'https://mbolamusic-api-1.onrender.com/api';
+  const el  = document.getElementById('track-list');
+  fetch(API + '/tracks?limit=24')
+    .then(r => r.json())
+    .then(j => {
+      const tracks = j?.data?.tracks || j?.data || [];
+      if (!tracks.length) { el.innerHTML = '<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;">No hay canciones disponibles aún.</p>'; return; }
+      el.innerHTML = tracks.map((t,i) => `
+        <div onclick="playTrack('${encodeURIComponent(t.audioUrl)}','${encodeURIComponent(t.title)}','${encodeURIComponent(t.artist?.artistName||'')}')"
+             style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s;"
+             onmouseover="this.style.borderColor='rgba(245,158,11,0.5)';this.style.transform='translateY(-3px)'"
+             onmouseout="this.style.borderColor='rgba(255,255,255,0.06)';this.style.transform='translateY(0)'">
+          <div style="height:130px;background:${['rgba(245,158,11,0.15)','rgba(63,81,181,0.2)','rgba(0,154,68,0.15)'][i%3]};display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;">
+            ${t.coverUrl ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'">` : '🎵'}
+            <div style="position:absolute;bottom:8px;right:8px;background:var(--amber);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;">▶</div>
+          </div>
+          <div style="padding:14px;">
+            <div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div>
+            <div style="font-size:0.78rem;color:var(--text2);margin-top:4px;">${t.artist?.artistName || ''}</div>
+            <div style="font-size:0.72rem;color:rgba(245,158,11,.7);margin-top:4px;text-transform:uppercase;letter-spacing:.04em;">${t.genre}</div>
+          </div>
+        </div>`).join('');
+    })
+    .catch(() => { el.innerHTML = '<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;opacity:.5;">No se pudo conectar al servidor.</p>'; });
+})();
+
+function playTrack(urlEnc, titleEnc, artistEnc) {
+  const url    = decodeURIComponent(urlEnc);
+  const title  = decodeURIComponent(titleEnc);
+  const artist = decodeURIComponent(artistEnc);
+  document.getElementById('wp-title').textContent  = title;
+  document.getElementById('wp-artist').textContent = artist;
+  const audio = document.getElementById('web-audio');
+  audio.src = url;
+  audio.play().catch(()=>{});
+  document.getElementById('web-player').style.display = 'block';
+}
+</script>
 
 <!-- DOWNLOAD -->
 <section class="download" id="descargar">

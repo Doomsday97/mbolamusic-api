@@ -71,6 +71,35 @@
   .pager button { width: auto; padding: 6px 14px; font-size: 13px; background: var(--surface2); color: var(--text); border-radius: 6px; }
   .loading { color: var(--muted); text-align: center; padding: 32px; }
   .empty   { color: var(--muted); text-align: center; padding: 32px; }
+
+  /* ── Upload form ── */
+  .upload-form { background: var(--surface); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; }
+  .upload-form h3 { color: var(--accent); margin-bottom: 16px; font-size: 15px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 10px 12px; background: var(--surface2); border: 1px solid #333;
+    border-radius: 8px; color: var(--text); font-size: 14px; width: 100%; margin: 0;
+  }
+  .form-group input[type=file] { padding: 8px; }
+  .form-group input:focus, .form-group select:focus { outline: 1px solid var(--accent); }
+  .form-full { grid-column: 1 / -1; }
+  .btn-upload { background: var(--accent); color: #000; border: none; border-radius: 8px;
+                padding: 10px 24px; font-weight: bold; font-size: 14px; cursor: pointer; width: auto; margin-top: 4px; }
+  .btn-upload:disabled { opacity: .5; cursor: default; }
+
+  /* ── Mini audio player ── */
+  #mini-player { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface);
+                 border-top: 1px solid var(--surface2); padding: 10px 24px;
+                 display: none; align-items: center; gap: 16px; z-index: 99; }
+  #mini-player.visible { display: flex; }
+  #mini-player .track-info { flex: 1; }
+  #mini-player .track-info strong { display: block; font-size: 14px; }
+  #mini-player .track-info span { font-size: 12px; color: var(--muted); }
+  #mini-player audio { flex: 2; height: 36px; }
+  #mini-player button { width: auto; padding: 6px 14px; font-size: 13px;
+                        background: var(--surface2); color: var(--muted); border-radius: 6px; }
 </style>
 </head>
 <body>
@@ -98,12 +127,24 @@
     <button class="active" onclick="showTab('stats', this)">Estadísticas</button>
     <button onclick="showTab('users', this)">Usuarios</button>
     <button onclick="showTab('payments', this)">Pagos pendientes</button>
+    <button onclick="showTab('tracks', this)">🎵 Canciones</button>
   </nav>
   <main>
     <div id="tab-stats"></div>
     <div id="tab-users" style="display:none"></div>
     <div id="tab-payments" style="display:none"></div>
+    <div id="tab-tracks" style="display:none"></div>
   </main>
+</div>
+
+<!-- Mini player -->
+<div id="mini-player">
+  <div class="track-info">
+    <strong id="mp-title">—</strong>
+    <span id="mp-artist">—</span>
+  </div>
+  <audio id="mp-audio" controls></audio>
+  <button onclick="closeMiniPlayer()">✕ Cerrar</button>
 </div>
 
 <script>
@@ -169,7 +210,7 @@ async function apiFetch(path, method = 'GET', body = null, auth = true) {
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 function showTab(name, btn) {
-  ['stats','users','payments'].forEach(t => {
+  ['stats','users','payments','tracks'].forEach(t => {
     document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
   });
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -177,6 +218,7 @@ function showTab(name, btn) {
   if (name === 'stats')    loadStats();
   if (name === 'users')    loadUsers(1);
   if (name === 'payments') loadPayments(1);
+  if (name === 'tracks')   loadTracks();
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
@@ -356,6 +398,174 @@ async function rejectPay(id) {
   if (!confirm('¿Rechazar este pago?')) return;
   try { await apiFetch('/payments/' + id + '/reject', 'POST'); loadPayments(_pPage); }
   catch (e) { alert(e.message); }
+}
+
+// ── Tracks ────────────────────────────────────────────────────────────────────
+let _artists = [];
+
+async function loadTracks() {
+  const el = document.getElementById('tab-tracks');
+  el.innerHTML = '<div class="loading">Cargando canciones…</div>';
+  try {
+    const [td, ad] = await Promise.all([
+      apiFetch('/admin/tracks'),
+      apiFetch('/admin/artists'),
+    ]);
+    _artists = ad.artists;
+    const artistOpts = _artists.map(a => `<option value="${a.id}">${esc(a.artistName)}</option>`).join('');
+    const rows = td.tracks.map(t => `
+      <tr>
+        <td>
+          <button class="btn-sm btn-success" onclick="playTrack('${esc(t.audioUrl)}','${esc(t.title)}','${esc(t.artist?.artistName||'')}')">▶</button>
+        </td>
+        <td>${esc(t.title)}</td>
+        <td>${esc(t.artist?.artistName || '—')}</td>
+        <td>${esc(t.genre)}</td>
+        <td>${t._count?.plays || 0}</td>
+        <td>${t._count?.downloads || 0}</td>
+        <td>
+          <span class="badge ${t.isPublished ? 'badge-done' : 'badge-failed'}">
+            ${t.isPublished ? 'Publicada' : 'Oculta'}
+          </span>
+        </td>
+        <td>
+          <button class="btn-sm btn-warn" onclick="toggleTrack('${t.id}')">${t.isPublished ? 'Ocultar' : 'Publicar'}</button>
+          <button class="btn-sm btn-danger" onclick="deleteTrack('${t.id}','${esc(t.title)}')">Borrar</button>
+        </td>
+      </tr>`).join('');
+
+    el.innerHTML = `
+      <div class="upload-form">
+        <h3>➕ Subir nueva canción</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Título *</label>
+            <input id="t-title" type="text" placeholder="Nombre de la canción">
+          </div>
+          <div class="form-group">
+            <label>Artista *</label>
+            <select id="t-artist"><option value="">— Seleccionar artista —</option>${artistOpts}</select>
+          </div>
+          <div class="form-group">
+            <label>Género *</label>
+            <select id="t-genre">
+              <option value="afrobeat">Afrobeat</option>
+              <option value="reggaeton">Reggaeton</option>
+              <option value="gospel">Gospel</option>
+              <option value="ndombolo">Ndombolo</option>
+              <option value="hiphop">Hip-Hop</option>
+              <option value="pop">Pop</option>
+              <option value="tradicional">Tradicional</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Álbum (opcional)</label>
+            <input id="t-album" type="text" placeholder="Nombre del álbum">
+          </div>
+          <div class="form-group">
+            <label>Archivo de audio (MP3/AAC)</label>
+            <input id="t-audio" type="file" accept="audio/*">
+          </div>
+          <div class="form-group">
+            <label>O URL de audio externa</label>
+            <input id="t-audiourl" type="url" placeholder="https://... (si no subes archivo)">
+          </div>
+          <div class="form-group">
+            <label>Portada (imagen, opcional)</label>
+            <input id="t-cover" type="file" accept="image/*">
+          </div>
+          <div class="form-group" style="align-self:end">
+            <button class="btn-upload" id="upload-btn" onclick="uploadTrack()">⬆ Subir canción</button>
+          </div>
+        </div>
+        <div id="upload-msg" style="margin-top:10px;font-size:13px;"></div>
+      </div>
+
+      <div class="section-header">
+        <h2>Canciones <small style="color:var(--muted)">(${td.tracks.length})</small></h2>
+      </div>
+      <table>
+        <thead><tr><th>Play</th><th>Título</th><th>Artista</th><th>Género</th><th>Plays</th><th>Descargas</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="8" class="empty">Sin canciones</td></tr>'}</tbody>
+      </table>`;
+  } catch(e) {
+    el.innerHTML = `<div class="empty">${e.message}</div>`;
+  }
+}
+
+async function uploadTrack() {
+  const title    = document.getElementById('t-title').value.trim();
+  const artistId = document.getElementById('t-artist').value;
+  const genre    = document.getElementById('t-genre').value;
+  const album    = document.getElementById('t-album').value.trim();
+  const audioUrl = document.getElementById('t-audiourl').value.trim();
+  const audioFile = document.getElementById('t-audio').files[0];
+  const coverFile = document.getElementById('t-cover').files[0];
+  const msg = document.getElementById('upload-msg');
+  const btn = document.getElementById('upload-btn');
+
+  if (!title || !artistId || !genre) { msg.style.color='var(--error)'; msg.textContent='Rellena título, artista y género.'; return; }
+  if (!audioFile && !audioUrl) { msg.style.color='var(--error)'; msg.textContent='Sube un archivo de audio o proporciona una URL.'; return; }
+
+  btn.disabled = true;
+  msg.style.color = 'var(--muted)';
+  msg.textContent = 'Subiendo…';
+
+  try {
+    const fd = new FormData();
+    fd.append('title', title);
+    fd.append('artistId', artistId);
+    fd.append('genre', genre);
+    if (album) fd.append('album', album);
+    if (audioUrl) fd.append('audioUrl', audioUrl);
+    if (audioFile) fd.append('audio', audioFile);
+    if (coverFile) fd.append('cover', coverFile);
+
+    const res = await fetch(API + '/admin/tracks', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + _token },
+      body: fd,
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Error');
+    msg.style.color = 'var(--success)';
+    msg.textContent = '✅ Canción subida: ' + json.data.track.title;
+    loadTracks();
+  } catch(e) {
+    msg.style.color = 'var(--error)';
+    msg.textContent = '❌ ' + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function deleteTrack(id, title) {
+  if (!confirm(`¿Eliminar la canción "${title}"? Esta acción es irreversible.`)) return;
+  try {
+    await apiFetch('/admin/tracks/' + id, 'DELETE');
+    loadTracks();
+  } catch(e) { alert(e.message); }
+}
+
+async function toggleTrack(id) {
+  try { await apiFetch('/admin/tracks/' + id + '/toggle', 'PATCH'); loadTracks(); }
+  catch(e) { alert(e.message); }
+}
+
+function playTrack(url, title, artist) {
+  const player = document.getElementById('mini-player');
+  const audio  = document.getElementById('mp-audio');
+  document.getElementById('mp-title').textContent  = title;
+  document.getElementById('mp-artist').textContent = artist;
+  audio.src = url;
+  audio.play();
+  player.classList.add('visible');
+}
+
+function closeMiniPlayer() {
+  document.getElementById('mp-audio').pause();
+  document.getElementById('mini-player').classList.remove('visible');
 }
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
