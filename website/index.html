@@ -232,8 +232,8 @@
       </div>
       <div id="nav-user" style="display:none;align-items:center;gap:10px;">
         <span id="nav-username" style="font-size:0.85rem;color:var(--text2);"></span>
-        <button onclick="goToMyPage()" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);color:var(--amber);padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;">Mi perfil</button>
-        <button onclick="logoutWeb()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text2);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;font-size:0.82rem;">Salir</button>
+        <button id="nav-profile-btn" onclick="goToMyPage()" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);color:var(--amber);padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;">Mi perfil</button>
+        <button id="nav-logout-btn" onclick="logoutWeb()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text2);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;font-size:0.82rem;">Salir</button>
       </div>
       <button id="nav-login-btn" onclick="openModal('login')" class="nav-cta" style="display:none;">Iniciar sesión</button>
       <a class="nav-cta" href="#descargar" id="nav-download-btn">Descargar APK</a>
@@ -258,12 +258,12 @@
     <!-- LOGIN -->
     <div id="panel-login">
       <div style="display:flex;flex-direction:column;gap:14px;">
-        <div><label style="font-size:0.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Email, teléfono o usuario</label>
+        <div><label id="li-id-label" style="font-size:0.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Email, teléfono o usuario</label>
           <input id="li-id" type="text" placeholder="tu@email.com" style="width:100%;padding:11px 14px;background:#1f1f1f;border:1px solid #333;border-radius:10px;color:#fff;font-size:0.95rem;"></div>
-        <div><label style="font-size:0.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Contraseña</label>
+        <div><label id="li-pw-label" style="font-size:0.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Contraseña</label>
           <input id="li-pw" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')doLoginWeb()" style="width:100%;padding:11px 14px;background:#1f1f1f;border:1px solid #333;border-radius:10px;color:#fff;font-size:0.95rem;"></div>
         <div id="li-err" style="color:#f87171;font-size:0.85rem;display:none;"></div>
-        <button onclick="doLoginWeb()" style="background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;">Entrar →</button>
+        <button id="li-submit-btn" onclick="doLoginWeb()" style="background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;">Entrar →</button>
       </div>
     </div>
 
@@ -271,23 +271,23 @@
     <div id="panel-register" style="display:none;">
       <div style="display:flex;flex-direction:column;gap:12px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <div><label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Usuario *</label>
+          <div><label id="rg-user-label" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Usuario *</label>
             <input id="rg-user" type="text" placeholder="juanito" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;"></div>
-          <div><label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Tipo de cuenta *</label>
+          <div><label id="rg-type-label" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Tipo de cuenta *</label>
             <select id="rg-role" onchange="toggleArtistField()" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;">
-              <option value="LISTENER">Oyente</option>
-              <option value="ARTIST">Artista</option>
+              <option id="rg-listener-opt" value="LISTENER">Oyente</option>
+              <option id="rg-artist-opt" value="ARTIST">Artista</option>
             </select></div>
         </div>
-        <div><label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Email</label>
+        <div><label id="rg-email-label" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Email</label>
           <input id="rg-email" type="email" placeholder="tu@email.com" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;"></div>
-        <div id="rg-artist-row" style="display:none;"><label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Nombre artístico *</label>
+        <div id="rg-artist-row" style="display:none;"><label id="rg-artname-label" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Nombre artístico *</label>
           <input id="rg-artist" type="text" placeholder="Tu nombre artístico" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;"></div>
-        <div><label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Contraseña *</label>
+        <div><label id="rg-pw-label" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Contraseña *</label>
           <input id="rg-pw" type="password" placeholder="mínimo 6 caracteres" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;"></div>
         <div id="rg-err" style="color:#f87171;font-size:0.85rem;display:none;"></div>
-        <button onclick="doRegisterWeb()" style="background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;">Crear cuenta →</button>
-        <p style="font-size:0.78rem;color:var(--text2);text-align:center;">Oyentes: 1 mes gratis · Artistas: 10.000 FCFA/mes</p>
+        <button id="rg-submit-btn" onclick="doRegisterWeb()" style="background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;">Crear cuenta →</button>
+        <p id="rg-note" style="font-size:0.78rem;color:var(--text2);text-align:center;">Oyentes: 1 mes gratis · Artistas: 10.000 FCFA/mes</p>
       </div>
     </div>
   </div>
@@ -400,50 +400,321 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── Language switcher ─────────────────────────────────────────────────────────
+const LANGS = {
+  es: { flag:'🇪🇸', code:'ES', label:'Español' },
+  fr: { flag:'🇫🇷', code:'FR', label:'Français' },
+  pt: { flag:'🇵🇹', code:'PT', label:'Português' },
+  en: { flag:'🇬🇧', code:'EN', label:'English' },
+};
+
 const T = {
   es: {
-    heroBadge:'🇬🇶 Hecho para Guinea Ecuatorial',heroTitle:'Tu música,<br><span>sin límites</span>',
-    heroSub:'Escucha los mejores artistas de Guinea Ecuatorial, descarga para offline y apoya el talento local con cada reproducción.',
-    heroCta:'⬇ Descargar APK',heroCtaSec:'Ver características',
-    stat1:'<strong>Gratis</strong><span>1 mes al registrarse</span>',stat2:'<strong>70%</strong><span>ganancias al artista</span>',stat3:'<strong>Offline</strong><span>descarga con cifrado</span>',
-    navFeatures:'Características',navPrices:'Precios',navListen:'🎵 Escuchar',navArtists:'Artistas',navDownload:'Descargar',navAdmin:'Admin',navCta:'Descargar APK',
-    tabLogin:'Iniciar sesión',tabRegister:'Registrarse',
+    // Nav & Hero
+    heroBadge: '🇬🇶 Hecho para Guinea Ecuatorial',
+    heroTitle: 'Tu música,<br><span>sin límites</span>',
+    heroSub: 'Escucha los mejores artistas de Guinea Ecuatorial, descarga para offline y apoya el talento local con cada reproducción.',
+    heroCta: '⬇ Descargar APK',
+    heroCtaSec: 'Ver características',
+    stat1: '<strong>Gratis</strong><span>1 mes al registrarse</span>',
+    stat2: '<strong>70%</strong><span>ganancias al artista</span>',
+    stat3: '<strong>Offline</strong><span>descarga con cifrado</span>',
+    navFeatures:'Características', navPrices:'Precios', navListen:'🎵 Escuchar',
+    navArtists:'Artistas', navDownload:'Descargar', navAdmin:'Admin',
+    navCta:'Descargar APK',
+    tabLogin:'Iniciar sesión', tabRegister:'Registrarse',
+    downloadCta:'⬇ Descargar APK',
+    nowPlaying: 'Reproduciendo ahora',
+    // Features
+    featLabel:'Características', featTitle:'Todo lo que necesitas',
+    featSub:'Diseñado para funcionar en las condiciones reales de Guinea Ecuatorial.',
+    feat1h:'Streaming de calidad', feat1p:'Escucha millones de canciones en alta calidad. Descubre los mejores artistas de Guinea Ecuatorial y del mundo.',
+    feat2h:'Descarga offline cifrada', feat2p:'Descarga tus canciones favoritas con cifrado AES-128 y escúchalas sin conexión. Sin internet, sin problema.',
+    feat3h:'Charts y tendencias', feat3p:'Sigue el podio de las canciones más escuchadas. Descubre lo nuevo de artistas locales en el Feed personalizado.',
+    feat4h:'Paga como quieras', feat4p:'50 FCFA por reproducción o 2.000 FCFA/mes todo incluido. Recarga tu monedero fácilmente desde la app.',
+    feat5h:'Sube tu música', feat5p:'¿Eres artista? Crea tu perfil, sube tus canciones y empieza a ganar dinero con cada reproducción y descarga.',
+    feat6h:'Multi-idioma', feat6p:'Disponible en español, francés y portugués. La app para todos los pueblos de Guinea Ecuatorial.',
+    // Pricing
+    priceLabel:'Precios', priceTitle:'Elige tu plan', priceSub:'Empieza gratis. Sin tarjeta de crédito.',
+    plan1name:'Prueba gratis', plan1period:'durante el primer mes',
+    plan1f1:'Streaming ilimitado', plan1f2:'Descarga offline (5 canciones)', plan1f3:'Feed personalizado', plan1f4:'Sin anuncios',
+    plan1cta:'Empezar gratis',
+    planBadge:'Más popular',
+    plan2name:'Suscripción', plan2period:'por mes, todo incluido',
+    plan2f1:'Streaming ilimitado', plan2f2:'Descargas offline ilimitadas', plan2f3:'Feed personalizado', plan2f4:'Sin anuncios', plan2f5:'Calidad de audio alta',
+    plan2cta:'Suscribirse',
+    plan3name:'Por uso', plan3period:'por reproducción',
+    plan3f1:'Paga solo lo que escuchas', plan3f2:'200 FCFA por descarga', plan3f3:'Sin compromiso mensual', plan3f4:'Recarga tu monedero',
+    plan3cta:'Usar por uso',
+    // Artists
+    artistLabel:'Para artistas', artistTitle:'Monetiza tu música',
+    artistSub:'Sube tus canciones, llega a más oyentes y gana el 70% de cada reproducción.',
+    step1h:'Crea tu perfil de artista', step1p:'Regístrate con rol de artista y completa tu perfil con foto y bio.',
+    step2h:'Activa tu suscripción', step2p:'10.000 FCFA/mes mantiene tu música visible para todos los oyentes.',
+    step3h:'Sube tus canciones', step3p:'Sube audio en formato MP3/AAC directamente desde la app. Sin límite de canciones.',
+    step4h:'Cobra tus ganancias', step4p:'Retira tus ganancias a tu cuenta bancaria o móvil cuando quieras.',
+    earnTitle:'Reparto de ingresos',
+    earnArtist:'Artista', earnPlatform:'Plataforma',
+    earnNote:'Por cada 50 FCFA de reproducción,<br>recibes <strong style="color:var(--amber)">35 FCFA</strong>.',
+    // Player
+    playerLabel:'Escuchar ahora', playerTitle:'Las canciones más recientes',
+    playerSub:'Escucha directamente desde el navegador, sin instalar nada.',
+    playerLoading:'Cargando canciones…', playerEmpty:'No hay canciones disponibles aún.', playerError:'No se pudo conectar al servidor.',
+    // Download
+    dlLabel:'Descarga', dlTitle:'Disponible ahora para Android',
+    dlSub:'Instala la app directamente en tu teléfono Android. iOS próximamente.',
+    dlAndroidSmall:'Descargar para', dlIosSmall:'Próximamente en',
+    dlNote:'El APK es seguro. Para instalarlo: Ajustes → Seguridad → Permitir fuentes desconocidas.',
+    dlSupport:'¿Problemas?',
+    // Admin
+    adminLabel:'Administración', adminTitle:'Panel de administración',
+    adminDesc:'Gestiona usuarios, confirma pagos bancarios, supervisa estadísticas de reproducción y controla la plataforma completa desde el panel web de administración.',
+    adminAccessLabel:'Acceso solo para administradores',
+    adminEmailLabel:'Email', adminPassLabel:'Contraseña por defecto',
+    adminBtn:'Abrir panel admin →',
+    // Footer
+    footerDesc:'La plataforma de música para Guinea Ecuatorial. Apoya a los artistas locales, escucha y descarga sin límites.',
+    footerAppCol:'App', footerLegalCol:'Legal', footerContactCol:'Contacto',
+    footerFeatures:'Características', footerPrices:'Precios', footerDownload:'Descargar', footerArtists:'Para artistas',
+    footerPrivacy:'Privacidad', footerTerms:'Términos', footerCookies:'Cookies',
+    footerSupport:'Soporte', footerBusiness:'Empresas',
+    footerCopy:'© 2025 MbôláMusic. Todos los derechos reservados.',
+    // Auth
+    profileBtn:'Mi perfil', logoutBtn:'Salir',
+    loginLabel:'Email, teléfono o usuario', loginPwLabel:'Contraseña', loginBtn:'Entrar →',
+    registerUserLabel:'Usuario *', registerTypeLabel:'Tipo de cuenta *',
+    listenerOpt:'Oyente', artistOpt:'Artista',
+    registerEmailLabel:'Email', registerArtistLabel:'Nombre artístico *',
+    registerPwLabel:'Contraseña *', registerPwHint:'mínimo 6 caracteres',
+    registerBtn:'Crear cuenta →',
+    registerNote:'Oyentes: 1 mes gratis · Artistas: 10.000 FCFA/mes',
   },
   fr: {
-    heroBadge:'🇬🇶 Fait pour la Guinée Équatoriale',heroTitle:'Ta musique,<br><span>sans limites</span>',
-    heroSub:"Écoute les meilleurs artistes de Guinée Équatoriale, télécharge pour écouter hors ligne et soutiens les talents locaux.",
-    heroCta:'⬇ Télécharger APK',heroCtaSec:'Voir les fonctionnalités',
-    stat1:"<strong>Gratuit</strong><span>1 mois à l'inscription</span>",stat2:'<strong>70%</strong><span>revenus pour l\'artiste</span>',stat3:'<strong>Hors ligne</strong><span>téléchargement chiffré</span>',
-    navFeatures:'Fonctionnalités',navPrices:'Tarifs',navListen:'🎵 Écouter',navArtists:'Artistes',navDownload:'Télécharger',navAdmin:'Admin',navCta:'Télécharger APK',
-    tabLogin:'Se connecter',tabRegister:"S'inscrire",
+    heroBadge: '🇬🇶 Fait pour la Guinée Équatoriale',
+    heroTitle: 'Ta musique,<br><span>sans limites</span>',
+    heroSub: 'Écoute les meilleurs artistes de Guinée Équatoriale, télécharge pour écouter hors ligne et soutiens les talents locaux.',
+    heroCta: '⬇ Télécharger APK',
+    heroCtaSec: 'Voir les fonctionnalités',
+    stat1: '<strong>Gratuit</strong><span>1 mois à l\'inscription</span>',
+    stat2: '<strong>70%</strong><span>revenus pour l\'artiste</span>',
+    stat3: '<strong>Hors ligne</strong><span>téléchargement chiffré</span>',
+    navFeatures:'Fonctionnalités', navPrices:'Tarifs', navListen:'🎵 Écouter',
+    navArtists:'Artistes', navDownload:'Télécharger', navAdmin:'Admin',
+    navCta:'Télécharger APK',
+    tabLogin:'Se connecter', tabRegister:"S'inscrire",
+    downloadCta:'⬇ Télécharger APK',
+    nowPlaying: 'En lecture',
+    featLabel:'Fonctionnalités', featTitle:'Tout ce dont tu as besoin',
+    featSub:'Conçu pour fonctionner dans les conditions réelles de la Guinée Équatoriale.',
+    feat1h:'Streaming de qualité', feat1p:'Écoute des millions de chansons en haute qualité. Découvre les meilleurs artistes de Guinée Équatoriale et du monde.',
+    feat2h:'Téléchargement offline chiffré', feat2p:'Télécharge tes chansons favorites avec chiffrement AES-128 et écoute-les sans connexion. Sans internet, sans problème.',
+    feat3h:'Charts et tendances', feat3p:'Suis le podium des chansons les plus écoutées. Découvre les nouveautés des artistes locaux dans le Feed personnalisé.',
+    feat4h:'Paye comme tu veux', feat4p:'50 FCFA par écoute ou 2.000 FCFA/mois tout inclus. Recharge ton portefeuille facilement depuis l\'appli.',
+    feat5h:'Mets en ligne ta musique', feat5p:'Tu es artiste ? Crée ton profil, mets en ligne tes chansons et commence à gagner de l\'argent à chaque écoute et téléchargement.',
+    feat6h:'Multilingue', feat6p:'Disponible en espagnol, français et portugais. L\'appli pour tous les peuples de Guinée Équatoriale.',
+    priceLabel:'Tarifs', priceTitle:'Choisis ton plan', priceSub:'Commence gratuitement. Sans carte bancaire.',
+    plan1name:'Essai gratuit', plan1period:'pendant le premier mois',
+    plan1f1:'Streaming illimité', plan1f2:'Téléchargement offline (5 chansons)', plan1f3:'Feed personnalisé', plan1f4:'Sans publicités',
+    plan1cta:'Commencer gratuitement',
+    planBadge:'Plus populaire',
+    plan2name:'Abonnement', plan2period:'par mois, tout inclus',
+    plan2f1:'Streaming illimité', plan2f2:'Téléchargements offline illimités', plan2f3:'Feed personnalisé', plan2f4:'Sans publicités', plan2f5:'Qualité audio élevée',
+    plan2cta:'S\'abonner',
+    plan3name:'À l\'usage', plan3period:'par écoute',
+    plan3f1:'Paye seulement ce que tu écoutes', plan3f2:'200 FCFA par téléchargement', plan3f3:'Sans engagement mensuel', plan3f4:'Recharge ton portefeuille',
+    plan3cta:'Utiliser à l\'usage',
+    artistLabel:'Pour les artistes', artistTitle:'Monétise ta musique',
+    artistSub:'Mets en ligne tes chansons, atteins plus d\'auditeurs et gagne 70% de chaque écoute.',
+    step1h:'Crée ton profil d\'artiste', step1p:'Inscris-toi avec le rôle artiste et complète ton profil avec photo et bio.',
+    step2h:'Active ton abonnement', step2p:'10.000 FCFA/mois maintient ta musique visible pour tous les auditeurs.',
+    step3h:'Mets en ligne tes chansons', step3p:'Uploade l\'audio en format MP3/AAC directement depuis l\'appli. Sans limite de chansons.',
+    step4h:'Encaisse tes gains', step4p:'Retire tes gains sur ton compte bancaire ou mobile quand tu veux.',
+    earnTitle:'Répartition des revenus',
+    earnArtist:'Artiste', earnPlatform:'Plateforme',
+    earnNote:'Pour chaque 50 FCFA d\'écoute,<br>tu reçois <strong style="color:var(--amber)">35 FCFA</strong>.',
+    playerLabel:'Écouter maintenant', playerTitle:'Les chansons les plus récentes',
+    playerSub:'Écoute directement depuis le navigateur, sans rien installer.',
+    playerLoading:'Chargement des chansons…', playerEmpty:'Aucune chanson disponible pour l\'instant.', playerError:'Impossible de se connecter au serveur.',
+    dlLabel:'Téléchargement', dlTitle:'Disponible maintenant pour Android',
+    dlSub:'Installe l\'appli directement sur ton téléphone Android. iOS bientôt.',
+    dlAndroidSmall:'Télécharger pour', dlIosSmall:'Bientôt sur',
+    dlNote:'L\'APK est sécurisé. Pour l\'installer : Paramètres → Sécurité → Autoriser sources inconnues.',
+    dlSupport:'Problèmes ?',
+    adminLabel:'Administration', adminTitle:'Panneau d\'administration',
+    adminDesc:'Gérez les utilisateurs, confirmez les paiements bancaires, supervisez les statistiques d\'écoute et contrôlez la plateforme complète depuis le panneau web d\'administration.',
+    adminAccessLabel:'Accès réservé aux administrateurs',
+    adminEmailLabel:'E-mail', adminPassLabel:'Mot de passe par défaut',
+    adminBtn:'Ouvrir le panneau admin →',
+    footerDesc:'La plateforme musicale pour la Guinée Équatoriale. Soutiens les artistes locaux, écoute et télécharge sans limites.',
+    footerAppCol:'Appli', footerLegalCol:'Légal', footerContactCol:'Contact',
+    footerFeatures:'Fonctionnalités', footerPrices:'Tarifs', footerDownload:'Télécharger', footerArtists:'Pour les artistes',
+    footerPrivacy:'Confidentialité', footerTerms:'Conditions', footerCookies:'Cookies',
+    footerSupport:'Support', footerBusiness:'Entreprises',
+    footerCopy:'© 2025 MbôláMusic. Tous droits réservés.',
+    profileBtn:'Mon profil', logoutBtn:'Quitter',
+    loginLabel:'E-mail, téléphone ou nom d\'utilisateur', loginPwLabel:'Mot de passe', loginBtn:'Entrer →',
+    registerUserLabel:'Utilisateur *', registerTypeLabel:'Type de compte *',
+    listenerOpt:'Auditeur', artistOpt:'Artiste',
+    registerEmailLabel:'E-mail', registerArtistLabel:'Nom artistique *',
+    registerPwLabel:'Mot de passe *', registerPwHint:'minimum 6 caractères',
+    registerBtn:'Créer un compte →',
+    registerNote:'Auditeurs : 1 mois gratuit · Artistes : 10.000 FCFA/mois',
   },
   pt: {
-    heroBadge:'🇬🇶 Feito para a Guiné Equatorial',heroTitle:'A tua música,<br><span>sem limites</span>',
-    heroSub:'Ouve os melhores artistas da Guiné Equatorial, descarrega para offline e apoia os talentos locais com cada reprodução.',
-    heroCta:'⬇ Descarregar APK',heroCtaSec:'Ver funcionalidades',
-    stat1:'<strong>Grátis</strong><span>1 mês ao registar</span>',stat2:'<strong>70%</strong><span>ganhos para o artista</span>',stat3:'<strong>Offline</strong><span>download cifrado</span>',
-    navFeatures:'Funcionalidades',navPrices:'Preços',navListen:'🎵 Ouvir',navArtists:'Artistas',navDownload:'Descarregar',navAdmin:'Admin',navCta:'Descarregar APK',
-    tabLogin:'Iniciar sessão',tabRegister:'Registar',
+    heroBadge: '🇬🇶 Feito para a Guiné Equatorial',
+    heroTitle: 'A tua música,<br><span>sem limites</span>',
+    heroSub: 'Ouve os melhores artistas da Guiné Equatorial, descarrega para offline e apoia os talentos locais com cada reprodução.',
+    heroCta: '⬇ Descarregar APK',
+    heroCtaSec: 'Ver funcionalidades',
+    stat1: '<strong>Grátis</strong><span>1 mês ao registar</span>',
+    stat2: '<strong>70%</strong><span>ganhos para o artista</span>',
+    stat3: '<strong>Offline</strong><span>download cifrado</span>',
+    navFeatures:'Funcionalidades', navPrices:'Preços', navListen:'🎵 Ouvir',
+    navArtists:'Artistas', navDownload:'Descarregar', navAdmin:'Admin',
+    navCta:'Descarregar APK',
+    tabLogin:'Iniciar sessão', tabRegister:'Registar',
+    downloadCta:'⬇ Descarregar APK',
+    nowPlaying: 'A reproduzir agora',
+    featLabel:'Funcionalidades', featTitle:'Tudo o que precisas',
+    featSub:'Desenvolvido para funcionar nas condições reais da Guiné Equatorial.',
+    feat1h:'Streaming de qualidade', feat1p:'Ouve milhões de músicas em alta qualidade. Descobre os melhores artistas da Guiné Equatorial e do mundo.',
+    feat2h:'Download offline cifrado', feat2p:'Descarrega as tuas músicas favoritas com cifra AES-128 e ouve-as sem ligação. Sem internet, sem problema.',
+    feat3h:'Charts e tendências', feat3p:'Segue o pódio das músicas mais ouvidas. Descobre o novo dos artistas locais no Feed personalizado.',
+    feat4h:'Paga como quiseres', feat4p:'50 FCFA por reprodução ou 2.000 FCFA/mês tudo incluído. Recarrega a tua carteira facilmente na app.',
+    feat5h:'Carrega a tua música', feat5p:'És artista? Cria o teu perfil, carrega as tuas músicas e começa a ganhar dinheiro com cada reprodução e download.',
+    feat6h:'Multi-idioma', feat6p:'Disponível em espanhol, francês e português. A app para todos os povos da Guiné Equatorial.',
+    priceLabel:'Preços', priceTitle:'Escolhe o teu plano', priceSub:'Começa de graça. Sem cartão de crédito.',
+    plan1name:'Teste gratuito', plan1period:'durante o primeiro mês',
+    plan1f1:'Streaming ilimitado', plan1f2:'Download offline (5 músicas)', plan1f3:'Feed personalizado', plan1f4:'Sem anúncios',
+    plan1cta:'Começar de graça',
+    planBadge:'Mais popular',
+    plan2name:'Subscrição', plan2period:'por mês, tudo incluído',
+    plan2f1:'Streaming ilimitado', plan2f2:'Downloads offline ilimitados', plan2f3:'Feed personalizado', plan2f4:'Sem anúncios', plan2f5:'Qualidade de áudio alta',
+    plan2cta:'Subscrever',
+    plan3name:'Por uso', plan3period:'por reprodução',
+    plan3f1:'Paga apenas o que ouves', plan3f2:'200 FCFA por download', plan3f3:'Sem compromisso mensal', plan3f4:'Recarrega a tua carteira',
+    plan3cta:'Usar por uso',
+    artistLabel:'Para artistas', artistTitle:'Monetiza a tua música',
+    artistSub:'Carrega as tuas músicas, alcança mais ouvintes e ganha 70% de cada reprodução.',
+    step1h:'Cria o teu perfil de artista', step1p:'Regista-te com o papel de artista e completa o teu perfil com foto e bio.',
+    step2h:'Ativa a tua subscrição', step2p:'10.000 FCFA/mês mantém a tua música visível para todos os ouvintes.',
+    step3h:'Carrega as tuas músicas', step3p:'Carrega áudio em formato MP3/AAC diretamente na app. Sem limite de músicas.',
+    step4h:'Levanta os teus ganhos', step4p:'Retira os teus ganhos para a tua conta bancária ou móvel quando quiseres.',
+    earnTitle:'Distribuição de receitas',
+    earnArtist:'Artista', earnPlatform:'Plataforma',
+    earnNote:'Por cada 50 FCFA de reprodução,<br>recebes <strong style="color:var(--amber)">35 FCFA</strong>.',
+    playerLabel:'Ouvir agora', playerTitle:'As músicas mais recentes',
+    playerSub:'Ouve diretamente no navegador, sem instalar nada.',
+    playerLoading:'A carregar músicas…', playerEmpty:'Ainda não há músicas disponíveis.', playerError:'Não foi possível ligar ao servidor.',
+    dlLabel:'Transferência', dlTitle:'Disponível agora para Android',
+    dlSub:'Instala a app diretamente no teu telemóvel Android. iOS em breve.',
+    dlAndroidSmall:'Descarregar para', dlIosSmall:'Em breve em',
+    dlNote:'O APK é seguro. Para instalar: Definições → Segurança → Permitir fontes desconhecidas.',
+    dlSupport:'Problemas?',
+    adminLabel:'Administração', adminTitle:'Painel de administração',
+    adminDesc:'Gere utilizadores, confirma pagamentos bancários, supervisiona estatísticas de reprodução e controla a plataforma completa a partir do painel web de administração.',
+    adminAccessLabel:'Acesso apenas para administradores',
+    adminEmailLabel:'E-mail', adminPassLabel:'Palavra-passe por defeito',
+    adminBtn:'Abrir painel admin →',
+    footerDesc:'A plataforma musical para a Guiné Equatorial. Apoia os artistas locais, ouve e descarrega sem limites.',
+    footerAppCol:'App', footerLegalCol:'Legal', footerContactCol:'Contacto',
+    footerFeatures:'Funcionalidades', footerPrices:'Preços', footerDownload:'Descarregar', footerArtists:'Para artistas',
+    footerPrivacy:'Privacidade', footerTerms:'Termos', footerCookies:'Cookies',
+    footerSupport:'Suporte', footerBusiness:'Empresas',
+    footerCopy:'© 2025 MbôláMusic. Todos os direitos reservados.',
+    profileBtn:'O meu perfil', logoutBtn:'Sair',
+    loginLabel:'E-mail, telemóvel ou utilizador', loginPwLabel:'Palavra-passe', loginBtn:'Entrar →',
+    registerUserLabel:'Utilizador *', registerTypeLabel:'Tipo de conta *',
+    listenerOpt:'Ouvinte', artistOpt:'Artista',
+    registerEmailLabel:'E-mail', registerArtistLabel:'Nome artístico *',
+    registerPwLabel:'Palavra-passe *', registerPwHint:'mínimo 6 caracteres',
+    registerBtn:'Criar conta →',
+    registerNote:'Ouvintes: 1 mês grátis · Artistas: 10.000 FCFA/mês',
   },
   en: {
-    heroBadge:'🇬🇶 Made for Equatorial Guinea',heroTitle:'Your music,<br><span>no limits</span>',
-    heroSub:'Listen to the best artists from Equatorial Guinea, download for offline and support local talent with every play.',
-    heroCta:'⬇ Download APK',heroCtaSec:'See features',
-    stat1:'<strong>Free</strong><span>1 month on sign up</span>',stat2:'<strong>70%</strong><span>earnings for artists</span>',stat3:'<strong>Offline</strong><span>encrypted download</span>',
-    navFeatures:'Features',navPrices:'Pricing',navListen:'🎵 Listen',navArtists:'Artists',navDownload:'Download',navAdmin:'Admin',navCta:'Download APK',
-    tabLogin:'Log in',tabRegister:'Sign up',
+    heroBadge: '🇬🇶 Made for Equatorial Guinea',
+    heroTitle: 'Your music,<br><span>no limits</span>',
+    heroSub: 'Listen to the best artists from Equatorial Guinea, download for offline and support local talent with every play.',
+    heroCta: '⬇ Download APK',
+    heroCtaSec: 'See features',
+    stat1: '<strong>Free</strong><span>1 month on sign up</span>',
+    stat2: '<strong>70%</strong><span>earnings for artists</span>',
+    stat3: '<strong>Offline</strong><span>encrypted download</span>',
+    navFeatures:'Features', navPrices:'Pricing', navListen:'🎵 Listen',
+    navArtists:'Artists', navDownload:'Download', navAdmin:'Admin',
+    navCta:'Download APK',
+    tabLogin:'Log in', tabRegister:'Sign up',
+    downloadCta:'⬇ Download APK',
+    nowPlaying: 'Now playing',
+    featLabel:'Features', featTitle:'Everything you need',
+    featSub:'Built to work in the real conditions of Equatorial Guinea.',
+    feat1h:'Quality streaming', feat1p:'Listen to millions of songs in high quality. Discover the best artists from Equatorial Guinea and the world.',
+    feat2h:'Encrypted offline download', feat2p:'Download your favourite songs with AES-128 encryption and listen offline. No internet, no problem.',
+    feat3h:'Charts & trends', feat3p:'Follow the podium of the most-played songs. Discover new releases from local artists in your personalised Feed.',
+    feat4h:'Pay your way', feat4p:'50 FCFA per play or 2,000 FCFA/month all-inclusive. Top up your wallet easily from the app.',
+    feat5h:'Upload your music', feat5p:'Are you an artist? Create your profile, upload your songs and start earning money with every play and download.',
+    feat6h:'Multi-language', feat6p:'Available in Spanish, French and Portuguese. The app for all peoples of Equatorial Guinea.',
+    priceLabel:'Pricing', priceTitle:'Choose your plan', priceSub:'Start for free. No credit card required.',
+    plan1name:'Free trial', plan1period:'for the first month',
+    plan1f1:'Unlimited streaming', plan1f2:'Offline download (5 songs)', plan1f3:'Personalised feed', plan1f4:'No ads',
+    plan1cta:'Start for free',
+    planBadge:'Most popular',
+    plan2name:'Subscription', plan2period:'per month, all-inclusive',
+    plan2f1:'Unlimited streaming', plan2f2:'Unlimited offline downloads', plan2f3:'Personalised feed', plan2f4:'No ads', plan2f5:'High audio quality',
+    plan2cta:'Subscribe',
+    plan3name:'Pay-as-you-go', plan3period:'per play',
+    plan3f1:'Pay only what you listen to', plan3f2:'200 FCFA per download', plan3f3:'No monthly commitment', plan3f4:'Top up your wallet',
+    plan3cta:'Use pay-as-you-go',
+    artistLabel:'For artists', artistTitle:'Monetise your music',
+    artistSub:'Upload your songs, reach more listeners and earn 70% of every play.',
+    step1h:'Create your artist profile', step1p:'Sign up as an artist and complete your profile with photo and bio.',
+    step2h:'Activate your subscription', step2p:'10,000 FCFA/month keeps your music visible to all listeners.',
+    step3h:'Upload your songs', step3p:'Upload audio in MP3/AAC format directly from the app. No song limit.',
+    step4h:'Collect your earnings', step4p:'Withdraw your earnings to your bank or mobile account whenever you want.',
+    earnTitle:'Revenue split',
+    earnArtist:'Artist', earnPlatform:'Platform',
+    earnNote:'For every 50 FCFA play,<br>you receive <strong style="color:var(--amber)">35 FCFA</strong>.',
+    playerLabel:'Listen now', playerTitle:'The latest songs',
+    playerSub:'Listen directly in your browser, no installation needed.',
+    playerLoading:'Loading songs…', playerEmpty:'No songs available yet.', playerError:'Could not connect to the server.',
+    dlLabel:'Download', dlTitle:'Available now for Android',
+    dlSub:'Install the app directly on your Android phone. iOS coming soon.',
+    dlAndroidSmall:'Download for', dlIosSmall:'Coming soon to',
+    dlNote:'The APK is safe. To install: Settings → Security → Allow unknown sources.',
+    dlSupport:'Problems?',
+    adminLabel:'Administration', adminTitle:'Admin panel',
+    adminDesc:'Manage users, confirm bank payments, monitor playback statistics and control the whole platform from the web admin panel.',
+    adminAccessLabel:'Admin access only',
+    adminEmailLabel:'Email', adminPassLabel:'Default password',
+    adminBtn:'Open admin panel →',
+    footerDesc:'The music platform for Equatorial Guinea. Support local artists, listen and download without limits.',
+    footerAppCol:'App', footerLegalCol:'Legal', footerContactCol:'Contact',
+    footerFeatures:'Features', footerPrices:'Pricing', footerDownload:'Download', footerArtists:'For artists',
+    footerPrivacy:'Privacy', footerTerms:'Terms', footerCookies:'Cookies',
+    footerSupport:'Support', footerBusiness:'Business',
+    footerCopy:'© 2025 MbôláMusic. All rights reserved.',
+    profileBtn:'My profile', logoutBtn:'Log out',
+    loginLabel:'Email, phone or username', loginPwLabel:'Password', loginBtn:'Log in →',
+    registerUserLabel:'Username *', registerTypeLabel:'Account type *',
+    listenerOpt:'Listener', artistOpt:'Artist',
+    registerEmailLabel:'Email', registerArtistLabel:'Artist name *',
+    registerPwLabel:'Password *', registerPwHint:'minimum 6 characters',
+    registerBtn:'Create account →',
+    registerNote:'Listeners: 1 month free · Artists: 10,000 FCFA/month',
   },
 };
-const LANG_META = { es:{flag:'🇪🇸',code:'ES'}, fr:{flag:'🇫🇷',code:'FR'}, pt:{flag:'🇵🇹',code:'PT'}, en:{flag:'🇬🇧',code:'EN'} };
 
-function setLang(code, save=true) {
+function setText(id, val) { const el = document.getElementById(id); if (el && val != null) el.textContent = val; }
+function setHTML(id, val) { const el = document.getElementById(id); if (el && val != null) el.innerHTML = val; }
+function setLang(code, save = true) {
   const t = T[code] || T['es'];
   if (save) localStorage.setItem('mbola_lang', code);
-  const m = LANG_META[code];
-  document.getElementById('lang-current').textContent = m.flag + ' ' + m.code;
-  document.querySelectorAll('.lang-opt').forEach((el,i) => {
-    el.classList.toggle('active', ['es','fr','pt','en'][i] === code);
+  const l = LANGS[code];
+  document.getElementById('lang-current').textContent = `${l.flag} ${l.code}`;
+  document.querySelectorAll('.lang-opt').forEach((el, i) => {
+    const codes = ['es','fr','pt','en'];
+    el.classList.toggle('active', codes[i] === code);
   });
+  // Hero
   const badge = document.querySelector('.hero-badge');
   if (badge) badge.textContent = t.heroBadge;
   const heroTitle = document.querySelector('.hero-title');
@@ -457,16 +728,87 @@ function setLang(code, save=true) {
   if (stats[0]) stats[0].innerHTML = t.stat1;
   if (stats[1]) stats[1].innerHTML = t.stat2;
   if (stats[2]) stats[2].innerHTML = t.stat3;
+  // Nav
   const navLinks = document.querySelectorAll('.nav-links a');
-  ['navFeatures','navPrices','navListen','navArtists','navDownload','navAdmin'].forEach((k,i) => {
-    if (navLinks[i] && t[k]) navLinks[i].textContent = t[k];
-  });
+  const nk = ['navFeatures','navPrices','navListen','navArtists','navDownload','navAdmin'];
+  navLinks.forEach((a, i) => { if (t[nk[i]]) a.textContent = t[nk[i]]; });
   const navCta = document.getElementById('nav-download-btn');
   if (navCta) navCta.textContent = t.navCta;
-  const tabL = document.getElementById('tab-login-btn');
-  const tabR = document.getElementById('tab-register-btn');
-  if (tabL) tabL.textContent = t.tabLogin;
-  if (tabR) tabR.textContent = t.tabRegister;
+  // Auth modal tabs
+  setText('tab-login-btn', t.tabLogin);
+  setText('tab-register-btn', t.tabRegister);
+  setText('nav-login-btn', t.tabLogin);
+  // Auth modal content
+  setText('li-id-label', t.loginLabel);
+  setText('li-pw-label', t.loginPwLabel);
+  setText('li-submit-btn', t.loginBtn);
+  setText('rg-user-label', t.registerUserLabel);
+  setText('rg-type-label', t.registerTypeLabel);
+  setText('rg-listener-opt', t.listenerOpt);
+  setText('rg-artist-opt', t.artistOpt);
+  setText('rg-email-label', t.registerEmailLabel);
+  setText('rg-artname-label', t.registerArtistLabel);
+  setText('rg-pw-label', t.registerPwLabel);
+  const rgPwInput = document.getElementById('rg-pw');
+  if (rgPwInput) rgPwInput.placeholder = t.registerPwHint;
+  setText('rg-submit-btn', t.registerBtn);
+  setText('rg-note', t.registerNote);
+  // Nav user buttons
+  setText('nav-profile-btn', t.profileBtn);
+  setText('nav-logout-btn', t.logoutBtn);
+  // Phone mockup
+  setText('mockup-now-playing', t.nowPlaying);
+  // Features
+  setText('feat-label', t.featLabel); setText('feat-title', t.featTitle); setText('feat-sub', t.featSub);
+  setText('feat1-h', t.feat1h); setText('feat1-p', t.feat1p);
+  setText('feat2-h', t.feat2h); setText('feat2-p', t.feat2p);
+  setText('feat3-h', t.feat3h); setText('feat3-p', t.feat3p);
+  setText('feat4-h', t.feat4h); setText('feat4-p', t.feat4p);
+  setText('feat5-h', t.feat5h); setText('feat5-p', t.feat5p);
+  setText('feat6-h', t.feat6h); setText('feat6-p', t.feat6p);
+  // Pricing
+  setText('price-label', t.priceLabel); setText('price-title', t.priceTitle); setText('price-sub', t.priceSub);
+  setText('plan1-name', t.plan1name); setText('plan1-period', t.plan1period);
+  setText('plan1-f1', t.plan1f1); setText('plan1-f2', t.plan1f2); setText('plan1-f3', t.plan1f3); setText('plan1-f4', t.plan1f4);
+  setText('plan1-cta', t.plan1cta);
+  setText('plan-badge', t.planBadge);
+  setText('plan2-name', t.plan2name); setText('plan2-period', t.plan2period);
+  setText('plan2-f1', t.plan2f1); setText('plan2-f2', t.plan2f2); setText('plan2-f3', t.plan2f3); setText('plan2-f4', t.plan2f4); setText('plan2-f5', t.plan2f5);
+  setText('plan2-cta', t.plan2cta);
+  setText('plan3-name', t.plan3name); setText('plan3-period', t.plan3period);
+  setText('plan3-f1', t.plan3f1); setText('plan3-f2', t.plan3f2); setText('plan3-f3', t.plan3f3); setText('plan3-f4', t.plan3f4);
+  setText('plan3-cta', t.plan3cta);
+  // Artists
+  setText('artist-label', t.artistLabel); setText('artist-title', t.artistTitle); setText('artist-sub', t.artistSub);
+  setText('step1-h', t.step1h); setText('step1-p', t.step1p);
+  setText('step2-h', t.step2h); setText('step2-p', t.step2p);
+  setText('step3-h', t.step3h); setText('step3-p', t.step3p);
+  setText('step4-h', t.step4h); setText('step4-p', t.step4p);
+  setText('earn-title', t.earnTitle);
+  setText('earn-artist', t.earnArtist); setText('earn-platform', t.earnPlatform);
+  setHTML('earn-note', t.earnNote);
+  // Player
+  setText('player-label', t.playerLabel); setText('player-title', t.playerTitle); setText('player-sub', t.playerSub);
+  setText('player-loading-msg', t.playerLoading);
+  // Earn donut label
+  setText('earn-artist-donut', t.earnArtist);
+  // Download
+  setText('dl-label', t.dlLabel); setText('dl-title', t.dlTitle); setText('dl-sub', t.dlSub);
+  setText('dl-android-small', t.dlAndroidSmall); setText('dl-ios-small', t.dlIosSmall);
+  setText('dl-note-text', t.dlNote); setText('dl-support', t.dlSupport);
+  // Admin
+  setText('admin-label', t.adminLabel); setText('admin-title', t.adminTitle); setText('admin-desc', t.adminDesc);
+  setText('admin-access-label', t.adminAccessLabel);
+  setText('admin-email-label', t.adminEmailLabel); setText('admin-pass-label', t.adminPassLabel);
+  setText('admin-btn', t.adminBtn);
+  // Footer
+  setText('footer-desc', t.footerDesc);
+  setText('footer-app-col', t.footerAppCol); setText('footer-legal-col', t.footerLegalCol); setText('footer-contact-col', t.footerContactCol);
+  setText('footer-feat', t.footerFeatures); setText('footer-prices', t.footerPrices);
+  setText('footer-dl', t.footerDownload); setText('footer-artists', t.footerArtists);
+  setText('footer-privacy', t.footerPrivacy); setText('footer-terms', t.footerTerms); setText('footer-cookies', t.footerCookies);
+  setText('footer-support', t.footerSupport); setText('footer-business', t.footerBusiness);
+  setText('footer-copy', t.footerCopy);
 }
 </script>
 
@@ -499,7 +841,7 @@ function setLang(code, save=true) {
             <div class="pscreen-avatar">M</div>
             <div class="pscreen-info">
               <p>Oyéto — DJ Mba</p>
-              <small>Reproduciendo ahora</small>
+              <small id="mockup-now-playing">Reproduciendo ahora</small>
             </div>
             <div class="play-btn">
               <svg width="12" height="14" viewBox="0 0 12 14" fill="#000"><path d="M1 1l10 6-10 6V1z"/></svg>
@@ -542,39 +884,39 @@ function setLang(code, save=true) {
 <!-- FEATURES -->
 <section class="features" id="caracteristicas">
   <div class="section-inner">
-    <p class="section-label">Características</p>
-    <h2 class="section-title">Todo lo que necesitas</h2>
-    <p class="section-sub">Diseñado para funcionar en las condiciones reales de Guinea Ecuatorial.</p>
+    <p class="section-label" id="feat-label">Características</p>
+    <h2 class="section-title" id="feat-title">Todo lo que necesitas</h2>
+    <p class="section-sub" id="feat-sub">Diseñado para funcionar en las condiciones reales de Guinea Ecuatorial.</p>
     <div class="features-grid">
       <div class="feat-card">
         <div class="feat-icon">🎧</div>
-        <h3>Streaming de calidad</h3>
-        <p>Escucha millones de canciones en alta calidad. Descubre los mejores artistas de Guinea Ecuatorial y del mundo.</p>
+        <h3 id="feat1-h">Streaming de calidad</h3>
+        <p id="feat1-p">Escucha millones de canciones en alta calidad. Descubre los mejores artistas de Guinea Ecuatorial y del mundo.</p>
       </div>
       <div class="feat-card">
         <div class="feat-icon">📥</div>
-        <h3>Descarga offline cifrada</h3>
-        <p>Descarga tus canciones favoritas con cifrado AES-128 y escúchalas sin conexión. Sin internet, sin problema.</p>
+        <h3 id="feat2-h">Descarga offline cifrada</h3>
+        <p id="feat2-p">Descarga tus canciones favoritas con cifrado AES-128 y escúchalas sin conexión. Sin internet, sin problema.</p>
       </div>
       <div class="feat-card">
         <div class="feat-icon">🔥</div>
-        <h3>Charts y tendencias</h3>
-        <p>Sigue el podio de las canciones más escuchadas. Descubre lo nuevo de artistas locales en el Feed personalizado.</p>
+        <h3 id="feat3-h">Charts y tendencias</h3>
+        <p id="feat3-p">Sigue el podio de las canciones más escuchadas. Descubre lo nuevo de artistas locales en el Feed personalizado.</p>
       </div>
       <div class="feat-card">
         <div class="feat-icon">💳</div>
-        <h3>Paga como quieras</h3>
-        <p>50 FCFA por reproducción o 2.000 FCFA/mes todo incluido. Recarga tu monedero fácilmente desde la app.</p>
+        <h3 id="feat4-h">Paga como quieras</h3>
+        <p id="feat4-p">50 FCFA por reproducción o 2.000 FCFA/mes todo incluido. Recarga tu monedero fácilmente desde la app.</p>
       </div>
       <div class="feat-card">
         <div class="feat-icon">🎤</div>
-        <h3>Sube tu música</h3>
-        <p>¿Eres artista? Crea tu perfil, sube tus canciones y empieza a ganar dinero con cada reproducción y descarga.</p>
+        <h3 id="feat5-h">Sube tu música</h3>
+        <p id="feat5-p">¿Eres artista? Crea tu perfil, sube tus canciones y empieza a ganar dinero con cada reproducción y descarga.</p>
       </div>
       <div class="feat-card">
         <div class="feat-icon">🌍</div>
-        <h3>Multi-idioma</h3>
-        <p>Disponible en español, francés y portugués. La app para todos los pueblos de Guinea Ecuatorial.</p>
+        <h3 id="feat6-h">Multi-idioma</h3>
+        <p id="feat6-p">Disponible en español, francés y portugués. La app para todos los pueblos de Guinea Ecuatorial.</p>
       </div>
     </div>
   </div>
@@ -583,47 +925,47 @@ function setLang(code, save=true) {
 <!-- PRICING -->
 <section id="precios">
   <div class="section-inner">
-    <p class="section-label">Precios</p>
-    <h2 class="section-title">Elige tu plan</h2>
-    <p class="section-sub">Empieza gratis. Sin tarjeta de crédito.</p>
+    <p class="section-label" id="price-label">Precios</p>
+    <h2 class="section-title" id="price-title">Elige tu plan</h2>
+    <p class="section-sub" id="price-sub">Empieza gratis. Sin tarjeta de crédito.</p>
     <div class="pricing-grid">
       <div class="price-card">
-        <p class="price-name">Prueba gratis</p>
+        <p class="price-name" id="plan1-name">Prueba gratis</p>
         <div class="price-amount">0 <span>FCFA</span></div>
-        <p class="price-period">durante el primer mes</p>
+        <p class="price-period" id="plan1-period">durante el primer mes</p>
         <ul class="price-features">
-          <li>Streaming ilimitado</li>
-          <li>Descarga offline (5 canciones)</li>
-          <li>Feed personalizado</li>
-          <li>Sin anuncios</li>
+          <li id="plan1-f1">Streaming ilimitado</li>
+          <li id="plan1-f2">Descarga offline (5 canciones)</li>
+          <li id="plan1-f3">Feed personalizado</li>
+          <li id="plan1-f4">Sin anuncios</li>
         </ul>
-        <a class="price-btn outline" href="#descargar">Empezar gratis</a>
+        <a class="price-btn outline" href="#descargar" id="plan1-cta">Empezar gratis</a>
       </div>
       <div class="price-card featured">
-        <div class="price-badge">Más popular</div>
-        <p class="price-name">Suscripción</p>
+        <div class="price-badge" id="plan-badge">Más popular</div>
+        <p class="price-name" id="plan2-name">Suscripción</p>
         <div class="price-amount">2.000 <span>FCFA</span></div>
-        <p class="price-period">por mes, todo incluido</p>
+        <p class="price-period" id="plan2-period">por mes, todo incluido</p>
         <ul class="price-features">
-          <li>Streaming ilimitado</li>
-          <li>Descargas offline ilimitadas</li>
-          <li>Feed personalizado</li>
-          <li>Sin anuncios</li>
-          <li>Calidad de audio alta</li>
+          <li id="plan2-f1">Streaming ilimitado</li>
+          <li id="plan2-f2">Descargas offline ilimitadas</li>
+          <li id="plan2-f3">Feed personalizado</li>
+          <li id="plan2-f4">Sin anuncios</li>
+          <li id="plan2-f5">Calidad de audio alta</li>
         </ul>
-        <a class="price-btn" href="#descargar">Suscribirse</a>
+        <a class="price-btn" href="#descargar" id="plan2-cta">Suscribirse</a>
       </div>
       <div class="price-card">
-        <p class="price-name">Por uso</p>
+        <p class="price-name" id="plan3-name">Por uso</p>
         <div class="price-amount">50 <span>FCFA</span></div>
-        <p class="price-period">por reproducción</p>
+        <p class="price-period" id="plan3-period">por reproducción</p>
         <ul class="price-features">
-          <li>Paga solo lo que escuchas</li>
-          <li>200 FCFA por descarga</li>
-          <li>Sin compromiso mensual</li>
-          <li>Recarga tu monedero</li>
+          <li id="plan3-f1">Paga solo lo que escuchas</li>
+          <li id="plan3-f2">200 FCFA por descarga</li>
+          <li id="plan3-f3">Sin compromiso mensual</li>
+          <li id="plan3-f4">Recarga tu monedero</li>
         </ul>
-        <a class="price-btn outline" href="#descargar">Usar por uso</a>
+        <a class="price-btn outline" href="#descargar" id="plan3-cta">Usar por uso</a>
       </div>
     </div>
   </div>
@@ -632,42 +974,42 @@ function setLang(code, save=true) {
 <!-- ARTISTS -->
 <section class="artists" id="artistas">
   <div class="section-inner">
-    <p class="section-label">Para artistas</p>
-    <h2 class="section-title">Monetiza tu música</h2>
-    <p class="section-sub">Sube tus canciones, llega a más oyentes y gana el 70% de cada reproducción.</p>
+    <p class="section-label" id="artist-label">Para artistas</p>
+    <h2 class="section-title" id="artist-title">Monetiza tu música</h2>
+    <p class="section-sub" id="artist-sub">Sube tus canciones, llega a más oyentes y gana el 70% de cada reproducción.</p>
     <div class="artists-grid">
       <div class="artists-steps">
         <div class="artist-step">
           <div class="step-num">1</div>
           <div class="step-text">
-            <h4>Crea tu perfil de artista</h4>
-            <p>Regístrate con rol de artista y completa tu perfil con foto y bio.</p>
+            <h4 id="step1-h">Crea tu perfil de artista</h4>
+            <p id="step1-p">Regístrate con rol de artista y completa tu perfil con foto y bio.</p>
           </div>
         </div>
         <div class="artist-step">
           <div class="step-num">2</div>
           <div class="step-text">
-            <h4>Activa tu suscripción</h4>
-            <p>10.000 FCFA/mes mantiene tu música visible para todos los oyentes.</p>
+            <h4 id="step2-h">Activa tu suscripción</h4>
+            <p id="step2-p">10.000 FCFA/mes mantiene tu música visible para todos los oyentes.</p>
           </div>
         </div>
         <div class="artist-step">
           <div class="step-num">3</div>
           <div class="step-text">
-            <h4>Sube tus canciones</h4>
-            <p>Sube audio en formato MP3/AAC directamente desde la app. Sin límite de canciones.</p>
+            <h4 id="step3-h">Sube tus canciones</h4>
+            <p id="step3-p">Sube audio en formato MP3/AAC directamente desde la app. Sin límite de canciones.</p>
           </div>
         </div>
         <div class="artist-step">
           <div class="step-num">4</div>
           <div class="step-text">
-            <h4>Cobra tus ganancias</h4>
-            <p>Retira tus ganancias a tu cuenta bancaria o móvil cuando quieras.</p>
+            <h4 id="step4-h">Cobra tus ganancias</h4>
+            <p id="step4-p">Retira tus ganancias a tu cuenta bancaria o móvil cuando quieras.</p>
           </div>
         </div>
       </div>
       <div class="artists-earn">
-        <h3 style="margin-bottom:1.5rem;font-size:1.1rem;">Reparto de ingresos</h3>
+        <h3 id="earn-title" style="margin-bottom:1.5rem;font-size:1.1rem;">Reparto de ingresos</h3>
         <div class="earn-donut">
           <svg viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="38" fill="none" stroke="#1a1a1a" stroke-width="18"/>
@@ -678,19 +1020,19 @@ function setLang(code, save=true) {
           </svg>
           <div class="donut-text">
             <strong>70%</strong>
-            <span>artista</span>
+            <span id="earn-artist-donut">artista</span>
           </div>
         </div>
         <div class="earn-legend">
           <div class="earn-item">
-            <div><span class="earn-dot" style="background:var(--amber)"></span>Artista</div>
+            <div><span class="earn-dot" style="background:var(--amber)"></span><span id="earn-artist">Artista</span></div>
             <strong style="color:var(--amber)">70%</strong>
           </div>
           <div class="earn-item">
-            <div><span class="earn-dot" style="background:#333"></span>Plataforma</div>
+            <div><span class="earn-dot" style="background:#333"></span><span id="earn-platform">Plataforma</span></div>
             <strong>30%</strong>
           </div>
-          <div style="border-top:1px solid var(--border);padding-top:0.75rem;margin-top:0.25rem;font-size:0.85rem;color:var(--text2);">
+          <div id="earn-note" style="border-top:1px solid var(--border);padding-top:0.75rem;margin-top:0.25rem;font-size:0.85rem;color:var(--text2);">
             Por cada 50 FCFA de reproducción,<br>recibes <strong style="color:var(--amber)">35 FCFA</strong>.
           </div>
         </div>
@@ -702,12 +1044,12 @@ function setLang(code, save=true) {
 <!-- PLAYER -->
 <section id="escuchar" style="background:var(--bg);padding:5rem 1.5rem;">
   <div class="section-inner">
-    <p class="section-label">Escuchar ahora</p>
-    <h2 class="section-title">Las canciones más recientes</h2>
-    <p class="section-sub">Escucha directamente desde el navegador, sin instalar nada.</p>
+    <p class="section-label" id="player-label">Escuchar ahora</p>
+    <h2 class="section-title" id="player-title">Las canciones más recientes</h2>
+    <p class="section-sub" id="player-sub">Escucha directamente desde el navegador, sin instalar nada.</p>
 
     <div id="track-list" style="margin-top:2.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem;">
-      <div style="color:var(--text2);padding:2rem;text-align:center;grid-column:1/-1;opacity:.6;">Cargando canciones…</div>
+      <div id="player-loading-msg" style="color:var(--text2);padding:2rem;text-align:center;grid-column:1/-1;opacity:.6;">Cargando canciones…</div>
     </div>
   </div>
 </section>
@@ -734,7 +1076,9 @@ function setLang(code, save=true) {
     .then(r => r.json())
     .then(j => {
       const tracks = j?.data?.tracks || j?.data || [];
-      if (!tracks.length) { el.innerHTML = '<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;">No hay canciones disponibles aún.</p>'; return; }
+      const lang = localStorage.getItem('mbola_lang') || 'es';
+      const tl = T[lang] || T['es'];
+      if (!tracks.length) { el.innerHTML = `<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;">${tl.playerEmpty}</p>`; return; }
       el.innerHTML = tracks.map((t,i) => `
         <div onclick="window.location.href='/player.html?id=${t.id}'"
              style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s;"
@@ -751,7 +1095,11 @@ function setLang(code, save=true) {
           </div>
         </div>`).join('');
     })
-    .catch(() => { el.innerHTML = '<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;opacity:.5;">No se pudo conectar al servidor.</p>'; });
+    .catch(() => {
+      const lang = localStorage.getItem('mbola_lang') || 'es';
+      const tl = T[lang] || T['es'];
+      el.innerHTML = `<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;opacity:.5;">${tl.playerError}</p>`;
+    });
 })();
 
 function playTrack(urlEnc, titleEnc, artistEnc) {
@@ -770,28 +1118,28 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
 <!-- DOWNLOAD -->
 <section class="download" id="descargar">
   <div class="download-inner">
-    <p class="section-label">Descarga</p>
-    <h2 class="section-title">Disponible ahora para Android</h2>
-    <p class="section-sub" style="margin:0 auto;">Instala la app directamente en tu teléfono Android. iOS próximamente.</p>
+    <p class="section-label" id="dl-label">Descarga</p>
+    <h2 class="section-title" id="dl-title">Disponible ahora para Android</h2>
+    <p class="section-sub" id="dl-sub" style="margin:0 auto;">Instala la app directamente en tu teléfono Android. iOS próximamente.</p>
     <div class="download-actions">
       <a class="store-btn" href="mbolamusic.apk" download>
         <span class="store-btn-icon">🤖</span>
         <div class="store-btn-text">
-          <small>Descargar para</small>
+          <small id="dl-android-small">Descargar para</small>
           <strong>Android APK</strong>
         </div>
       </a>
       <a class="store-btn" href="#" style="opacity:0.5;cursor:not-allowed;">
         <span class="store-btn-icon">🍎</span>
         <div class="store-btn-text">
-          <small>Próximamente en</small>
+          <small id="dl-ios-small">Próximamente en</small>
           <strong>App Store</strong>
         </div>
       </a>
     </div>
     <p class="apk-note">
-      El APK es seguro. Para instalarlo: Ajustes → Seguridad → Permitir fuentes desconocidas.<br>
-      ¿Problemas? <a href="mailto:soporte@mbolamusic.com">soporte@mbolamusic.com</a>
+      <span id="dl-note-text">El APK es seguro. Para instalarlo: Ajustes → Seguridad → Permitir fuentes desconocidas.</span><br>
+      <span id="dl-support">¿Problemas?</span> <a href="mailto:soporte@mbolamusic.com">soporte@mbolamusic.com</a>
     </p>
   </div>
 </section>
@@ -799,11 +1147,11 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
 <!-- ADMIN -->
 <section class="admin-section" id="admin">
   <div class="section-inner">
-    <p class="section-label">Administración</p>
-    <h2 class="section-title">Panel de administración</h2>
+    <p class="section-label" id="admin-label">Administración</p>
+    <h2 class="section-title" id="admin-title">Panel de administración</h2>
     <div class="admin-card">
       <div>
-        <p style="color:var(--text2);font-size:0.95rem;max-width:480px;margin-bottom:1.25rem;">
+        <p id="admin-desc" style="color:var(--text2);font-size:0.95rem;max-width:480px;margin-bottom:1.25rem;">
           Gestiona usuarios, confirma pagos bancarios, supervisa estadísticas de reproducción y controla la plataforma completa desde el panel web de administración.
         </p>
         <div class="admin-features">
@@ -816,16 +1164,16 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
         </div>
       </div>
       <div class="admin-access">
-        <p>Acceso solo para administradores</p>
+        <p id="admin-access-label">Acceso solo para administradores</p>
         <div class="cred">
-          <label>Email</label>
+          <label id="admin-email-label">Email</label>
           <span>admin@mbolamusic.com</span>
         </div>
         <div class="cred">
-          <label>Contraseña por defecto</label>
+          <label id="admin-pass-label">Contraseña por defecto</label>
           <span>Cambiar en .env</span>
         </div>
-        <a class="admin-btn" href="https://mbolamusic-api-1.onrender.com/admin" target="_blank">Abrir panel admin →</a>
+        <a class="admin-btn" id="admin-btn" href="https://mbolamusic-api-1.onrender.com/admin" target="_blank">Abrir panel admin →</a>
       </div>
     </div>
   </div>
@@ -840,7 +1188,7 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
           <div class="logo-icon">🎵</div>
           MbôláMusic
         </a>
-        <p>La plataforma de música para Guinea Ecuatorial. Apoya a los artistas locales, escucha y descarga sin límites.</p>
+        <p id="footer-desc">La plataforma de música para Guinea Ecuatorial. Apoya a los artistas locales, escucha y descarga sin límites.</p>
         <div class="footer-flag" style="margin-top:1rem;">
           <div class="flag-stripe" style="background:var(--gn-green)"></div>
           <div class="flag-stripe" style="background:#fff"></div>
@@ -850,34 +1198,33 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
         </div>
       </div>
       <div class="footer-col">
-        <h4>App</h4>
+        <h4 id="footer-app-col">App</h4>
         <ul>
-          <li><a href="#caracteristicas">Características</a></li>
-          <li><a href="#precios">Precios</a></li>
-          <li><a href="#descargar">Descargar</a></li>
-          <li><a href="#artistas">Para artistas</a></li>
+          <li><a href="#caracteristicas" id="footer-feat">Características</a></li>
+          <li><a href="#precios" id="footer-prices">Precios</a></li>
+          <li><a href="#descargar" id="footer-dl">Descargar</a></li>
+          <li><a href="#artistas" id="footer-artists">Para artistas</a></li>
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Legal</h4>
+        <h4 id="footer-legal-col">Legal</h4>
         <ul>
-          <li><a href="/terminos.html">Términos de uso</a></li>
-          <li><a href="/privacidad.html">Privacidad (RGPD)</a></li>
-          <li><a href="/privacidad.html#cookies">Cookies</a></li>
-          <li><a href="/terminos.html">Licencias</a></li>
+          <li><a href="/terminos.html" id="footer-terms">Términos de uso</a></li>
+          <li><a href="/privacidad.html" id="footer-privacy">Privacidad (RGPD)</a></li>
+          <li><a href="/privacidad.html#cookies" id="footer-cookies">Cookies</a></li>
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Contacto</h4>
+        <h4 id="footer-contact-col">Contacto</h4>
         <ul>
-          <li><a href="mailto:soporte@mbolamusic.com">soporte@mbolamusic.com</a></li>
-          <li><a href="mailto:artistas@mbolamusic.com">artistas@mbolamusic.com</a></li>
+          <li><a href="mailto:soporte@mbolamusic.com" id="footer-support">soporte@mbolamusic.com</a></li>
+          <li><a href="mailto:artistas@mbolamusic.com" id="footer-business">artistas@mbolamusic.com</a></li>
           <li><a href="mailto:admin@mbolamusic.com">admin@mbolamusic.com</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <p>© 2025 MbôláMusic. Todos los derechos reservados. Guinea Ecuatorial 🇬🇶</p>
+      <p id="footer-copy">© 2025 MbôláMusic. Todos los derechos reservados. Guinea Ecuatorial 🇬🇶</p>
       <p style="color:var(--text2);font-size:0.8rem;">Hecho con ❤ para Africa</p>
     </div>
   </div>
