@@ -89,6 +89,25 @@
                 padding: 10px 24px; font-weight: bold; font-size: 14px; cursor: pointer; width: auto; margin-top: 4px; }
   .btn-upload:disabled { opacity: .5; cursor: default; }
 
+  /* ── Modal ── */
+  .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px; }
+  .modal-overlay.hidden { display:none; }
+  .modal-box { background:var(--surface);border-radius:var(--radius);padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto; }
+  .modal-box h3 { color:var(--accent);margin-bottom:16px; }
+  .modal-box .mfield { margin-bottom:12px; }
+  .modal-box .mfield label { display:block;font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px; }
+  .modal-box .mfield input,.modal-box .mfield textarea { width:100%;padding:10px 12px;background:var(--surface2);border:1px solid #333;border-radius:8px;color:var(--text);font-size:14px;margin:0; }
+  .modal-box .mfield textarea { resize:vertical;min-height:70px; }
+  .modal-actions { display:flex;gap:8px;margin-top:16px;flex-wrap:wrap; }
+  .modal-actions button { width:auto;font-size:13px;padding:8px 16px;border-radius:8px; }
+  .btn-primary { background:var(--accent);color:#000;border:none;font-weight:bold;cursor:pointer; }
+  .btn-secondary { background:var(--surface2);color:var(--text);border:none;cursor:pointer; }
+  .btn-danger2 { background:var(--error);color:#fff;border:none;cursor:pointer; }
+  .txn-list { margin-top:16px; }
+  .txn-list h4 { color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px; }
+  .txn-row { display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--surface2);font-size:13px; }
+  .txn-row:last-child { border-bottom:none; }
+
   /* ── Mini audio player ── */
   #mini-player { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface);
                  border-top: 1px solid var(--surface2); padding: 10px 24px;
@@ -137,6 +156,38 @@
     <div id="tab-tracks" style="display:none"></div>
     <div id="tab-online" style="display:none"></div>
   </main>
+</div>
+
+<!-- User detail modal -->
+<div id="user-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h3>👤 Detalle de usuario</h3>
+    <div class="mfield"><label>Usuario</label><input id="mu-username" type="text" /></div>
+    <div class="mfield"><label>Email</label><input id="mu-email" type="email" /></div>
+    <div class="mfield"><label>País</label><input id="mu-country" type="text" /></div>
+    <div class="mfield"><label>Ciudad</label><input id="mu-city" type="text" /></div>
+    <div id="mu-artist-section" style="display:none">
+      <div class="mfield"><label>Nombre artístico</label><input id="mu-artistname" type="text" /></div>
+      <div class="mfield"><label>Bio</label><textarea id="mu-bio"></textarea></div>
+    </div>
+    <div class="mfield"><label>Monedero (FCFA)</label><input id="mu-wallet" type="number" min="0" /></div>
+    <div class="mfield"><label>Verificado</label>
+      <select id="mu-verified" style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid #333;border-radius:8px;color:var(--text);font-size:14px;margin:0;">
+        <option value="true">Sí</option><option value="false">No</option>
+      </select>
+    </div>
+    <div id="mu-stats" style="font-size:13px;color:var(--muted);margin-bottom:8px;"></div>
+    <div class="txn-list">
+      <h4>Historial de transacciones</h4>
+      <div id="mu-txns"><div class="loading">Cargando…</div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveUser()">Guardar cambios</button>
+      <button class="btn-danger2" onclick="promptResetPw()">Resetear contraseña</button>
+      <button class="btn-secondary" onclick="closeUserModal()">Cerrar</button>
+    </div>
+    <div id="mu-msg" style="font-size:13px;margin-top:8px;"></div>
+  </div>
 </div>
 
 <!-- Mini player -->
@@ -277,10 +328,11 @@ async function loadUsers(page = 1) {
         <td>${fmt(u.walletBalance)} FCFA</td>
         <td>${new Date(u.createdAt).toLocaleDateString('es')}</td>
         <td>
+          <button class="btn-sm btn-success" onclick="viewUser('${u.id}')">Detalles</button>
           ${u.role === 'ARTIST' ? `
             <button class="btn-sm btn-warn" onclick="blockUser('${u.id}', '${esc(u.username)}')">Ocultar</button>
             <button class="btn-sm btn-success" onclick="unblockUser('${u.id}')">Restaurar</button>
-          ` : '—'}
+          ` : ''}
         </td>
       </tr>`).join('');
     el.querySelector('.loading, .empty')?.remove();
@@ -311,6 +363,93 @@ async function loadUsers(page = 1) {
 }
 
 function filterUsers(role) { _uRole = role; loadUsers(1); }
+
+// ── User detail modal ─────────────────────────────────────────────────────────
+let _currentUserId = null;
+
+async function viewUser(id) {
+  _currentUserId = id;
+  const modal = document.getElementById('user-modal');
+  modal.classList.remove('hidden');
+  document.getElementById('mu-msg').textContent = '';
+  document.getElementById('mu-txns').innerHTML = '<div class="loading">Cargando…</div>';
+  try {
+    const d = await apiFetch('/admin/users/' + id);
+    const u = d.user;
+    document.getElementById('mu-username').value = u.username || '';
+    document.getElementById('mu-email').value    = u.email    || '';
+    document.getElementById('mu-country').value  = u.country  || '';
+    document.getElementById('mu-city').value     = u.city     || '';
+    document.getElementById('mu-wallet').value   = u.walletBalance || 0;
+    document.getElementById('mu-verified').value = u.isVerified ? 'true' : 'false';
+    const artistSec = document.getElementById('mu-artist-section');
+    if (u.role === 'ARTIST' && u.artistProfile) {
+      artistSec.style.display = '';
+      document.getElementById('mu-artistname').value = u.artistProfile.artistName || '';
+      document.getElementById('mu-bio').value        = u.artistProfile.bio || '';
+    } else {
+      artistSec.style.display = 'none';
+    }
+    document.getElementById('mu-stats').textContent =
+      `Rol: ${u.role} · Plays: ${u._count?.plays || 0} · Descargas: ${u._count?.downloads || 0} · Registro: ${new Date(u.createdAt).toLocaleDateString('es')}`;
+    const txns = u.payments || [];
+    if (!txns.length) {
+      document.getElementById('mu-txns').innerHTML = '<div style="color:var(--muted);font-size:13px;">Sin transacciones</div>';
+    } else {
+      const statusColor = s => ({ COMPLETED:'var(--success)', FAILED:'var(--error)', VERIFYING:'var(--accent)', PENDING:'var(--accent)' }[s] || 'var(--muted)');
+      document.getElementById('mu-txns').innerHTML = txns.slice(0, 20).map(p => `
+        <div class="txn-row">
+          <span>${p.type || p.description || '—'}</span>
+          <span style="color:${statusColor(p.status)}">${p.status}</span>
+          <span style="font-weight:bold">${fmt(p.amount)} FCFA</span>
+          <span style="color:var(--muted)">${new Date(p.createdAt).toLocaleDateString('es')}</span>
+        </div>`).join('');
+    }
+  } catch (e) {
+    document.getElementById('mu-msg').style.color = 'var(--error)';
+    document.getElementById('mu-msg').textContent = e.message;
+  }
+}
+
+async function saveUser() {
+  const msg = document.getElementById('mu-msg');
+  msg.textContent = 'Guardando…';
+  msg.style.color = 'var(--muted)';
+  try {
+    await apiFetch('/admin/users/' + _currentUserId, 'PUT', {
+      username:      document.getElementById('mu-username').value.trim(),
+      email:         document.getElementById('mu-email').value.trim(),
+      country:       document.getElementById('mu-country').value.trim(),
+      city:          document.getElementById('mu-city').value.trim(),
+      walletBalance: parseInt(document.getElementById('mu-wallet').value) || 0,
+      isVerified:    document.getElementById('mu-verified').value === 'true',
+    });
+    msg.style.color = 'var(--success)';
+    msg.textContent = '✅ Guardado correctamente';
+    loadUsers(_uPage);
+  } catch(e) {
+    msg.style.color = 'var(--error)';
+    msg.textContent = '❌ ' + e.message;
+  }
+}
+
+async function promptResetPw() {
+  const pw = prompt('Nueva contraseña para este usuario (mínimo 6 caracteres):');
+  if (!pw || pw.length < 6) { alert('Contraseña demasiado corta'); return; }
+  try {
+    await apiFetch('/admin/users/' + _currentUserId + '/reset-password', 'POST', { newPassword: pw });
+    document.getElementById('mu-msg').style.color = 'var(--success)';
+    document.getElementById('mu-msg').textContent = '✅ Contraseña restablecida';
+  } catch(e) {
+    document.getElementById('mu-msg').style.color = 'var(--error)';
+    document.getElementById('mu-msg').textContent = '❌ ' + e.message;
+  }
+}
+
+function closeUserModal() {
+  document.getElementById('user-modal').classList.add('hidden');
+  _currentUserId = null;
+}
 
 async function blockUser(id, name) {
   if (!confirm(`¿Ocultar toda la música de ${name}?`)) return;

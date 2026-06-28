@@ -8,6 +8,9 @@ router.use(authenticate, requireRole('ADMIN'));
 
 router.get('/stats',                       admin.stats);
 router.get('/users',                       admin.listUsers);
+router.get('/users/:id',                   admin.getUser);
+router.put('/users/:id',                   admin.updateUser);
+router.post('/users/:id/reset-password',   admin.resetPassword);
 router.post('/users/:id/block',            admin.blockArtist);
 router.post('/users/:id/unblock',          admin.unblockArtist);
 router.get('/payments',                    admin.listPayments);

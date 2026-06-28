@@ -139,9 +139,47 @@ async function myReferral(req, res) {
   return ok(res, { code: ref?.code ?? null });
 }
 
+// PUT /api/auth/profile
+async function updateProfile(req, res) {
+  const { username, country, city, artistName, bio } = req.body;
+  const userId = req.user.id;
+
+  if (username && username.length < 3) return fail(res, 'El nombre de usuario debe tener al menos 3 caracteres');
+  if (username) {
+    const taken = await prisma.user.findFirst({ where: { username, NOT: { id: userId } } });
+    if (taken) return fail(res, 'Ese nombre de usuario ya está en uso');
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      ...(username && { username }),
+      ...(country && { country }),
+      ...(city !== undefined && { city }),
+    },
+  });
+
+  if (req.user.role === 'ARTIST' && (artistName || bio !== undefined)) {
+    await prisma.artistProfile.update({
+      where: { userId },
+      data: {
+        ...(artistName && { artistName }),
+        ...(bio !== undefined && { bio }),
+      },
+    });
+  }
+
+  const fresh = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { artistProfile: true },
+  });
+
+  return ok(res, { user: sanitize(fresh) });
+}
+
 function sanitize(user) {
   const { passwordHash, ...rest } = user;
   return rest;
 }
 
-module.exports = { register, login, me, myReferral };
+module.exports = { register, login, me, myReferral, updateProfile };

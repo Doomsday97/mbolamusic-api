@@ -147,6 +147,59 @@ async function listArtists(req, res) {
   return ok(res, { artists });
 }
 
+// GET /api/admin/users/:id  -> detalle completo con historial de pagos
+async function getUser(req, res) {
+  const user = await prisma.user.findUnique({
+    where: { id: req.params.id },
+    select: {
+      id: true, username: true, email: true, phone: true,
+      role: true, country: true, city: true, isVerified: true,
+      walletBalance: true, createdAt: true,
+      artistProfile: { select: { artistName: true, bio: true, idVerified: true, totalEarnings: true } },
+      payments: {
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+        select: { id: true, type: true, amount: true, status: true, createdAt: true, description: true },
+      },
+      plays: { select: { id: true }, take: 1 },
+      downloads: { select: { id: true }, take: 1 },
+      _count: { select: { plays: true, downloads: true } },
+    },
+  });
+  if (!user) return fail(res, 'Usuario no encontrado', 404);
+  return ok(res, { user });
+}
+
+// PUT /api/admin/users/:id  -> editar datos del usuario
+async function updateUser(req, res) {
+  const { username, email, country, city, isVerified, walletBalance } = req.body;
+  const user = await prisma.user.findUnique({ where: { id: req.params.id } });
+  if (!user) return fail(res, 'Usuario no encontrado', 404);
+
+  const updated = await prisma.user.update({
+    where: { id: req.params.id },
+    data: {
+      ...(username && { username }),
+      ...(email && { email }),
+      ...(country && { country }),
+      ...(city !== undefined && { city }),
+      ...(isVerified !== undefined && { isVerified }),
+      ...(walletBalance !== undefined && { walletBalance: parseInt(walletBalance) }),
+    },
+  });
+  return ok(res, { user: updated });
+}
+
+// POST /api/admin/users/:id/reset-password  -> admin resetea contraseña
+async function resetPassword(req, res) {
+  const bcrypt = require('bcryptjs');
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 6) return fail(res, 'La contraseña debe tener al menos 6 caracteres');
+  const hash = await bcrypt.hash(newPassword, 10);
+  await prisma.user.update({ where: { id: req.params.id }, data: { passwordHash: hash } });
+  return ok(res, { reset: true });
+}
+
 // POST /api/admin/tracks  -> sube sin requerir suscripción de artista
 async function adminUploadTrack(req, res) {
   const { title, genre, artistId, album, durationSec, audioUrl: externalUrl } = req.body;
@@ -208,7 +261,8 @@ async function onlineUsers(req, res) {
 }
 
 module.exports = {
-  stats, listUsers, blockArtist, unblockArtist, listPayments,
+  stats, listUsers, getUser, updateUser, resetPassword,
+  blockArtist, unblockArtist, listPayments,
   listAllTracks, listArtists, adminUploadTrack, adminDeleteTrack, togglePublish,
   onlineUsers,
 };
