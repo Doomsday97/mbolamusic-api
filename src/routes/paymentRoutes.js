@@ -15,6 +15,11 @@ router.post('/per-download',         pay.payPerDownload);
 router.post('/wallet-topup',         pay.walletTopup);
 router.get('/',                      pay.listPayments);
 
+// Gestión de suscripciones
+router.get('/subscription/current',       pay.currentSubscription);
+router.post('/subscription/cancel',       pay.cancelSubscription);
+router.post('/subscription/auto-renew',   pay.enableAutoRenew);
+
 // Confirmación manual de transferencias (solo ADMIN)
 router.post('/:id/confirm', requireRole('ADMIN'), pay.adminConfirmPayment);
 router.post('/:id/reject',  requireRole('ADMIN'), pay.adminRejectPayment);

@@ -5,22 +5,74 @@ const prisma = require('../config/prisma');
 const business = require('../config/business');
 const { addDays, isExpired } = require('../utils/dates');
 
-// Devuelve la suscripción activa del usuario (o null)
+// Devuelve la suscripción activa del usuario (o null).
+// Si está expirada con autoRenew=true, intenta renovarla desde el wallet.
 async function getActiveSubscription(userId) {
   const sub = await prisma.subscription.findFirst({
     where: { userId, status: 'ACTIVE' },
     orderBy: { endDate: 'desc' },
   });
   if (!sub) return null;
-  if (isExpired(sub.endDate)) {
-    await prisma.subscription.update({
-      where: { id: sub.id },
-      data: { status: 'EXPIRED' },
-    });
-    await applySubscriptionEffects(userId);
-    return null;
+
+  if (!isExpired(sub.endDate)) return sub;
+
+  // Suscripción expirada: intentar auto-renovación si está activada
+  if (sub.autoRenew) {
+    const renewed = await tryAutoRenew(userId, sub);
+    if (renewed) return renewed;
   }
-  return sub;
+
+  // Sin auto-renovación o wallet insuficiente → marcar como expirada
+  await prisma.subscription.update({
+    where: { id: sub.id },
+    data: { status: 'EXPIRED' },
+  });
+  await applySubscriptionEffects(userId);
+  return null;
+}
+
+// Intenta renovar una suscripción de oyente desde el wallet interno.
+// Devuelve la nueva suscripción, o null si no hay saldo suficiente.
+async function tryAutoRenew(userId, expiredSub) {
+  const cost = expiredSub.type === 'ARTIST_MONTHLY'
+    ? 10000
+    : 2000; // LISTENER_MONTHLY
+
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { walletBalance: true } });
+  if (!user || user.walletBalance < cost) return null;
+
+  // Descontar del wallet y crear nueva suscripción en una transacción
+  const [, newSub] = await prisma.$transaction([
+    prisma.user.update({
+      where: { id: userId },
+      data: { walletBalance: { decrement: cost } },
+    }),
+    prisma.subscription.update({
+      where: { id: expiredSub.id },
+      data: { status: 'EXPIRED' },
+    }),
+  ]);
+
+  const createdSub = await createSubscription(userId, expiredSub.type);
+  // Heredar la preferencia de autoRenew
+  await prisma.subscription.update({
+    where: { id: createdSub.id },
+    data: { autoRenew: true },
+  });
+
+  // Registrar el pago automático
+  await prisma.payment.create({
+    data: {
+      userId,
+      amount: cost,
+      method: 'WALLET',
+      status: 'COMPLETED',
+      purpose: expiredSub.type === 'ARTIST_MONTHLY' ? 'ARTIST_SUBSCRIPTION' : 'LISTENER_SUBSCRIPTION',
+      completedAt: new Date(),
+    },
+  });
+
+  return createdSub;
 }
 
 // Crea (o renueva) una suscripción
@@ -75,4 +127,5 @@ module.exports = {
   createSubscription,
   applySubscriptionEffects,
   listenerHasAccess,
+  tryAutoRenew,
 };

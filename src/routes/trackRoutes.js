@@ -18,11 +18,10 @@ router.get('/mine',  authenticate, requireRole('ARTIST'), tracks.myTracks);
 router.post(
   '/',
   authenticate,
-  requireRole('ARTIST'),
   upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'cover', maxCount: 1 }]),
   tracks.uploadTrack,
 );
-router.delete('/:id', authenticate, requireRole('ARTIST'), tracks.deleteTrack);
+router.delete('/:id', authenticate, tracks.deleteTrack);
 
 // Reproducción (oyente)
 router.post('/:id/play', authenticate, tracks.playTrack);

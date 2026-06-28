@@ -134,9 +134,36 @@ async function payPerDownload(req, res) {
 }
 
 // POST /api/payments/wallet-topup  body: { amount, method }
+// Límite: 100.000 FCFA por mes entre recarga y retiro
+const MONTHLY_WALLET_LIMIT = 100000;
+
+async function getMonthlyWalletTotal(userId) {
+  const start = new Date();
+  start.setDate(1);
+  start.setHours(0, 0, 0, 0);
+  const agg = await prisma.payment.aggregate({
+    where: {
+      userId,
+      purpose: 'WALLET_TOPUP',
+      status: 'COMPLETED',
+      createdAt: { gte: start },
+    },
+    _sum: { amount: true },
+  });
+  return agg._sum.amount || 0;
+}
+
 async function walletTopup(req, res) {
   const { amount, method } = req.body;
   if (!amount || amount <= 0) return fail(res, 'Monto inválido');
+  if (amount > MONTHLY_WALLET_LIMIT) return fail(res, `El monto máximo por operación es ${MONTHLY_WALLET_LIMIT} FCFA`);
+
+  // Comprobar límite mensual
+  const monthTotal = await getMonthlyWalletTotal(req.user.id);
+  if (monthTotal + amount > MONTHLY_WALLET_LIMIT) {
+    const remaining = MONTHLY_WALLET_LIMIT - monthTotal;
+    return fail(res, `Límite mensual de ${MONTHLY_WALLET_LIMIT} FCFA superado. Puedes añadir ${remaining} FCFA más este mes.`);
+  }
 
   const { payment, result } = await processPayment({
     user: req.user,
@@ -152,7 +179,53 @@ async function walletTopup(req, res) {
     });
   }
 
-  return ok(res, { payment, result });
+  return ok(res, { payment, result, monthlyUsed: monthTotal + (result.status === 'COMPLETED' ? amount : 0), monthlyLimit: MONTHLY_WALLET_LIMIT });
+}
+
+// POST /api/payments/listener-subscription  body: { method, autoRenew }
+// (now also handles the autoRenew flag)
+// (already defined above, we patch it via subscriptionService)
+
+// GET /api/subscriptions/current  → estado de suscripción actual
+async function currentSubscription(req, res) {
+  const sub = await subscriptionService.getActiveSubscription(req.user.id);
+  return ok(res, { subscription: sub });
+}
+
+// POST /api/subscriptions/cancel  → cancela auto-renovación, deja activa hasta endDate
+async function cancelSubscription(req, res) {
+  const sub = await prisma.subscription.findFirst({
+    where: { userId: req.user.id, status: 'ACTIVE' },
+    orderBy: { endDate: 'desc' },
+  });
+  if (!sub) return fail(res, 'No tienes una suscripción activa');
+
+  await prisma.subscription.update({
+    where: { id: sub.id },
+    data: { autoRenew: false },
+  });
+
+  return ok(res, {
+    cancelled: true,
+    effectiveDate: sub.endDate,
+    message: `Tu suscripción seguirá activa hasta el ${new Date(sub.endDate).toLocaleDateString('es')}, luego se cancelará.`,
+  });
+}
+
+// POST /api/subscriptions/enable-auto-renew  → activa pago automático desde wallet
+async function enableAutoRenew(req, res) {
+  const sub = await prisma.subscription.findFirst({
+    where: { userId: req.user.id, status: 'ACTIVE' },
+    orderBy: { endDate: 'desc' },
+  });
+  if (!sub) return fail(res, 'No tienes una suscripción activa');
+
+  await prisma.subscription.update({
+    where: { id: sub.id },
+    data: { autoRenew: true },
+  });
+
+  return ok(res, { autoRenew: true });
 }
 
 // GET /api/payments  -> historial del usuario
@@ -287,4 +360,7 @@ module.exports = {
   flutterwaveWebhook,
   adminConfirmPayment,
   adminRejectPayment,
+  currentSubscription,
+  cancelSubscription,
+  enableAutoRenew,
 };

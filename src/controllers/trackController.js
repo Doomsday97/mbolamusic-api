@@ -5,16 +5,33 @@ const subscriptionService = require('../services/subscriptionService');
 const paymentController = require('./paymentController');
 const notif = require('./notificationController');
 
-// POST /api/tracks  (solo ARTIST con suscripción activa)  multipart: audio, cover
+// POST /api/tracks  (ARTIST con suscripción activa o ADMIN)  multipart: audio, cover
 async function uploadTrack(req, res) {
-  if (req.user.role !== 'ARTIST' || !req.user.artistProfile) {
+  const isAdmin = req.user.role === 'ADMIN';
+  const isArtist = req.user.role === 'ARTIST' && req.user.artistProfile;
+
+  if (!isAdmin && !isArtist) {
     return fail(res, 'Solo artistas pueden subir música', 403);
   }
 
-  // Debe tener suscripción de artista activa
-  const sub = await subscriptionService.getActiveSubscription(req.user.id);
-  if (!sub) {
-    return fail(res, 'Necesitas una suscripción de artista activa (10.000 FCFA/mes) para publicar', 402);
+  // Artistas deben tener suscripción activa; admins no
+  if (isArtist) {
+    const sub = await subscriptionService.getActiveSubscription(req.user.id);
+    if (!sub) {
+      return fail(res, 'Necesitas una suscripción de artista activa (10.000 FCFA/mes) para publicar', 402);
+    }
+  }
+
+  // Para admin: necesitamos el artistId en el body
+  let artistProfileId;
+  if (isAdmin) {
+    const { artistId } = req.body;
+    if (!artistId) return fail(res, 'El administrador debe indicar el artistId');
+    const artist = await prisma.artistProfile.findUnique({ where: { id: artistId } });
+    if (!artist) return fail(res, 'Artista no encontrado', 404);
+    artistProfileId = artistId;
+  } else {
+    artistProfileId = req.user.artistProfile.id;
   }
 
   const { title, genre, lyrics, album, durationSec } = req.body;
@@ -31,7 +48,7 @@ async function uploadTrack(req, res) {
 
   const track = await prisma.track.create({
     data: {
-      artistId: req.user.artistProfile.id,
+      artistId: artistProfileId,
       title,
       genre,
       lyrics,
@@ -43,18 +60,20 @@ async function uploadTrack(req, res) {
     },
   });
 
-  // Notificar a seguidores
-  const followers = await prisma.follow.findMany({
-    where: { followingId: req.user.id },
-    select: { followerId: true },
-  });
-  for (const f of followers) {
-    notif.create(
-      f.followerId,
-      'NEW_TRACK',
-      'Nueva canción',
-      `${req.user.artistProfile.artistName} acaba de subir "${title}"`,
-    );
+  // Notificar a seguidores (solo si es artista, no admin)
+  if (isArtist) {
+    const followers = await prisma.follow.findMany({
+      where: { followingId: req.user.id },
+      select: { followerId: true },
+    });
+    for (const f of followers) {
+      notif.create(
+        f.followerId,
+        'NEW_TRACK',
+        'Nueva canción',
+        `${req.user.artistProfile.artistName} acaba de subir "${title}"`,
+      );
+    }
   }
 
   return ok(res, { track }, 201);

@@ -8,6 +8,10 @@ services:
     startCommand: node src/server.js
     healthCheckPath: /health
     envVars:
+      # DATABASE_URL debe estar seteada manualmente en Render dashboard.
+      # sync: false indica que Render NO la sobrescribe en cada deploy.
+      - key: DATABASE_URL
+        sync: false
       - key: NODE_ENV
         value: production
       - key: PORT
@@ -18,9 +22,9 @@ services:
         value: 30d
       - key: PAYMENT_PROVIDER
         value: mock
-      # STORAGE: cambia a "s3" cuando tengas las credenciales de Cloudflare R2
+      # STORAGE: Cloudflare R2 / AWS S3. Las credenciales (S3_*) deben estar en el dashboard.
       - key: STORAGE_PROVIDER
-        value: local
+        value: s3
       - key: UPLOAD_DIR
         value: uploads
       # Cloudflare R2 / AWS S3 (solo necesario si STORAGE_PROVIDER=s3)
