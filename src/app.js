@@ -11,6 +11,10 @@ const { UPLOAD_DIR }   = require('./services/storage');
 
 const app = express();
 
+// Render usa un reverse proxy que añade X-Forwarded-For;
+// sin trust proxy, express-rate-limit no puede leer la IP real del cliente.
+app.set('trust proxy', 1);
+
 // ── 1. Security headers (helmet) ─────────────────────────────────────────────
 app.use(helmet({
   // HSTS: obliga HTTPS durante 1 año (incluido en subdomains)
