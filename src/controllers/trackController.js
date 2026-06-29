@@ -1,8 +1,11 @@
+const path = require('path');
 const prisma = require('../config/prisma');
 const { ok, fail } = require('../utils/response');
 const storage = require('../services/storage');
 const subscriptionService = require('../services/subscriptionService');
 const paymentController = require('./paymentController');
+
+const AUDIO_EXTS = new Set(['.mp3', '.wav', '.ogg', '.flac', '.aac', '.m4a', '.opus', '.wma', '.mp4', '.webm']);
 const notif = require('./notificationController');
 
 // POST /api/tracks  (ARTIST con suscripción activa o ADMIN)  multipart: audio, cover
@@ -41,9 +44,11 @@ async function uploadTrack(req, res) {
   const coverFile = req.files?.cover?.[0];
   if (!audioFile) return fail(res, 'Falta el archivo de audio');
 
-  // Validación básica de tipo de audio
-  if (!audioFile.mimetype.startsWith('audio/')) {
-    return fail(res, 'El archivo no es de audio válido');
+  // Validar que el archivo sea audio por MIME type O por extensión
+  // (Android / Flutter pueden enviar application/octet-stream para archivos de audio)
+  const ext = path.extname(audioFile.originalname).toLowerCase();
+  if (!audioFile.mimetype.startsWith('audio/') && !AUDIO_EXTS.has(ext)) {
+    return fail(res, 'El archivo no es de audio válido (.mp3, .wav, .ogg, .flac, .aac, .m4a…)');
   }
 
   const track = await prisma.track.create({

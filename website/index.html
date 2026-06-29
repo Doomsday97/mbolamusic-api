@@ -112,7 +112,7 @@
   .price-features { list-style: none; margin-bottom: 2rem; }
   .price-features li { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border); color: var(--text2); }
   .price-features li::before { content: '✓'; color: var(--amber); font-weight: 700; flex-shrink: 0; }
-  .price-btn { display: block; text-align: center; background: var(--amber); color: #000; padding: 0.875rem; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.95rem; transition: all 0.2s; }
+  .price-btn { display: block; text-align: center; background: var(--amber); color: #000; padding: 0.875rem; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.95rem; transition: all 0.2s; border: none; cursor: pointer; width: 100%; font-family: inherit; }
   .price-btn:hover { background: var(--amber-light); }
   .price-btn.outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
   .price-btn.outline:hover { border-color: var(--amber); color: var(--amber); }
@@ -360,9 +360,8 @@ async function doRegisterWeb() {
 }
 
 function redirectByRole(user) {
-  if (user.role === 'ADMIN')    { window.location.href = '/admin'; return; }
-  if (user.role === 'ARTIST')   { window.location.href = '/artista.html'; return; }
-  window.location.href = '/oyente.html';
+  if (user.role === 'ADMIN') { window.location.href = '/admin'; return; }
+  openMiCuenta();  // Listener y Artist: mostrar panel de cuenta
 }
 
 function logoutWeb() {
@@ -373,9 +372,8 @@ function logoutWeb() {
 
 function goToMyPage() {
   const user = JSON.parse(localStorage.getItem('mbola_user') || '{}');
-  if (user.role === 'ADMIN')  { window.location.href = '/admin'; return; }
-  if (user.role === 'ARTIST') { window.location.href = '/artista.html'; return; }
-  window.location.href = '/oyente.html';
+  if (user.role === 'ADMIN') { window.location.href = '/admin'; return; }
+  openMiCuenta();
 }
 
 function openEditProfileWeb() {
@@ -1117,7 +1115,7 @@ function setLang(code, save = true) {
           <li id="plan1-f3">Feed personalizado</li>
           <li id="plan1-f4">Sin anuncios</li>
         </ul>
-        <a class="price-btn outline" href="#descargar" id="plan1-cta">Empezar gratis</a>
+        <button class="price-btn outline" id="plan1-cta" onclick="requireLoginThen('register')">Empezar gratis</button>
       </div>
       <div class="price-card featured">
         <div class="price-badge" id="plan-badge">Más popular</div>
@@ -1131,7 +1129,7 @@ function setLang(code, save = true) {
           <li id="plan2-f4">Sin anuncios</li>
           <li id="plan2-f5">Calidad de audio alta</li>
         </ul>
-        <a class="price-btn" href="#descargar" id="plan2-cta">Suscribirse</a>
+        <button class="price-btn" id="plan2-cta" onclick="requireLoginThen('subscribe')">Suscribirse</button>
       </div>
       <div class="price-card">
         <p class="price-name" id="plan3-name">Por uso</p>
@@ -1143,7 +1141,7 @@ function setLang(code, save = true) {
           <li id="plan3-f3">Sin compromiso mensual</li>
           <li id="plan3-f4">Recarga tu monedero</li>
         </ul>
-        <a class="price-btn outline" href="#descargar" id="plan3-cta">Usar por uso</a>
+        <button class="price-btn outline" id="plan3-cta" onclick="requireLoginThen('topup')">Recargar monedero</button>
       </div>
     </div>
   </div>
@@ -1645,6 +1643,331 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
     </div>
   </div>
 </div>
+
+<!-- ════════════════════════════════════════════════════════════
+     MI CUENTA MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="mi-cuenta-overlay" onclick="if(event.target===this)closeMiCuenta()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:11500;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;position:relative;">
+    <button onclick="closeMiCuenta()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;line-height:1;">✕</button>
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;color:var(--amber);">👤 Mi cuenta</h3>
+
+    <!-- Perfil rápido -->
+    <div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:rgba(255,255,255,0.04);border-radius:12px;margin-bottom:1.25rem;">
+      <div id="mc-avatar-wrap" style="width:56px;height:56px;border-radius:50%;background:rgba(245,158,11,0.18);border:2px solid var(--amber);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:var(--amber);flex-shrink:0;overflow:hidden;"></div>
+      <div style="flex:1;min-width:0;">
+        <div id="mc-username" style="font-weight:700;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+        <div id="mc-role-label" style="font-size:0.8rem;color:var(--text2);"></div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div id="mc-balance-val" style="font-size:1.1rem;font-weight:800;color:var(--amber);"></div>
+        <div style="font-size:0.7rem;color:var(--text2);">Monedero</div>
+      </div>
+    </div>
+
+    <!-- Suscripción -->
+    <div style="margin-bottom:1.25rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+        <span style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Suscripción</span>
+        <span id="mc-sub-badge" style="font-size:0.72rem;padding:2px 10px;border-radius:20px;font-weight:700;"></span>
+      </div>
+      <div id="mc-sub-info" style="padding:12px;background:rgba(255,255,255,0.04);border-radius:10px;font-size:0.85rem;color:var(--text2);margin-bottom:10px;"></div>
+      <button id="mc-subscribe-btn" onclick="closeMiCuenta();openSubscribeModal();" style="display:none;width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.9rem;cursor:pointer;">Suscribirme — 2.000 FCFA/mes</button>
+    </div>
+
+    <!-- Artista: ganancias -->
+    <div id="mc-artist-section" style="display:none;margin-bottom:1.25rem;">
+      <div style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.5rem;">Ganancias de artista</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:rgba(255,255,255,0.04);border-radius:10px;margin-bottom:8px;">
+        <span style="color:var(--text2);font-size:0.9rem;">Disponible para retirar</span>
+        <span id="mc-earnings-val" style="font-weight:700;color:var(--amber);font-size:1rem;"></span>
+      </div>
+      <button onclick="closeMiCuenta();openWithdrawModal('earnings');" style="width:100%;background:rgba(245,158,11,0.12);color:var(--amber);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:11px;font-weight:700;font-size:0.85rem;cursor:pointer;">Retirar ganancias →</button>
+    </div>
+
+    <!-- Monedero acciones -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;">
+      <button onclick="closeMiCuenta();openTopupModal();" style="background:rgba(255,255,255,0.06);color:var(--text);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px;font-weight:600;font-size:0.85rem;cursor:pointer;">＋ Recargar</button>
+      <button onclick="closeMiCuenta();openWithdrawModal('wallet');" style="background:rgba(255,255,255,0.06);color:var(--text);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px;font-weight:600;font-size:0.85rem;cursor:pointer;">↑ Retirar saldo</button>
+    </div>
+
+    <button onclick="closeMiCuenta();openEditProfileWeb();" style="width:100%;background:rgba(255,255,255,0.04);color:var(--text2);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:11px;font-weight:600;font-size:0.85rem;cursor:pointer;margin-bottom:8px;">✏ Editar perfil</button>
+    <button onclick="logoutWeb();closeMiCuenta();" style="width:100%;background:rgba(248,113,113,0.08);color:#f87171;border:1px solid rgba(248,113,113,0.2);border-radius:10px;padding:10px;font-weight:600;font-size:0.82rem;cursor:pointer;">Cerrar sesión</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     SUSCRIPCIÓN MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="subscribe-overlay" onclick="if(event.target===this)closeSubscribeModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:11500;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:420px;position:relative;">
+    <button onclick="closeSubscribeModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;line-height:1;">✕</button>
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.4rem;color:var(--amber);">Suscripción Oyente</h3>
+    <p style="font-size:0.85rem;color:var(--text2);margin-bottom:1.5rem;">2.000 FCFA/mes · Todo incluido · Sin anuncios</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem;">
+      <label id="sm-method-label" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Método de pago</label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;">
+        <input type="radio" name="sub-method" value="BANK_TRANSFER" checked style="accent-color:var(--amber);">
+        <span style="color:var(--text);font-size:0.9rem;">🏦 Transferencia bancaria</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;">
+        <input type="radio" name="sub-method" value="SIM_BALANCE" style="accent-color:var(--amber);">
+        <span style="color:var(--text);font-size:0.9rem;">📱 Saldo SIM / Mobile Money</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;">
+        <input type="radio" name="sub-method" value="WALLET" style="accent-color:var(--amber);">
+        <span style="color:var(--text);font-size:0.9rem;">💰 Monedero interno</span>
+      </label>
+    </div>
+    <div id="sm-bank-info" style="padding:12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:10px;font-size:0.82rem;color:var(--text2);margin-bottom:1rem;line-height:1.6;">
+      Banco: <strong style="color:var(--text)">BGFI Bank Guinea Ecuatorial</strong><br>
+      Titular: <strong style="color:var(--text)">MbôláMusic SARL</strong><br>
+      Concepto: <strong style="color:var(--text)">SUSCRIPCION + tu usuario</strong>
+    </div>
+    <div id="sm-result" style="display:none;padding:12px;border-radius:10px;font-size:0.85rem;margin-bottom:1rem;"></div>
+    <button id="sm-btn" onclick="doSubscribeWeb()" style="width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:0.95rem;cursor:pointer;">Confirmar suscripción →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     RECARGAR / RETIRAR MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="wallet-overlay" onclick="if(event.target===this)closeWalletModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:11500;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:400px;position:relative;">
+    <button onclick="closeWalletModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;line-height:1;">✕</button>
+    <h3 id="wm-title" style="font-size:1.1rem;font-weight:700;margin-bottom:1.25rem;color:var(--amber);"></h3>
+    <div id="wm-method-section" style="margin-bottom:1rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Método</label>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <label style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:9px;cursor:pointer;">
+          <input type="radio" name="wm-method" value="BANK_TRANSFER" checked style="accent-color:var(--amber);"> <span style="color:var(--text);font-size:0.88rem;">🏦 Transferencia bancaria</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:9px;cursor:pointer;">
+          <input type="radio" name="wm-method" value="SIM_BALANCE" style="accent-color:var(--amber);"> <span style="color:var(--text);font-size:0.88rem;">📱 Saldo SIM</span>
+        </label>
+      </div>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Monto (FCFA)</label>
+      <select id="wm-amount" style="width:100%;padding:11px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;">
+        <option value="2000">2.000 FCFA</option>
+        <option value="5000">5.000 FCFA</option>
+        <option value="10000">10.000 FCFA</option>
+        <option value="20000">20.000 FCFA</option>
+      </select>
+    </div>
+    <div id="wm-result" style="display:none;padding:12px;border-radius:10px;font-size:0.85rem;margin-bottom:1rem;"></div>
+    <button id="wm-btn" onclick="doWalletAction()" style="width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;"></button>
+  </div>
+</div>
+
+<script>
+// ── Panel Mi Cuenta ───────────────────────────────────────────────────────────
+async function openMiCuenta() {
+  const token = localStorage.getItem('mbola_token');
+  const user  = JSON.parse(localStorage.getItem('mbola_user') || '{}');
+  if (!token) { openModal('login'); return; }
+
+  // Avatar
+  const wrap = document.getElementById('mc-avatar-wrap');
+  if (user.avatarUrl) {
+    wrap.innerHTML = `<img src="${user.avatarUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+  } else {
+    wrap.textContent = (user.username || '?')[0].toUpperCase();
+  }
+  document.getElementById('mc-username').textContent = user.username || '';
+  document.getElementById('mc-role-label').textContent = user.role === 'ARTIST' ? '🎤 Artista' : '🎧 Oyente';
+  document.getElementById('mc-balance-val').textContent = (user.walletBalance ?? 0) + ' FCFA';
+
+  // Suscripción
+  try {
+    const sr = await fetch(API_BASE + '/payments/subscription/current', { headers: { Authorization: 'Bearer ' + token } });
+    const sj = await sr.json();
+    const sub = sj?.data?.subscription;
+    const badge = document.getElementById('mc-sub-badge');
+    const info  = document.getElementById('mc-sub-info');
+    const btn   = document.getElementById('mc-subscribe-btn');
+    if (sub && sub.status === 'ACTIVE') {
+      badge.textContent = '✅ Activa';
+      badge.style.background = 'rgba(74,222,128,0.15)';
+      badge.style.color = '#4ade80';
+      const end = new Date(sub.endDate).toLocaleDateString();
+      const typeLabel = sub.type === 'LISTENER_FREE' ? 'Prueba gratis' : sub.type === 'LISTENER_MONTHLY' ? 'Mensual' : 'Artista mensual';
+      info.textContent = typeLabel + ' · Vence el ' + end;
+      btn.style.display = 'none';
+    } else {
+      badge.textContent = user.role === 'ARTIST' ? '—' : '⚠ Sin plan';
+      badge.style.background = 'rgba(251,191,36,0.12)';
+      badge.style.color = 'var(--amber)';
+      info.textContent = user.role === 'LISTENER' ? 'No tienes una suscripción activa.' : 'Necesitas suscripción de artista para publicar música.';
+      if (user.role === 'LISTENER') btn.style.display = '';
+    }
+  } catch(_) {
+    document.getElementById('mc-sub-info').textContent = 'No se pudo cargar la suscripción.';
+  }
+
+  // Artista: ganancias
+  const artistSec = document.getElementById('mc-artist-section');
+  if (user.role === 'ARTIST') {
+    artistSec.style.display = '';
+    try {
+      const pr = await fetch(API_BASE + '/artist/dashboard', { headers: { Authorization: 'Bearer ' + token } });
+      const pj = await pr.json();
+      const earnings = pj?.data?.totalEarnings ?? pj?.data?.availableEarnings ?? 0;
+      document.getElementById('mc-earnings-val').textContent = earnings + ' FCFA';
+    } catch(_) { document.getElementById('mc-earnings-val').textContent = '— FCFA'; }
+  } else {
+    artistSec.style.display = 'none';
+  }
+
+  document.getElementById('mi-cuenta-overlay').style.display = 'flex';
+}
+function closeMiCuenta() { document.getElementById('mi-cuenta-overlay').style.display = 'none'; }
+
+// ── Suscripción ───────────────────────────────────────────────────────────────
+function openSubscribeModal() {
+  const token = localStorage.getItem('mbola_token');
+  if (!token) { openModal('login'); return; }
+  document.getElementById('sm-result').style.display = 'none';
+  document.getElementById('subscribe-overlay').style.display = 'flex';
+}
+function closeSubscribeModal() { document.getElementById('subscribe-overlay').style.display = 'none'; }
+
+async function doSubscribeWeb() {
+  const token  = localStorage.getItem('mbola_token');
+  const method = document.querySelector('input[name="sub-method"]:checked')?.value || 'BANK_TRANSFER';
+  const res    = document.getElementById('sm-result');
+  const btn    = document.getElementById('sm-btn');
+  btn.disabled = true; btn.textContent = 'Procesando…';
+  res.style.display = 'none';
+  try {
+    const r = await fetch(API_BASE + '/payments/listener-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ method }),
+    });
+    const j = await r.json();
+    if (!j.success) throw new Error(j.error || 'Error');
+    const status = j.data?.result?.status;
+    if (status === 'COMPLETED') {
+      res.style.display = ''; res.style.background = 'rgba(74,222,128,0.1)'; res.style.color = '#4ade80';
+      res.textContent = '✅ Suscripción activada. ¡Disfruta MbôláMusic!';
+    } else {
+      res.style.display = ''; res.style.background = 'rgba(245,158,11,0.08)'; res.style.color = 'var(--amber)';
+      const bankInfo = j.data?.result?.bankDetails;
+      if (bankInfo) {
+        res.innerHTML = '⏳ Pago en verificación. Realiza la transferencia:<br>'
+          + `<strong>Banco:</strong> ${bankInfo.bankName}<br>`
+          + `<strong>Titular:</strong> ${bankInfo.accountName}<br>`
+          + `<strong>Número:</strong> ${bankInfo.accountNumber}<br>`
+          + `<strong>Importe:</strong> ${bankInfo.amount} FCFA<br>`
+          + `<em>El admin confirmará en 24h.</em>`;
+      } else {
+        res.textContent = '⏳ Pago enviado. Un administrador lo confirmará pronto.';
+      }
+    }
+  } catch(e) {
+    res.style.display = ''; res.style.background = 'rgba(248,113,113,0.1)'; res.style.color = '#f87171';
+    res.textContent = '❌ ' + e.message;
+  } finally { btn.disabled = false; btn.textContent = 'Confirmar suscripción →'; }
+}
+
+// ── Topup / Withdraw Wallet ───────────────────────────────────────────────────
+let _walletMode = 'topup';  // 'topup' | 'wallet-withdraw' | 'earnings'
+
+function openTopupModal() {
+  const token = localStorage.getItem('mbola_token');
+  if (!token) { openModal('login'); return; }
+  _walletMode = 'topup';
+  document.getElementById('wm-title').textContent = '＋ Recargar monedero';
+  document.getElementById('wm-btn').textContent = 'Recargar →';
+  document.getElementById('wm-method-section').style.display = '';
+  document.getElementById('wm-result').style.display = 'none';
+  document.getElementById('wallet-overlay').style.display = 'flex';
+}
+
+function openWithdrawModal(mode) {
+  const token = localStorage.getItem('mbola_token');
+  if (!token) { openModal('login'); return; }
+  _walletMode = mode; // 'wallet-withdraw' o 'earnings'
+  const isEarnings = mode === 'earnings';
+  document.getElementById('wm-title').textContent = isEarnings ? '↑ Retirar ganancias' : '↑ Retirar saldo del monedero';
+  document.getElementById('wm-btn').textContent = 'Retirar →';
+  document.getElementById('wm-method-section').style.display = isEarnings ? 'none' : '';
+  document.getElementById('wm-result').style.display = 'none';
+  document.getElementById('wallet-overlay').style.display = 'flex';
+}
+function closeWalletModal() { document.getElementById('wallet-overlay').style.display = 'none'; }
+
+async function doWalletAction() {
+  const token  = localStorage.getItem('mbola_token');
+  const amount = parseInt(document.getElementById('wm-amount').value, 10);
+  const method = document.querySelector('input[name="wm-method"]:checked')?.value || 'BANK_TRANSFER';
+  const res    = document.getElementById('wm-result');
+  const btn    = document.getElementById('wm-btn');
+  btn.disabled = true; btn.textContent = 'Procesando…';
+  res.style.display = 'none';
+  try {
+    let url, body;
+    if (_walletMode === 'topup') {
+      url = API_BASE + '/payments/wallet-topup';
+      body = { amount, method };
+    } else if (_walletMode === 'earnings') {
+      url = API_BASE + '/payments/artist-earnings-withdraw';
+      body = { amount };
+    } else {
+      url = API_BASE + '/payments/wallet-withdraw';
+      body = { amount };
+    }
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify(body),
+    });
+    const j = await r.json();
+    if (!j.success) throw new Error(j.error || 'Error');
+    res.style.display = ''; res.style.background = 'rgba(74,222,128,0.1)'; res.style.color = '#4ade80';
+    const status = j.data?.result?.status;
+    if (status === 'VERIFYING') {
+      res.style.background = 'rgba(245,158,11,0.08)'; res.style.color = 'var(--amber)';
+      res.textContent = '⏳ Solicitud enviada. Un administrador la procesará en 24h.';
+    } else if (_walletMode === 'topup') {
+      res.textContent = `✅ Monedero recargado. Nuevo saldo: ${j.data?.walletBalance ?? '—'} FCFA`;
+      // Actualizar user en localStorage
+      const u = JSON.parse(localStorage.getItem('mbola_user') || '{}');
+      if (j.data?.walletBalance != null) { u.walletBalance = j.data.walletBalance; localStorage.setItem('mbola_user', JSON.stringify(u)); }
+    } else {
+      res.textContent = `✅ Operación completada. Saldo: ${j.data?.walletBalance ?? '—'} FCFA`;
+    }
+  } catch(e) {
+    res.style.display = ''; res.style.background = 'rgba(248,113,113,0.1)'; res.style.color = '#f87171';
+    res.textContent = '❌ ' + e.message;
+  } finally { btn.disabled = false; btn.textContent = _walletMode === 'topup' ? 'Recargar →' : 'Retirar →'; }
+}
+
+// ── Requiere login antes de abrir un flujo ────────────────────────────────────
+function requireLoginThen(action) {
+  const token = localStorage.getItem('mbola_token');
+  if (!token) { openModal('login'); _pendingAction = action; return; }
+  if (action === 'subscribe') openSubscribeModal();
+  else if (action === 'topup') openTopupModal();
+  else if (action === 'register') openModal('register');
+}
+let _pendingAction = null;
+// Ejecutar acción pendiente tras login
+const _origLoginFunc = typeof doLoginWeb !== 'undefined' ? null : null;
+// Hook post-login
+document.addEventListener('DOMContentLoaded', () => {
+  const origLogin = window.doLoginWeb;
+  window.doLoginWeb = async function() {
+    await origLogin?.();
+    if (_pendingAction && localStorage.getItem('mbola_token')) {
+      const a = _pendingAction; _pendingAction = null;
+      setTimeout(() => requireLoginThen(a), 300);
+    }
+  };
+});
+</script>
 
 </body>
 </html>

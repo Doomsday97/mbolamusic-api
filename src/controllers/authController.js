@@ -181,28 +181,32 @@ async function updateProfile(req, res) {
 
 // POST /api/auth/security-questions  — guarda/actualiza las 4 preguntas de seguridad
 async function setSecurityQuestions(req, res) {
-  const { questions } = req.body; // [{ question, answer }, ...]
-  if (!Array.isArray(questions) || questions.length !== 4) {
-    return fail(res, 'Se requieren exactamente 4 preguntas de seguridad');
-  }
-  for (const q of questions) {
-    if (!q.question || !q.answer || q.answer.trim().length < 2) {
-      return fail(res, 'Cada pregunta debe tener una respuesta de al menos 2 caracteres');
+  try {
+    const { questions } = req.body; // [{ question, answer }, ...]
+    if (!Array.isArray(questions) || questions.length !== 4) {
+      return fail(res, 'Se requieren exactamente 4 preguntas de seguridad');
     }
-  }
-  const uniqueQs = new Set(questions.map(q => q.question));
-  if (uniqueQs.size !== 4) return fail(res, 'Las 4 preguntas deben ser distintas');
+    for (const q of questions) {
+      if (!q.question || !q.answer || q.answer.trim().length < 2) {
+        return fail(res, 'Cada pregunta debe tener una respuesta de al menos 2 caracteres');
+      }
+    }
+    const uniqueQs = new Set(questions.map(q => q.question));
+    if (uniqueQs.size !== 4) return fail(res, 'Las 4 preguntas deben ser distintas');
 
-  // Borrar las anteriores y crear las nuevas
-  await prisma.securityQuestion.deleteMany({ where: { userId: req.user.id } });
-  await prisma.securityQuestion.createMany({
-    data: await Promise.all(questions.map(async (q) => ({
-      userId: req.user.id,
-      question: q.question,
-      answerHash: await bcrypt.hash(q.answer.trim().toLowerCase(), 10),
-    }))),
-  });
-  return ok(res, { saved: true });
+    // Borrar las anteriores y crear las nuevas
+    await prisma.securityQuestion.deleteMany({ where: { userId: req.user.id } });
+    await prisma.securityQuestion.createMany({
+      data: await Promise.all(questions.map(async (q) => ({
+        userId: req.user.id,
+        question: q.question,
+        answerHash: await bcrypt.hash(q.answer.trim().toLowerCase(), 10),
+      }))),
+    });
+    return ok(res, { saved: true });
+  } catch (e) {
+    return fail(res, 'Error al guardar preguntas de seguridad: ' + e.message, 500);
+  }
 }
 
 // POST /api/auth/recover-password/challenge  — devuelve 1 pregunta aleatoria

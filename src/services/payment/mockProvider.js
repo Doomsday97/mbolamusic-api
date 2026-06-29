@@ -9,8 +9,7 @@ async function charge({ amount, method, userId, purpose, metadata = {} }) {
     return { status: 'FAILED', externalRef: null, message: 'Monto inválido' };
   }
 
-  // Simulación: la transferencia bancaria queda "en verificación";
-  // el resto se completa al instante.
+  // Transferencia bancaria y saldo SIM/Mobile Money → requieren verificación manual de admin
   if (method === 'BANK_TRANSFER') {
     return {
       status: 'VERIFYING',
@@ -25,6 +24,15 @@ async function charge({ amount, method, userId, purpose, metadata = {} }) {
     };
   }
 
+  if (method === 'SIM_BALANCE') {
+    return {
+      status: 'VERIFYING',
+      externalRef: 'SIM-' + uuid().slice(0, 8),
+      message: 'Recarga por saldo SIM enviada. Un administrador confirmará el pago en breve.',
+    };
+  }
+
+  // Tarjeta (Flutterwave) y Wallet interno → se completan al instante
   return {
     status: 'COMPLETED',
     externalRef: 'MOCK-' + uuid().slice(0, 8),
