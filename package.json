@@ -9,6 +9,7 @@
     "start": "node src/server.js",
     "start:prod": "node scripts/start-prod.js",
     "seed": "node prisma/seed.js",
+    "setup:rls": "node scripts/setup-rls.js",
     "migrate": "prisma migrate dev",
     "test": "jest --runInBand",
     "test:watch": "jest --watch"
@@ -19,6 +20,8 @@
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "helmet": "^8.0.0",
+    "express-rate-limit": "^7.4.1",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "jsonwebtoken": "^9.0.2",
