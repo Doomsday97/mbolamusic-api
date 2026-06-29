@@ -214,6 +214,8 @@
     </a>
     <ul class="nav-links">
       <li><a href="#caracteristicas">Características</a></li>
+      <li><a href="#tendencias">Tendencias</a></li>
+      <li><a href="#generos">Géneros</a></li>
       <li><a href="#precios">Precios</a></li>
       <li><a href="#escuchar">🎵 Escuchar</a></li>
       <li><a href="#artistas">Artistas</a></li>
@@ -559,6 +561,11 @@ const T = {
     earnArtist:'Artista', earnPlatform:'Plataforma',
     earnNote:'Por cada 50 FCFA de reproducción,<br>recibes <strong style="color:var(--amber)">35 FCFA</strong>.',
     // Player
+    // Géneros
+    genLabel:'Explorar', genTitle:'Géneros musicales', genSub:'Descubre la música que más te gusta por estilo.',
+    // Tendencias
+    trendLabel:'En tendencia', trendTitle:'Lo más escuchado ahora', trendSub:'Las canciones que la comunidad más reproduce esta semana.',
+    // Player
     playerLabel:'Escuchar ahora', playerTitle:'Las canciones más recientes',
     playerSub:'Escucha directamente desde el navegador, sin instalar nada.',
     playerLoading:'Cargando canciones…', playerEmpty:'No hay canciones disponibles aún.', playerError:'No se pudo conectar al servidor.',
@@ -644,6 +651,8 @@ const T = {
     earnTitle:'Répartition des revenus',
     earnArtist:'Artiste', earnPlatform:'Plateforme',
     earnNote:'Pour chaque 50 FCFA d\'écoute,<br>tu reçois <strong style="color:var(--amber)">35 FCFA</strong>.',
+    genLabel:'Explorer', genTitle:'Genres musicaux', genSub:'Découvre la musique que tu aimes le plus par style.',
+    trendLabel:'En tendance', trendTitle:'Le plus écouté maintenant', trendSub:'Les chansons que la communauté écoute le plus cette semaine.',
     playerLabel:'Écouter maintenant', playerTitle:'Les chansons les plus récentes',
     playerSub:'Écoute directement depuis le navigateur, sans rien installer.',
     playerLoading:'Chargement des chansons…', playerEmpty:'Aucune chanson disponible pour l\'instant.', playerError:'Impossible de se connecter au serveur.',
@@ -725,6 +734,8 @@ const T = {
     earnTitle:'Distribuição de receitas',
     earnArtist:'Artista', earnPlatform:'Plataforma',
     earnNote:'Por cada 50 FCFA de reprodução,<br>recebes <strong style="color:var(--amber)">35 FCFA</strong>.',
+    genLabel:'Explorar', genTitle:'Géneros musicais', genSub:'Descobre a música de que mais gostas por estilo.',
+    trendLabel:'Em tendência', trendTitle:'O mais ouvido agora', trendSub:'As músicas que a comunidade mais reproduz esta semana.',
     playerLabel:'Ouvir agora', playerTitle:'As músicas mais recentes',
     playerSub:'Ouve diretamente no navegador, sem instalar nada.',
     playerLoading:'A carregar músicas…', playerEmpty:'Ainda não há músicas disponíveis.', playerError:'Não foi possível ligar ao servidor.',
@@ -806,6 +817,8 @@ const T = {
     earnTitle:'Revenue split',
     earnArtist:'Artist', earnPlatform:'Platform',
     earnNote:'For every 50 FCFA play,<br>you receive <strong style="color:var(--amber)">35 FCFA</strong>.',
+    genLabel:'Explore', genTitle:'Music genres', genSub:'Discover the music you love most by style.',
+    trendLabel:'Trending', trendTitle:'Most listened right now', trendSub:'The songs the community plays most this week.',
     playerLabel:'Listen now', playerTitle:'The latest songs',
     playerSub:'Listen directly in your browser, no installation needed.',
     playerLoading:'Loading songs…', playerEmpty:'No songs available yet.', playerError:'Could not connect to the server.',
@@ -940,6 +953,10 @@ function setLang(code, save = true) {
   setText('earn-title', t.earnTitle);
   setText('earn-artist', t.earnArtist); setText('earn-platform', t.earnPlatform);
   setHTML('earn-note', t.earnNote);
+  // Géneros
+  setText('gen-label', t.genLabel); setText('gen-title', t.genTitle); setText('gen-sub', t.genSub);
+  // Tendencias
+  setText('trend-label', t.trendLabel); setText('trend-title', t.trendTitle); setText('trend-sub', t.trendSub);
   // Player
   setText('player-label', t.playerLabel); setText('player-title', t.playerTitle); setText('player-sub', t.playerSub);
   setText('player-loading-msg', t.playerLoading);
@@ -1202,14 +1219,97 @@ function setLang(code, save = true) {
   </div>
 </section>
 
-<!-- PLAYER -->
-<section id="escuchar" style="background:var(--bg);padding:5rem 1.5rem;">
+<!-- GÉNEROS -->
+<section id="generos" style="background:var(--bg2);padding:4rem 1.5rem;">
   <div class="section-inner">
-    <p class="section-label" id="player-label">Escuchar ahora</p>
-    <h2 class="section-title" id="player-title">Las canciones más recientes</h2>
-    <p class="section-sub" id="player-sub">Escucha directamente desde el navegador, sin instalar nada.</p>
+    <p class="section-label" id="gen-label">Explorar</p>
+    <h2 class="section-title" id="gen-title">Géneros musicales</h2>
+    <p class="section-sub" id="gen-sub">Descubre la música que más te gusta por estilo.</p>
+    <div style="margin-top:2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;">
+      <a href="#escuchar" onclick="filterGenreWeb('Hip-Hop')" style="text-decoration:none;">
+        <div style="background:linear-gradient(135deg,#6B21A8,#9333EA);border-radius:14px;padding:1.1rem 1.25rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:transform .15s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+          <span style="font-size:1.5rem;">🎧</span>
+          <span style="color:#fff;font-weight:700;font-size:0.95rem;">Hip-Hop</span>
+        </div>
+      </a>
+      <a href="#escuchar" onclick="filterGenreWeb('Afrosounds')" style="text-decoration:none;">
+        <div style="background:linear-gradient(135deg,#B45309,#F59E0B);border-radius:14px;padding:1.1rem 1.25rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:transform .15s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+          <span style="font-size:1.5rem;">🎵</span>
+          <span style="color:#fff;font-weight:700;font-size:0.95rem;">Afrosounds</span>
+        </div>
+      </a>
+      <a href="#escuchar" onclick="filterGenreWeb('Caribbean')" style="text-decoration:none;">
+        <div style="background:linear-gradient(135deg,#0F766E,#14B8A6);border-radius:14px;padding:1.1rem 1.25rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:transform .15s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+          <span style="font-size:1.5rem;">🌴</span>
+          <span style="color:#fff;font-weight:700;font-size:0.95rem;">Caribbean</span>
+        </div>
+      </a>
+      <a href="#escuchar" onclick="filterGenreWeb('Gospel')" style="text-decoration:none;">
+        <div style="background:linear-gradient(135deg,#1D4ED8,#3B82F6);border-radius:14px;padding:1.1rem 1.25rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:transform .15s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+          <span style="font-size:1.5rem;">🙏</span>
+          <span style="color:#fff;font-weight:700;font-size:0.95rem;">Gospel</span>
+        </div>
+      </a>
+      <a href="#escuchar" onclick="filterGenreWeb('Urbano')" style="text-decoration:none;">
+        <div style="background:linear-gradient(135deg,#991B1B,#EF4444);border-radius:14px;padding:1.1rem 1.25rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:transform .15s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+          <span style="font-size:1.5rem;">🏙️</span>
+          <span style="color:#fff;font-weight:700;font-size:0.95rem;">Urbano</span>
+        </div>
+      </a>
+      <a href="#escuchar" onclick="filterGenreWeb('Bikutsi')" style="text-decoration:none;">
+        <div style="background:linear-gradient(135deg,#166534,#22C55E);border-radius:14px;padding:1.1rem 1.25rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:transform .15s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+          <span style="font-size:1.5rem;">🥁</span>
+          <span style="color:#fff;font-weight:700;font-size:0.95rem;">Bikutsi</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
 
-    <div id="track-list" style="margin-top:2.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem;">
+<!-- TENDENCIAS -->
+<section id="tendencias" style="background:var(--bg);padding:4rem 1.5rem;">
+  <div class="section-inner">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+      <div>
+        <p class="section-label" id="trend-label">En tendencia</p>
+        <h2 class="section-title" id="trend-title" style="margin-bottom:0;">Lo más escuchado ahora</h2>
+      </div>
+      <a href="#escuchar" style="color:var(--amber);font-size:0.88rem;text-decoration:none;display:flex;align-items:center;gap:4px;white-space:nowrap;">
+        Ver todo <span>›</span>
+      </a>
+    </div>
+    <p class="section-sub" id="trend-sub" style="margin-bottom:2rem;">Las canciones que la comunidad más reproduce esta semana.</p>
+
+    <!-- Carrusel horizontal -->
+    <div style="position:relative;">
+      <div id="trend-scroll" style="display:flex;gap:1rem;overflow-x:auto;padding-bottom:12px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(245,158,11,.4) transparent;">
+        <div id="trend-loading" style="color:var(--text2);padding:2rem;opacity:.6;white-space:nowrap;">Cargando tendencias…</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAYER -->
+<section id="escuchar" style="background:var(--bg2);padding:5rem 1.5rem;">
+  <div class="section-inner">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;">
+      <div>
+        <p class="section-label" id="player-label">Escuchar ahora</p>
+        <h2 class="section-title" id="player-title" style="margin-bottom:0;">Las canciones más recientes</h2>
+        <p class="section-sub" id="player-sub" style="margin-bottom:0;">Escucha directamente desde el navegador, sin instalar nada.</p>
+      </div>
+      <!-- Filtro por género -->
+      <div id="genre-filter-bar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button id="gf-all" onclick="filterGenreWeb('')" style="background:var(--amber);color:#000;border:none;padding:6px 16px;border-radius:20px;font-weight:600;font-size:0.82rem;cursor:pointer;" id="genre-label-es">Todos</button>
+        <button onclick="filterGenreWeb('Hip-Hop')" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:0.82rem;cursor:pointer;transition:all .2s;" onmouseover="this.style.color='var(--amber)';this.style.borderColor='var(--amber)'" onmouseout="this.style.color='var(--text2)';this.style.borderColor='var(--border)'">Hip-Hop</button>
+        <button onclick="filterGenreWeb('Afrosounds')" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:0.82rem;cursor:pointer;transition:all .2s;" onmouseover="this.style.color='var(--amber)';this.style.borderColor='var(--amber)'" onmouseout="this.style.color='var(--text2)';this.style.borderColor='var(--border)'">Afrosounds</button>
+        <button onclick="filterGenreWeb('Caribbean')" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:0.82rem;cursor:pointer;transition:all .2s;" onmouseover="this.style.color='var(--amber)';this.style.borderColor='var(--amber)'" onmouseout="this.style.color='var(--text2)';this.style.borderColor='var(--border)'">Caribbean</button>
+        <button onclick="filterGenreWeb('Gospel')" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:0.82rem;cursor:pointer;transition:all .2s;" onmouseover="this.style.color='var(--amber)';this.style.borderColor='var(--amber)'" onmouseout="this.style.color='var(--text2)';this.style.borderColor='var(--border)'">Gospel</button>
+        <button onclick="filterGenreWeb('Urbano')" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:0.82rem;cursor:pointer;transition:all .2s;" onmouseover="this.style.color='var(--amber)';this.style.borderColor='var(--amber)'" onmouseout="this.style.color='var(--text2)';this.style.borderColor='var(--border)'">Urbano</button>
+      </div>
+    </div>
+
+    <div id="track-list" style="margin-top:2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem;">
       <div id="player-loading-msg" style="color:var(--text2);padding:2rem;text-align:center;grid-column:1/-1;opacity:.6;">Cargando canciones…</div>
     </div>
   </div>
@@ -1230,36 +1330,85 @@ function setLang(code, save = true) {
 </div>
 
 <script>
+const API = 'https://mbolamusic-api-1.onrender.com/api';
+let _allTracks = [];
+
+function renderTrackCard(t, i) {
+  const bgs = ['rgba(245,158,11,0.15)','rgba(63,81,181,0.2)','rgba(0,154,68,0.15)'];
+  return `<div onclick="window.location.href='/player.html?id=${t.id}'"
+       style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s;"
+       onmouseover="this.style.borderColor='rgba(245,158,11,0.5)';this.style.transform='translateY(-3px)'"
+       onmouseout="this.style.borderColor='rgba(255,255,255,0.06)';this.style.transform='translateY(0)'">
+    <div style="height:130px;background:${bgs[i%3]};display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;">
+      ${t.coverUrl ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'">` : '🎵'}
+      <div style="position:absolute;bottom:8px;right:8px;background:var(--amber);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;">▶</div>
+    </div>
+    <div style="padding:14px;">
+      <div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div>
+      <div style="font-size:0.78rem;color:var(--text2);margin-top:4px;">${t.artist?.artistName || t.artistName || ''}</div>
+      <div style="font-size:0.72rem;color:rgba(245,158,11,.7);margin-top:4px;text-transform:uppercase;letter-spacing:.04em;">${t.genre}</div>
+    </div>
+  </div>`;
+}
+
+function filterGenreWeb(genre) {
+  const el = document.getElementById('track-list');
+  const filtered = genre ? _allTracks.filter(t => t.genre === genre) : _allTracks;
+  const lang = localStorage.getItem('mbola_lang') || 'es';
+  const tl = T[lang] || T['es'];
+  if (!filtered.length) {
+    el.innerHTML = `<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;">${tl.playerEmpty || 'Sin canciones'}</p>`;
+    return;
+  }
+  el.innerHTML = filtered.map((t, i) => renderTrackCard(t, i)).join('');
+  // scroll suavemente a la sección
+  document.getElementById('escuchar').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
 (function loadTracks() {
-  const API = 'https://mbolamusic-api-1.onrender.com/api';
-  const el  = document.getElementById('track-list');
-  fetch(API + '/tracks?limit=24')
+  const el = document.getElementById('track-list');
+  fetch(API + '/tracks?limit=48')
     .then(r => r.json())
     .then(j => {
-      const tracks = j?.data?.tracks || j?.data || [];
+      _allTracks = j?.data?.tracks || j?.data || [];
       const lang = localStorage.getItem('mbola_lang') || 'es';
       const tl = T[lang] || T['es'];
-      if (!tracks.length) { el.innerHTML = `<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;">${tl.playerEmpty}</p>`; return; }
-      el.innerHTML = tracks.map((t,i) => `
-        <div onclick="window.location.href='/player.html?id=${t.id}'"
-             style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s;"
-             onmouseover="this.style.borderColor='rgba(245,158,11,0.5)';this.style.transform='translateY(-3px)'"
-             onmouseout="this.style.borderColor='rgba(255,255,255,0.06)';this.style.transform='translateY(0)'">
-          <div style="height:130px;background:${['rgba(245,158,11,0.15)','rgba(63,81,181,0.2)','rgba(0,154,68,0.15)'][i%3]};display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;">
-            ${t.coverUrl ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'">` : '🎵'}
-            <div style="position:absolute;bottom:8px;right:8px;background:var(--amber);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;">▶</div>
-          </div>
-          <div style="padding:14px;">
-            <div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div>
-            <div style="font-size:0.78rem;color:var(--text2);margin-top:4px;">${t.artist?.artistName || ''}</div>
-            <div style="font-size:0.72rem;color:rgba(245,158,11,.7);margin-top:4px;text-transform:uppercase;letter-spacing:.04em;">${t.genre}</div>
-          </div>
-        </div>`).join('');
+      if (!_allTracks.length) { el.innerHTML = `<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;">${tl.playerEmpty}</p>`; return; }
+      el.innerHTML = _allTracks.map((t, i) => renderTrackCard(t, i)).join('');
     })
     .catch(() => {
       const lang = localStorage.getItem('mbola_lang') || 'es';
       const tl = T[lang] || T['es'];
       el.innerHTML = `<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;opacity:.5;">${tl.playerError}</p>`;
+    });
+})();
+
+// Cargar sección Tendencias
+(function loadTrending() {
+  const el = document.getElementById('trend-scroll');
+  fetch(API + '/tracks?limit=12')
+    .then(r => r.json())
+    .then(j => {
+      const tracks = j?.data?.tracks || j?.data || [];
+      if (!tracks.length) { el.innerHTML = '<p style="color:var(--text2);opacity:.6;">Sin datos disponibles.</p>'; return; }
+      el.innerHTML = tracks.map(t => `
+        <div onclick="window.location.href='/player.html?id=${t.id}'"
+             style="flex:0 0 160px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;cursor:pointer;scroll-snap-align:start;transition:border-color .2s,transform .15s;"
+             onmouseover="this.style.borderColor='rgba(245,158,11,0.5)';this.style.transform='translateY(-3px)'"
+             onmouseout="this.style.borderColor='rgba(255,255,255,0.07)';this.style.transform='translateY(0)'">
+          <div style="height:160px;background:rgba(245,158,11,0.12);display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;">
+            ${t.coverUrl ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'">` : '🎵'}
+            <div style="position:absolute;bottom:8px;right:8px;background:var(--amber);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:.9rem;box-shadow:0 2px 8px rgba(245,158,11,.4);">▶</div>
+          </div>
+          <div style="padding:10px 12px;">
+            <div style="font-weight:700;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div>
+            <div style="font-size:0.75rem;color:var(--text2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.artist?.artistName || t.artistName || ''}</div>
+            <div style="font-size:0.7rem;color:rgba(245,158,11,.7);margin-top:3px;text-transform:uppercase;letter-spacing:.04em;">${t.genre}</div>
+          </div>
+        </div>`).join('');
+    })
+    .catch(() => {
+      el.innerHTML = '<p style="color:var(--text2);opacity:.5;">Error al cargar tendencias.</p>';
     });
 })();
 
