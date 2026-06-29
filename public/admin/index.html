@@ -1226,7 +1226,39 @@ const _translations = {
     tabStats:'Statistiques', tabUsers:'Utilisateurs', tabPayments:'Paiements en attente',
     tabTracks:'🎵 Chansons', tabOnline:'🟢 En ligne', tabChat:'💬 Support',
   },
+  pt: {
+    logout:'Sair', statUsers:'Utilizadores', statArtists:'Artistas',
+    statTracks:'Músicas publicadas', statPlays:'Reproduções', statDownloads:'Transferências',
+    statPending:'Pagamentos pendentes', statRevenue:'Receitas totais (FCFA)',
+    statPlatform:'Plataforma (FCFA)', statArtist:'Artistas (FCFA)',
+    platformEarningsLabel:'Ganhos disponíveis da plataforma',
+    withdrawPlatformBtn:'💸 Solicitar levantamento', platformAvailable:'Disponível',
+    platformWithdrawTitle:'💰 Levantar ganhos da plataforma',
+    amountLabel:'Montante (FCFA)', bankDetailsLabel:'Referência / Dados bancários',
+    withdrawBtn:'Levantar', cancelBtn:'Cancelar', invalidAmount:'Montante inválido',
+    insufficientFunds:'Saldo insuficiente', processing:'A processar…',
+    withdrawSuccess:'Levantamento registado', remaining:'Restante',
+    tabStats:'Estatísticas', tabUsers:'Utilizadores', tabPayments:'Pagamentos pendentes',
+    tabTracks:'🎵 Músicas', tabOnline:'🟢 Online', tabChat:'💬 Suporte',
+  },
+  en: {
+    logout:'Logout', statUsers:'Users', statArtists:'Artists',
+    statTracks:'Published tracks', statPlays:'Plays', statDownloads:'Downloads',
+    statPending:'Pending payments', statRevenue:'Total revenue (FCFA)',
+    statPlatform:'Platform (FCFA)', statArtist:'Artists (FCFA)',
+    platformEarningsLabel:'Available platform earnings',
+    withdrawPlatformBtn:'💸 Request withdrawal', platformAvailable:'Available',
+    platformWithdrawTitle:'💰 Withdraw platform earnings',
+    amountLabel:'Amount (FCFA)', bankDetailsLabel:'Reference / Bank details',
+    withdrawBtn:'Withdraw', cancelBtn:'Cancel', invalidAmount:'Invalid amount',
+    insufficientFunds:'Insufficient balance', processing:'Processing…',
+    withdrawSuccess:'Withdrawal registered', remaining:'Remaining',
+    tabStats:'Statistics', tabUsers:'Users', tabPayments:'Pending payments',
+    tabTracks:'🎵 Tracks', tabOnline:'🟢 Online', tabChat:'💬 Support',
+  },
 };
+const _langs = ['es','fr','pt','en'];
+const _langLabels = { es:'🇪🇸 ES', fr:'🇫🇷 FR', pt:'🇵🇹 PT', en:'🇬🇧 EN' };
 let _lang = localStorage.getItem('adminLang') || 'es';
 
 function i18n(key, fallback) {
@@ -1240,7 +1272,6 @@ function applyLang() {
     const t = i18n(key, null);
     if (t) el.textContent = t;
   });
-  // Nav tabs
   const tabMap = { stats:'tabStats', users:'tabUsers', payments:'tabPayments',
                    tracks:'tabTracks', online:'tabOnline', chat:'tabChat' };
   document.querySelectorAll('nav button').forEach(btn => {
@@ -1252,11 +1283,13 @@ function applyLang() {
     }
   });
   const btn = document.getElementById('lang-toggle-btn');
-  if (btn) btn.textContent = _lang === 'fr' ? '🇪🇸 ES' : '🇫🇷 FR';
+  const nextLang = _langs[(_langs.indexOf(_lang) + 1) % _langs.length];
+  if (btn) btn.textContent = _langLabels[nextLang];
 }
 
 function toggleLang() {
-  _lang = _lang === 'es' ? 'fr' : 'es';
+  const idx = _langs.indexOf(_lang);
+  _lang = _langs[(idx + 1) % _langs.length];
   localStorage.setItem('adminLang', _lang);
   applyLang();
 }
