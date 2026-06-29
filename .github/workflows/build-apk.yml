@@ -1,0 +1,79 @@
+name: Build APK y publicar en website
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/build-apk.yml'
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout mbolamusic-api (este repo)
+        uses: actions/checkout@v4
+
+      - name: Checkout mbolamusic-mobile (repo publico)
+        uses: actions/checkout@v4
+        with:
+          repository: Doomsday97/mbolamusic-mobile
+          path: mobile
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configurar Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generar local.properties
+        working-directory: mobile
+        run: |
+          echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
+          echo "sdk.dir=$ANDROID_HOME"    >> android/local.properties
+
+      - name: Gradle init — forzar compileSdk 36
+        run: |
+          mkdir -p ~/.gradle/init.d
+          cat > ~/.gradle/init.d/sdk_override.gradle << 'EOF'
+          allprojects {
+              afterEvaluate { project ->
+                  if (project.hasProperty('android')) {
+                      project.android { compileSdkVersion 36 }
+                  }
+              }
+          }
+          EOF
+
+      - name: Instalar dependencias Flutter
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: Build APK release (ARM64)
+        working-directory: mobile
+        run: flutter build apk --release --target-platform android-arm64 --split-per-abi
+
+      - name: Copiar APK a website/
+        run: |
+          APK=$(find mobile/build/app/outputs -name "*.apk" -type f | head -1)
+          echo "APK encontrado: $APK ($(du -sh "$APK" | cut -f1))"
+          cp "$APK" website/mbolamusic.apk
+
+      - name: Commit y push del APK
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add website/mbolamusic.apk
+          git diff --cached --quiet \
+            && echo "APK sin cambios." \
+            || (git commit -m "chore: actualizar APK desde build automatico [skip ci]" && git push)
+          echo "Listo. APK disponible en /mbolamusic.apk"
