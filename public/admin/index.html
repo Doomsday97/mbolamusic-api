@@ -558,7 +558,7 @@ async function viewUser(id) {
       const statusColor = s => ({ COMPLETED:'var(--success)', FAILED:'var(--error)', VERIFYING:'var(--accent)', PENDING:'var(--accent)' }[s] || 'var(--muted)');
       document.getElementById('mu-txns').innerHTML = txns.slice(0, 20).map(p => `
         <div class="txn-row">
-          <span>${p.type || p.description || '—'}</span>
+          <span>${p.purpose || p.method || '—'}</span>
           <span style="color:${statusColor(p.status)}">${p.status}</span>
           <span style="font-weight:bold">${fmt(p.amount)} FCFA</span>
           <span style="color:var(--muted)">${new Date(p.createdAt).toLocaleDateString('es')}</span>

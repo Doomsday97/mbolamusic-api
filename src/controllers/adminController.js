@@ -149,45 +149,51 @@ async function listArtists(req, res) {
 
 // GET /api/admin/users/:id  -> detalle completo con historial de pagos
 async function getUser(req, res) {
-  const user = await prisma.user.findUnique({
-    where: { id: req.params.id },
-    select: {
-      id: true, username: true, email: true, phone: true,
-      role: true, country: true, city: true, isVerified: true,
-      walletBalance: true, createdAt: true,
-      artistProfile: { select: { artistName: true, bio: true, idVerified: true, totalEarnings: true } },
-      payments: {
-        orderBy: { createdAt: 'desc' },
-        take: 50,
-        select: { id: true, type: true, amount: true, status: true, createdAt: true, description: true },
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      select: {
+        id: true, username: true, email: true, phone: true,
+        role: true, country: true, city: true, isVerified: true,
+        walletBalance: true, createdAt: true,
+        artistProfile: { select: { artistName: true, bio: true, totalEarnings: true } },
+        payments: {
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+          select: { id: true, purpose: true, amount: true, status: true, createdAt: true, method: true },
+        },
+        _count: { select: { plays: true, downloads: true } },
       },
-      plays: { select: { id: true }, take: 1 },
-      downloads: { select: { id: true }, take: 1 },
-      _count: { select: { plays: true, downloads: true } },
-    },
-  });
-  if (!user) return fail(res, 'Usuario no encontrado', 404);
-  return ok(res, { user });
+    });
+    if (!user) return fail(res, 'Usuario no encontrado', 404);
+    return ok(res, { user });
+  } catch (e) {
+    return fail(res, 'Error al obtener usuario: ' + e.message, 500);
+  }
 }
 
 // PUT /api/admin/users/:id  -> editar datos del usuario
 async function updateUser(req, res) {
-  const { username, email, country, city, isVerified, walletBalance } = req.body;
-  const user = await prisma.user.findUnique({ where: { id: req.params.id } });
-  if (!user) return fail(res, 'Usuario no encontrado', 404);
+  try {
+    const { username, email, country, city, isVerified, walletBalance } = req.body;
+    const user = await prisma.user.findUnique({ where: { id: req.params.id } });
+    if (!user) return fail(res, 'Usuario no encontrado', 404);
 
-  const updated = await prisma.user.update({
-    where: { id: req.params.id },
-    data: {
-      ...(username && { username }),
-      ...(email && { email }),
-      ...(country && { country }),
-      ...(city !== undefined && { city }),
-      ...(isVerified !== undefined && { isVerified }),
-      ...(walletBalance !== undefined && { walletBalance: parseInt(walletBalance) }),
-    },
-  });
-  return ok(res, { user: updated });
+    const updated = await prisma.user.update({
+      where: { id: req.params.id },
+      data: {
+        ...(username && { username }),
+        ...(email && { email }),
+        ...(country && { country }),
+        ...(city !== undefined && { city }),
+        ...(isVerified !== undefined && { isVerified }),
+        ...(walletBalance !== undefined && { walletBalance: parseInt(walletBalance) }),
+      },
+    });
+    return ok(res, { user: updated });
+  } catch (e) {
+    return fail(res, 'Error al actualizar usuario: ' + e.message, 500);
+  }
 }
 
 // POST /api/admin/users/:id/reset-password  -> admin resetea contraseña
