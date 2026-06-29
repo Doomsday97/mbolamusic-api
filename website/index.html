@@ -1705,6 +1705,11 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
       <button id="mc-subscribe-btn" onclick="closeMiCuenta();openSubscribeModal();" style="display:none;width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.9rem;cursor:pointer;">Suscribirme — 2.000 FCFA/mes</button>
     </div>
 
+    <!-- Artista: subir música -->
+    <div id="mc-upload-section" style="display:none;margin-bottom:1.25rem;">
+      <button onclick="closeMiCuenta();openUploadModal();" style="width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;">🎵 Subir nueva canción</button>
+    </div>
+
     <!-- Artista: ganancias -->
     <div id="mc-artist-section" style="display:none;margin-bottom:1.25rem;">
       <div style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.5rem;">Ganancias de artista</div>
@@ -1723,6 +1728,84 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
 
     <button onclick="closeMiCuenta();openEditProfileWeb();" style="width:100%;background:rgba(255,255,255,0.04);color:var(--text2);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:11px;font-weight:600;font-size:0.85rem;cursor:pointer;margin-bottom:8px;">✏ Editar perfil</button>
     <button onclick="logoutWeb();closeMiCuenta();" style="width:100%;background:rgba(248,113,113,0.08);color:#f87171;border:1px solid rgba(248,113,113,0.2);border-radius:10px;padding:10px;font-weight:600;font-size:0.82rem;cursor:pointer;">Cerrar sesión</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     SUBIR MÚSICA MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="upload-overlay" onclick="if(event.target===this)closeUploadModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:11500;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:500px;max-height:92vh;overflow-y:auto;position:relative;">
+    <button onclick="closeUploadModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;line-height:1;">✕</button>
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;color:var(--amber);">🎵 Subir nueva canción</h3>
+
+    <!-- Archivo de audio -->
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Archivo de audio *</label>
+      <label id="up-audio-label" for="up-audio-input" style="display:flex;align-items:center;gap:10px;padding:14px;background:#1a1a1a;border:2px dashed rgba(245,158,11,0.3);border-radius:10px;cursor:pointer;transition:border-color 0.2s;">
+        <span style="font-size:1.4rem;">🎵</span>
+        <span id="up-audio-name" style="color:var(--text2);font-size:0.88rem;">Seleccionar MP3, WAV, OGG, FLAC…</span>
+      </label>
+      <input type="file" id="up-audio-input" accept="audio/*,.mp3,.wav,.ogg,.flac,.aac,.m4a,.opus" style="display:none;" onchange="upAudioChosen(event)">
+    </div>
+
+    <!-- Carátula -->
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Carátula (opcional)</label>
+      <label id="up-cover-label" for="up-cover-input" style="display:flex;align-items:center;gap:12px;padding:12px;background:#1a1a1a;border:1px dashed rgba(255,255,255,0.1);border-radius:10px;cursor:pointer;">
+        <div id="up-cover-preview" style="width:52px;height:52px;border-radius:8px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;overflow:hidden;">🖼️</div>
+        <span id="up-cover-name" style="color:var(--text2);font-size:0.88rem;">Seleccionar imagen (JPG, PNG…)</span>
+      </label>
+      <input type="file" id="up-cover-input" accept="image/*" style="display:none;" onchange="upCoverChosen(event)">
+    </div>
+
+    <!-- Título -->
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Título *</label>
+      <input id="up-title" type="text" placeholder="Nombre de la canción" style="width:100%;padding:11px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;font-family:inherit;box-sizing:border-box;">
+    </div>
+
+    <!-- Género -->
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Género *</label>
+      <select id="up-genre" style="width:100%;padding:11px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;font-family:inherit;">
+        <option value="Afrosounds">Afrosounds</option>
+        <option value="Hip-Hop">Hip-Hop</option>
+        <option value="Urbano">Urbano</option>
+        <option value="Bikutsi">Bikutsi</option>
+        <option value="Caribbean">Caribbean</option>
+        <option value="Gospel">Gospel</option>
+        <option value="Pop">Pop</option>
+      </select>
+    </div>
+
+    <!-- Álbum (opcional) -->
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Álbum (opcional)</label>
+      <input id="up-album" type="text" placeholder="Nombre del álbum" style="width:100%;padding:11px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;font-family:inherit;box-sizing:border-box;">
+    </div>
+
+    <!-- Letra (opcional) -->
+    <div style="margin-bottom:1.25rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Letra (opcional)</label>
+      <textarea id="up-lyrics" rows="4" placeholder="Pega la letra de la canción…" style="width:100%;padding:11px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.88rem;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+    </div>
+
+    <!-- Aviso derechos -->
+    <div style="padding:10px 12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:9px;font-size:0.8rem;color:var(--text2);margin-bottom:1.25rem;line-height:1.5;">
+      ✅ Confirmo que tengo los derechos sobre este contenido y acepto los <a href="#" style="color:var(--amber);">términos de MbôláMusic</a>.
+    </div>
+
+    <!-- Progreso -->
+    <div id="up-progress-wrap" style="display:none;margin-bottom:1rem;">
+      <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
+        <div id="up-progress-bar" style="height:100%;background:var(--amber);width:0%;transition:width 0.3s;border-radius:3px;"></div>
+      </div>
+      <div id="up-progress-label" style="font-size:0.78rem;color:var(--text2);margin-top:6px;text-align:center;">Subiendo…</div>
+    </div>
+
+    <div id="up-result" style="display:none;padding:12px;border-radius:10px;font-size:0.85rem;margin-bottom:1rem;"></div>
+    <button id="up-btn" onclick="doUploadTrack()" style="width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:0.95rem;cursor:pointer;">Publicar canción →</button>
   </div>
 </div>
 
@@ -1836,9 +1919,11 @@ async function openMiCuenta() {
     document.getElementById('mc-sub-info').textContent = 'No se pudo cargar la suscripción.';
   }
 
-  // Artista: ganancias
+  // Artista: botón subir + ganancias
+  const uploadSec = document.getElementById('mc-upload-section');
   const artistSec = document.getElementById('mc-artist-section');
   if (user.role === 'ARTIST') {
+    uploadSec.style.display = '';
     artistSec.style.display = '';
     try {
       const pr = await fetch(API_BASE + '/artist/dashboard', { headers: { Authorization: 'Bearer ' + token } });
@@ -1847,6 +1932,7 @@ async function openMiCuenta() {
       document.getElementById('mc-earnings-val').textContent = earnings + ' FCFA';
     } catch(_) { document.getElementById('mc-earnings-val').textContent = '— FCFA'; }
   } else {
+    uploadSec.style.display = 'none';
     artistSec.style.display = 'none';
   }
 
@@ -1973,6 +2059,128 @@ async function doWalletAction() {
     res.style.display = ''; res.style.background = 'rgba(248,113,113,0.1)'; res.style.color = '#f87171';
     res.textContent = '❌ ' + e.message;
   } finally { btn.disabled = false; btn.textContent = _walletMode === 'topup' ? 'Recargar →' : 'Retirar →'; }
+}
+
+// ── Subir Música ─────────────────────────────────────────────────────────────
+function openUploadModal() {
+  const token = localStorage.getItem('mbola_token');
+  if (!token) { openModal('login'); return; }
+  // Resetear formulario
+  document.getElementById('up-audio-input').value = '';
+  document.getElementById('up-cover-input').value = '';
+  document.getElementById('up-audio-name').textContent = 'Seleccionar MP3, WAV, OGG, FLAC…';
+  document.getElementById('up-cover-name').textContent = 'Seleccionar imagen (JPG, PNG…)';
+  document.getElementById('up-cover-preview').innerHTML = '🖼️';
+  document.getElementById('up-title').value = '';
+  document.getElementById('up-album').value = '';
+  document.getElementById('up-lyrics').value = '';
+  document.getElementById('up-result').style.display = 'none';
+  document.getElementById('up-progress-wrap').style.display = 'none';
+  document.getElementById('up-btn').disabled = false;
+  document.getElementById('up-btn').textContent = 'Publicar canción →';
+  document.getElementById('up-audio-label').style.borderColor = 'rgba(245,158,11,0.3)';
+  document.getElementById('upload-overlay').style.display = 'flex';
+}
+function closeUploadModal() { document.getElementById('upload-overlay').style.display = 'none'; }
+
+function upAudioChosen(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  document.getElementById('up-audio-name').textContent = file.name;
+  document.getElementById('up-audio-label').style.borderColor = 'var(--amber)';
+}
+function upCoverChosen(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  document.getElementById('up-cover-name').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const preview = document.getElementById('up-cover-preview');
+    preview.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function doUploadTrack() {
+  const token     = localStorage.getItem('mbola_token');
+  const audioFile = document.getElementById('up-audio-input').files[0];
+  const coverFile = document.getElementById('up-cover-input').files[0];
+  const title     = document.getElementById('up-title').value.trim();
+  const genre     = document.getElementById('up-genre').value;
+  const album     = document.getElementById('up-album').value.trim();
+  const lyrics    = document.getElementById('up-lyrics').value.trim();
+
+  const res = document.getElementById('up-result');
+  res.style.display = 'none';
+
+  if (!audioFile) {
+    res.style.display = ''; res.style.background = 'rgba(248,113,113,0.1)'; res.style.color = '#f87171';
+    res.textContent = '❌ Debes seleccionar un archivo de audio.'; return;
+  }
+  if (!title) {
+    res.style.display = ''; res.style.background = 'rgba(248,113,113,0.1)'; res.style.color = '#f87171';
+    res.textContent = '❌ El título es obligatorio.'; return;
+  }
+
+  const btn = document.getElementById('up-btn');
+  btn.disabled = true;
+  const progressWrap = document.getElementById('up-progress-wrap');
+  const progressBar  = document.getElementById('up-progress-bar');
+  const progressLbl  = document.getElementById('up-progress-label');
+  progressWrap.style.display = '';
+  progressBar.style.width = '10%';
+  progressLbl.textContent = 'Preparando…';
+
+  try {
+    const fd = new FormData();
+    fd.append('title',       title);
+    fd.append('genre',       genre);
+    fd.append('album',       album);
+    fd.append('lyrics',      lyrics);
+    fd.append('durationSec', '0');
+    fd.append('audio',       audioFile);
+    if (coverFile) fd.append('cover', coverFile);
+
+    progressBar.style.width = '30%';
+    progressLbl.textContent = 'Subiendo audio…';
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', API_BASE + '/tracks');
+    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const pct = Math.round((e.loaded / e.total) * 70) + 20;
+        progressBar.style.width = pct + '%';
+        progressLbl.textContent = `Subiendo… ${pct}%`;
+      }
+    };
+
+    const result = await new Promise((resolve, reject) => {
+      xhr.onload = () => {
+        try { resolve(JSON.parse(xhr.responseText)); }
+        catch (_) { reject(new Error('Respuesta inesperada del servidor')); }
+      };
+      xhr.onerror = () => reject(new Error('Error de red'));
+      xhr.send(fd);
+    });
+
+    progressBar.style.width = '100%';
+
+    if (!result.success) throw new Error(result.error || 'Error al publicar');
+
+    progressWrap.style.display = 'none';
+    res.style.display = ''; res.style.background = 'rgba(74,222,128,0.1)'; res.style.color = '#4ade80';
+    res.textContent = `✅ "${title}" publicada correctamente. ¡Ya aparece en el catálogo!`;
+    btn.textContent = 'Publicar otra canción';
+    btn.disabled = false;
+    btn.onclick = () => { closeUploadModal(); openUploadModal(); };
+  } catch(e) {
+    progressWrap.style.display = 'none';
+    res.style.display = ''; res.style.background = 'rgba(248,113,113,0.1)'; res.style.color = '#f87171';
+    res.textContent = '❌ ' + e.message;
+    btn.disabled = false; btn.textContent = 'Publicar canción →';
+  }
 }
 
 // ── Requiere login antes de abrir un flujo ────────────────────────────────────
