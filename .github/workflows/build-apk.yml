@@ -17,10 +17,11 @@ jobs:
       - name: Checkout mbolamusic-api (este repo)
         uses: actions/checkout@v4
 
-      - name: Checkout mbolamusic-mobile (repo publico)
+      - name: Checkout mbolamusic-mobile
         uses: actions/checkout@v4
         with:
           repository: Doomsday97/mbolamusic-mobile
+          token: ${{ secrets.API_DEPLOY_TOKEN }}
           path: mobile
 
       - name: Configurar Java 17
