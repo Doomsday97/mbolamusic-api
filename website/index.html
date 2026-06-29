@@ -1365,32 +1365,85 @@ function filterGenreWeb(genre) {
   document.getElementById('escuchar').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
-(function loadTracks() {
+// ── Skeleton loader ──────────────────────────────────────────────────────────
+(function injectSkeletonCSS() {
+  const s = document.createElement('style');
+  s.textContent = `
+    @keyframes mbSkim {
+      0%   { background-position: -400px 0 }
+      100% { background-position:  400px 0 }
+    }
+    .sk {
+      background: linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.12) 50%,rgba(255,255,255,.06) 75%);
+      background-size: 800px 100%;
+      animation: mbSkim 1.4s infinite linear;
+      border-radius: 8px;
+    }
+  `;
+  document.head.appendChild(s);
+})();
+
+function skeletonTrack() {
+  return `<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;overflow:hidden;">
+    <div class="sk" style="height:130px;"></div>
+    <div style="padding:14px;display:flex;flex-direction:column;gap:8px;">
+      <div class="sk" style="height:13px;width:75%;"></div>
+      <div class="sk" style="height:11px;width:50%;"></div>
+      <div class="sk" style="height:10px;width:35%;"></div>
+    </div>
+  </div>`;
+}
+
+function skeletonTrend() {
+  return `<div style="flex:0 0 160px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;scroll-snap-align:start;">
+    <div class="sk" style="height:160px;"></div>
+    <div style="padding:10px 12px;display:flex;flex-direction:column;gap:7px;">
+      <div class="sk" style="height:12px;width:80%;"></div>
+      <div class="sk" style="height:10px;width:55%;"></div>
+    </div>
+  </div>`;
+}
+
+function fetchWithTimeout(url, ms) {
+  const ctrl = new AbortController();
+  const id = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(id));
+}
+
+// ── Cargar tracks ─────────────────────────────────────────────────────────────
+function loadTracks() {
   const el = document.getElementById('track-list');
-  fetch(API + '/tracks?limit=48')
+  el.innerHTML = Array(8).fill(0).map(skeletonTrack).join('');
+  const lang = localStorage.getItem('mbola_lang') || 'es';
+  const tl = T[lang] || T['es'];
+  fetchWithTimeout(API + '/tracks?limit=48', 18000)
     .then(r => r.json())
     .then(j => {
       _allTracks = j?.data?.tracks || j?.data || [];
-      const lang = localStorage.getItem('mbola_lang') || 'es';
-      const tl = T[lang] || T['es'];
-      if (!_allTracks.length) { el.innerHTML = `<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;">${tl.playerEmpty}</p>`; return; }
+      if (!_allTracks.length) {
+        el.innerHTML = `<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;">${tl.playerEmpty}</p>`;
+        return;
+      }
       el.innerHTML = _allTracks.map((t, i) => renderTrackCard(t, i)).join('');
     })
     .catch(() => {
-      const lang = localStorage.getItem('mbola_lang') || 'es';
-      const tl = T[lang] || T['es'];
-      el.innerHTML = `<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;opacity:.5;">${tl.playerError}</p>`;
+      el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2.5rem 1rem;">
+        <p style="color:var(--text2);opacity:.7;margin-bottom:1rem;">⚡ El servidor está despertando, puede tardar unos segundos…</p>
+        <button onclick="loadTracks()" style="background:var(--amber);color:#000;border:none;padding:.55rem 1.4rem;border-radius:20px;font-weight:700;cursor:pointer;font-size:.9rem;">↺ Reintentar</button>
+      </div>`;
     });
-})();
+}
+loadTracks();
 
-// Cargar sección Tendencias
-(function loadTrending() {
+// ── Cargar Tendencias ─────────────────────────────────────────────────────────
+function loadTrending() {
   const el = document.getElementById('trend-scroll');
-  fetch(API + '/tracks?limit=12')
+  el.innerHTML = Array(6).fill(0).map(skeletonTrend).join('');
+  fetchWithTimeout(API + '/tracks?limit=12', 18000)
     .then(r => r.json())
     .then(j => {
       const tracks = j?.data?.tracks || j?.data || [];
-      if (!tracks.length) { el.innerHTML = '<p style="color:var(--text2);opacity:.6;">Sin datos disponibles.</p>'; return; }
+      if (!tracks.length) { el.innerHTML = '<p style="color:var(--text2);opacity:.6;padding:1rem;">Sin datos disponibles.</p>'; return; }
       el.innerHTML = tracks.map(t => `
         <div onclick="window.location.href='/player.html?id=${t.id}'"
              style="flex:0 0 160px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;cursor:pointer;scroll-snap-align:start;transition:border-color .2s,transform .15s;"
@@ -1408,9 +1461,13 @@ function filterGenreWeb(genre) {
         </div>`).join('');
     })
     .catch(() => {
-      el.innerHTML = '<p style="color:var(--text2);opacity:.5;">Error al cargar tendencias.</p>';
+      el.innerHTML = `<div style="display:flex;align-items:center;gap:1rem;padding:1rem 0;">
+        <span style="color:var(--text2);opacity:.7;font-size:.9rem;">⚡ Servidor despertando…</span>
+        <button onclick="loadTrending()" style="background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);padding:.35rem 1rem;border-radius:16px;font-weight:600;cursor:pointer;font-size:.82rem;white-space:nowrap;">↺ Reintentar</button>
+      </div>`;
     });
-})();
+}
+loadTrending();
 
 function playTrack(urlEnc, titleEnc, artistEnc) {
   const url    = decodeURIComponent(urlEnc);
