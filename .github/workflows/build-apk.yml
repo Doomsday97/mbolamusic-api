@@ -1,11 +1,16 @@
 name: Build APK y publicar en website
 
+# Este workflow solo se ejecuta manualmente.
+# El APK también se publica automáticamente desde mbolamusic-mobile
+# cuando se hace push a main en ese repo.
+
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/build-apk.yml'
+    inputs:
+      reason:
+        description: 'Motivo del build manual'
+        required: false
+        default: 'build manual solicitado'
 
 jobs:
   build-apk:
@@ -76,5 +81,5 @@ jobs:
           git add website/mbolamusic.apk
           git diff --cached --quiet \
             && echo "APK sin cambios." \
-            || (git commit -m "chore: actualizar APK desde build automatico [skip ci]" && git push)
+            || (git commit -m "chore: actualizar APK desde build manual [skip ci]" && git push)
           echo "Listo. APK disponible en /mbolamusic.apk"
