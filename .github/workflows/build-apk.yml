@@ -1,16 +1,9 @@
 name: Build APK y publicar en website
 
-# Este workflow solo se ejecuta manualmente.
-# El APK también se publica automáticamente desde mbolamusic-mobile
-# cuando se hace push a main en ese repo.
-
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
-    inputs:
-      reason:
-        description: 'Motivo del build manual'
-        required: false
-        default: 'build manual solicitado'
 
 jobs:
   build-apk:
@@ -47,7 +40,7 @@ jobs:
           echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
           echo "sdk.dir=$ANDROID_HOME"    >> android/local.properties
 
-      - name: Gradle init — forzar compileSdk 36
+      - name: Gradle init — forzar compileSdk 36 en todos los plugins
         run: |
           mkdir -p ~/.gradle/init.d
           cat > ~/.gradle/init.d/sdk_override.gradle << 'EOF'
@@ -68,18 +61,38 @@ jobs:
         working-directory: mobile
         run: flutter build apk --release --target-platform android-arm64 --split-per-abi
 
+      - name: Localizar APK generado
+        run: |
+          echo "=== APKs generados ==="
+          find mobile/build/app/outputs -name "*.apk" -type f
+          APK=$(find mobile/build/app/outputs -name "*.apk" -type f | head -1)
+          if [ -z "$APK" ]; then
+            echo "ERROR: no se encontro ningun APK"
+            exit 1
+          fi
+          echo "APK_PATH=$APK" >> $GITHUB_ENV
+          echo "Tamano: $(du -sh "$APK" | cut -f1)"
+
       - name: Copiar APK a website/
         run: |
-          APK=$(find mobile/build/app/outputs -name "*.apk" -type f | head -1)
-          echo "APK encontrado: $APK ($(du -sh "$APK" | cut -f1))"
-          cp "$APK" website/mbolamusic.apk
+          mkdir -p website
+          cp "$APK_PATH" website/mbolamusic.apk
+          echo "APK copiado a website/mbolamusic.apk"
 
-      - name: Commit y push del APK
+      - name: Subir APK como artefacto de GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: mbolamusic-arm64-release
+          path: website/mbolamusic.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit y push del APK en website/
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add website/mbolamusic.apk
           git diff --cached --quiet \
-            && echo "APK sin cambios." \
-            || (git commit -m "chore: actualizar APK desde build manual [skip ci]" && git push)
-          echo "Listo. APK disponible en /mbolamusic.apk"
+            && echo "APK sin cambios, nada que publicar." \
+            || (git commit -m "chore: actualizar APK desde build automatico [skip ci]" && git push)
+          echo "Listo. APK disponible en website/mbolamusic.apk"
