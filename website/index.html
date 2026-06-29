@@ -325,12 +325,12 @@ async function doLoginWeb() {
       body: JSON.stringify({ identifier, password })
     });
     const j = await r.json();
-    if (!j.success) { err.textContent = j.error || 'Error al iniciar sesión'; err.style.display = ''; return; }
+    if (!j.success) { err.textContent = j.error || (T[localStorage.getItem('mbola_lang')||'es']||T.es).errLogin; err.style.display = ''; return; }
     localStorage.setItem('mbola_token', j.data.token);
     localStorage.setItem('mbola_user',  JSON.stringify(j.data.user));
     closeModal();
     redirectByRole(j.data.user);
-  } catch(e) { err.textContent = 'Error de conexión con el servidor'; err.style.display = ''; }
+  } catch(e) { err.textContent = (T[localStorage.getItem('mbola_lang')||'es']||T.es).errConnection; err.style.display = ''; }
 }
 
 async function doRegisterWeb() {
@@ -348,12 +348,12 @@ async function doRegisterWeb() {
       method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
     });
     const j = await r.json();
-    if (!j.success) { err.textContent = j.error || 'Error al registrarse'; err.style.display = ''; return; }
+    if (!j.success) { err.textContent = j.error || (T[localStorage.getItem('mbola_lang')||'es']||T.es).errRegister; err.style.display = ''; return; }
     localStorage.setItem('mbola_token', j.data.token);
     localStorage.setItem('mbola_user',  JSON.stringify(j.data.user));
     closeModal();
     redirectByRole(j.data.user);
-  } catch(e) { err.textContent = 'Error de conexión con el servidor'; err.style.display = ''; }
+  } catch(e) { err.textContent = (T[localStorage.getItem('mbola_lang')||'es']||T.es).errConnection; err.style.display = ''; }
 }
 
 function redirectByRole(user) {
@@ -487,6 +487,12 @@ const T = {
     registerPwLabel:'Contraseña *', registerPwHint:'mínimo 6 caracteres',
     registerBtn:'Crear cuenta →',
     registerNote:'Oyentes: 1 mes gratis · Artistas: 10.000 FCFA/mes',
+    artistPlaceholder:'Tu nombre artístico',
+    chipUsers:'Usuarios', chipPayments:'Pagos', chipStats:'Estadísticas',
+    chipArtists:'Artistas', chipSongs:'Canciones', chipSubs:'Suscripciones',
+    footerMadeWith:'Hecho con ❤ para Africa',
+    errLogin:'Error al iniciar sesión', errConnection:'Error de conexión con el servidor',
+    errRegister:'Error al registrarse',
   },
   fr: {
     heroBadge: '🇬🇶 Fait pour la Guinée Équatoriale',
@@ -558,6 +564,12 @@ const T = {
     registerPwLabel:'Mot de passe *', registerPwHint:'minimum 6 caractères',
     registerBtn:'Créer un compte →',
     registerNote:'Auditeurs : 1 mois gratuit · Artistes : 10.000 FCFA/mois',
+    artistPlaceholder:'Ton nom artistique',
+    chipUsers:'Utilisateurs', chipPayments:'Paiements', chipStats:'Statistiques',
+    chipArtists:'Artistes', chipSongs:'Chansons', chipSubs:'Abonnements',
+    footerMadeWith:'Fait avec ❤ pour l\'Afrique',
+    errLogin:'Erreur de connexion', errConnection:'Erreur de connexion au serveur',
+    errRegister:'Erreur lors de l\'inscription',
   },
   pt: {
     heroBadge: '🇬🇶 Feito para a Guiné Equatorial',
@@ -629,6 +641,12 @@ const T = {
     registerPwLabel:'Palavra-passe *', registerPwHint:'mínimo 6 caracteres',
     registerBtn:'Criar conta →',
     registerNote:'Ouvintes: 1 mês grátis · Artistas: 10.000 FCFA/mês',
+    artistPlaceholder:'O teu nome artístico',
+    chipUsers:'Utilizadores', chipPayments:'Pagamentos', chipStats:'Estatísticas',
+    chipArtists:'Artistas', chipSongs:'Músicas', chipSubs:'Subscrições',
+    footerMadeWith:'Feito com ❤ para África',
+    errLogin:'Erro ao iniciar sessão', errConnection:'Erro de ligação ao servidor',
+    errRegister:'Erro ao registar',
   },
   en: {
     heroBadge: '🇬🇶 Made for Equatorial Guinea',
@@ -700,6 +718,12 @@ const T = {
     registerPwLabel:'Password *', registerPwHint:'minimum 6 characters',
     registerBtn:'Create account →',
     registerNote:'Listeners: 1 month free · Artists: 10,000 FCFA/month',
+    artistPlaceholder:'Your artist name',
+    chipUsers:'Users', chipPayments:'Payments', chipStats:'Statistics',
+    chipArtists:'Artists', chipSongs:'Songs', chipSubs:'Subscriptions',
+    footerMadeWith:'Made with ❤ for Africa',
+    errLogin:'Login error', errConnection:'Connection error',
+    errRegister:'Registration error',
   },
 };
 
@@ -809,6 +833,14 @@ function setLang(code, save = true) {
   setText('footer-privacy', t.footerPrivacy); setText('footer-terms', t.footerTerms); setText('footer-cookies', t.footerCookies);
   setText('footer-support', t.footerSupport); setText('footer-business', t.footerBusiness);
   setText('footer-copy', t.footerCopy);
+  setText('footer-made-with', t.footerMadeWith);
+  // Admin chips
+  setText('chip-users', t.chipUsers); setText('chip-payments', t.chipPayments);
+  setText('chip-stats', t.chipStats); setText('chip-artists', t.chipArtists);
+  setText('chip-songs', t.chipSongs); setText('chip-subs', t.chipSubs);
+  // Artist name placeholder
+  const rgArtist = document.getElementById('rg-artist');
+  if (rgArtist) rgArtist.placeholder = t.artistPlaceholder;
 }
 </script>
 
@@ -1155,12 +1187,12 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
           Gestiona usuarios, confirma pagos bancarios, supervisa estadísticas de reproducción y controla la plataforma completa desde el panel web de administración.
         </p>
         <div class="admin-features">
-          <span class="admin-chip">Usuarios</span>
-          <span class="admin-chip">Pagos</span>
-          <span class="admin-chip">Estadísticas</span>
-          <span class="admin-chip">Artistas</span>
-          <span class="admin-chip">Canciones</span>
-          <span class="admin-chip">Suscripciones</span>
+          <span class="admin-chip" id="chip-users">Usuarios</span>
+          <span class="admin-chip" id="chip-payments">Pagos</span>
+          <span class="admin-chip" id="chip-stats">Estadísticas</span>
+          <span class="admin-chip" id="chip-artists">Artistas</span>
+          <span class="admin-chip" id="chip-songs">Canciones</span>
+          <span class="admin-chip" id="chip-subs">Suscripciones</span>
         </div>
       </div>
       <div class="admin-access">
@@ -1225,7 +1257,7 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
     </div>
     <div class="footer-bottom">
       <p id="footer-copy">© 2025 MbôláMusic. Todos los derechos reservados. Guinea Ecuatorial 🇬🇶</p>
-      <p style="color:var(--text2);font-size:0.8rem;">Hecho con ❤ para Africa</p>
+      <p id="footer-made-with" style="color:var(--text2);font-size:0.8rem;">Hecho con ❤ para Africa</p>
     </div>
   </div>
 </footer>
