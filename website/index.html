@@ -383,11 +383,39 @@ function openEditProfileWeb() {
   document.getElementById('ep-city').value       = user.city       || '';
   document.getElementById('ep-artistname').value = user.artistName || '';
   document.getElementById('ep-bio').value        = '';
+  // Resetear file input
+  document.getElementById('ep-avatar-input').value = '';
+  // Mostrar avatar actual o iniciales
+  const preview = document.getElementById('ep-avatar-preview');
+  const initials = document.getElementById('ep-avatar-initials');
+  if (user.avatarUrl) {
+    preview.src = user.avatarUrl;
+    preview.style.display = '';
+    initials.style.display = 'none';
+  } else {
+    preview.style.display = 'none';
+    initials.style.display = 'flex';
+    initials.textContent = (user.username || '?')[0].toUpperCase();
+  }
   const artistSection = document.getElementById('ep-artist-section');
   artistSection.style.display = user.role === 'ARTIST' ? 'flex' : 'none';
   document.getElementById('ep-ok').style.display  = 'none';
   document.getElementById('ep-err').style.display = 'none';
   document.getElementById('edit-profile-overlay').style.display = 'flex';
+}
+
+function previewAvatar(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const preview = document.getElementById('ep-avatar-preview');
+    const initials = document.getElementById('ep-avatar-initials');
+    preview.src = e.target.result;
+    preview.style.display = '';
+    initials.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
 }
 
 function closeEditProfileWeb() {
@@ -403,17 +431,33 @@ async function saveProfileWeb() {
   ok.style.display = 'none'; err.style.display = 'none';
   btn.disabled = true; btn.textContent = t.epSaving || 'Guardando…';
   const user = JSON.parse(localStorage.getItem('mbola_user') || '{}');
-  const body = {
-    username: document.getElementById('ep-username').value.trim(),
-    country:  document.getElementById('ep-country').value.trim(),
-    city:     document.getElementById('ep-city').value.trim(),
-  };
-  if (user.role === 'ARTIST') {
-    body.artistName = document.getElementById('ep-artistname').value.trim();
-    body.bio        = document.getElementById('ep-bio').value.trim();
-  }
+  const token = localStorage.getItem('mbola_token');
   try {
-    const token = localStorage.getItem('mbola_token');
+    // 1. Subir avatar si el usuario seleccionó uno
+    const avatarFile = document.getElementById('ep-avatar-input').files[0];
+    let newAvatarUrl = user.avatarUrl;
+    if (avatarFile) {
+      const fd = new FormData();
+      fd.append('avatar', avatarFile);
+      const ar = await fetch(API_BASE + '/auth/avatar', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: fd,
+      });
+      const aj = await ar.json();
+      if (!aj.success) throw new Error(aj.error || 'Error al subir foto');
+      newAvatarUrl = aj.data.avatarUrl;
+    }
+    // 2. Guardar datos de texto
+    const body = {
+      username: document.getElementById('ep-username').value.trim(),
+      country:  document.getElementById('ep-country').value.trim(),
+      city:     document.getElementById('ep-city').value.trim(),
+    };
+    if (user.role === 'ARTIST') {
+      body.artistName = document.getElementById('ep-artistname').value.trim();
+      body.bio        = document.getElementById('ep-bio').value.trim();
+    }
     const r = await fetch(API_BASE + '/auth/profile', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
@@ -421,7 +465,7 @@ async function saveProfileWeb() {
     });
     const j = await r.json();
     if (!j.success) throw new Error(j.error || 'Error');
-    const updated = { ...user, ...body };
+    const updated = { ...user, ...body, avatarUrl: newAvatarUrl };
     localStorage.setItem('mbola_user', JSON.stringify(updated));
     document.getElementById('nav-username').textContent = updated.username;
     ok.textContent = t.epSaved || '✅ Perfil actualizado';
@@ -542,6 +586,7 @@ const T = {
     epTitle:'✏ Editar perfil', epUserLbl:'Usuario', epCountryLbl:'País', epCityLbl:'Ciudad',
     epArtnameLbl:'Nombre artístico', epBioLbl:'Biografía',
     epSave:'Guardar cambios', epSaving:'Guardando…', epSaved:'✅ Perfil actualizado',
+    epAvatarLabel:'Toca para cambiar foto',
     loginLabel:'Email, teléfono o usuario', loginPwLabel:'Contraseña', loginBtn:'Entrar →',
     registerUserLabel:'Usuario *', registerTypeLabel:'Tipo de cuenta *',
     listenerOpt:'Oyente', artistOpt:'Artista',
@@ -622,6 +667,7 @@ const T = {
     epTitle:'✏ Modifier le profil', epUserLbl:'Utilisateur', epCountryLbl:'Pays', epCityLbl:'Ville',
     epArtnameLbl:'Nom d\'artiste', epBioLbl:'Biographie',
     epSave:'Enregistrer', epSaving:'Enregistrement…', epSaved:'✅ Profil mis à jour',
+    epAvatarLabel:'Toucher pour changer la photo',
     loginLabel:'E-mail, téléphone ou nom d\'utilisateur', loginPwLabel:'Mot de passe', loginBtn:'Entrer →',
     registerUserLabel:'Utilisateur *', registerTypeLabel:'Type de compte *',
     listenerOpt:'Auditeur', artistOpt:'Artiste',
@@ -702,6 +748,7 @@ const T = {
     epTitle:'✏ Editar perfil', epUserLbl:'Utilizador', epCountryLbl:'País', epCityLbl:'Cidade',
     epArtnameLbl:'Nome artístico', epBioLbl:'Biografia',
     epSave:'Guardar alterações', epSaving:'A guardar…', epSaved:'✅ Perfil atualizado',
+    epAvatarLabel:'Toque para alterar a foto',
     loginLabel:'E-mail, telemóvel ou utilizador', loginPwLabel:'Palavra-passe', loginBtn:'Entrar →',
     registerUserLabel:'Utilizador *', registerTypeLabel:'Tipo de conta *',
     listenerOpt:'Ouvinte', artistOpt:'Artista',
@@ -782,6 +829,7 @@ const T = {
     epTitle:'✏ Edit profile', epUserLbl:'Username', epCountryLbl:'Country', epCityLbl:'City',
     epArtnameLbl:'Artist name', epBioLbl:'Biography',
     epSave:'Save changes', epSaving:'Saving…', epSaved:'✅ Profile updated',
+    epAvatarLabel:'Tap to change photo',
     loginLabel:'Email, phone or username', loginPwLabel:'Password', loginBtn:'Log in →',
     registerUserLabel:'Username *', registerTypeLabel:'Account type *',
     listenerOpt:'Listener', artistOpt:'Artist',
@@ -860,6 +908,7 @@ function setLang(code, save = true) {
   setText('ep-artname-lbl',  t.epArtnameLbl);
   setText('ep-bio-lbl',      t.epBioLbl);
   setText('ep-save-btn',     t.epSave);
+  setText('ep-avatar-label', t.epAvatarLabel);
   // Phone mockup
   setText('mockup-now-playing', t.nowPlaying);
   // Features
@@ -1347,6 +1396,16 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
   <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;position:relative;">
     <h3 id="ep-modal-title" style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;color:var(--amber);">✏ Editar perfil</h3>
     <div style="display:flex;flex-direction:column;gap:14px;">
+      <!-- Foto de perfil -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div onclick="document.getElementById('ep-avatar-input').click()" title="Cambiar foto" style="cursor:pointer;position:relative;width:88px;height:88px;flex-shrink:0;">
+          <img id="ep-avatar-preview" src="" alt="" style="width:88px;height:88px;border-radius:50%;object-fit:cover;border:2px solid var(--amber);display:none;">
+          <div id="ep-avatar-initials" style="width:88px;height:88px;border-radius:50%;background:rgba(245,158,11,0.18);border:2px solid var(--amber);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:var(--amber);"></div>
+          <div style="position:absolute;bottom:2px;right:2px;background:var(--amber);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#000;">📷</div>
+        </div>
+        <input type="file" id="ep-avatar-input" accept="image/*" style="display:none;" onchange="previewAvatar(event)">
+        <span id="ep-avatar-label" style="font-size:0.75rem;color:var(--text2);">Toca para cambiar foto</span>
+      </div>
       <div>
         <label id="ep-user-lbl" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Usuario</label>
         <input id="ep-username" type="text" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;">

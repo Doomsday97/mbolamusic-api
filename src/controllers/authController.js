@@ -4,6 +4,8 @@ const { z } = require('zod');
 const prisma = require('../config/prisma');
 const { signToken } = require('../utils/jwt');
 const { ok, fail } = require('../utils/response');
+const { upload: uploadFile } = require('../services/storage');
+const fs = require('fs');
 const subscriptionService = require('../services/subscriptionService');
 
 function genReferralCode() {
@@ -253,4 +255,33 @@ function sanitize(user) {
   return rest;
 }
 
-module.exports = { register, login, me, myReferral, updateProfile, listArtists, setSecurityQuestions, recoverChallenge, recoverVerify };
+// POST /api/auth/avatar  — sube/cambia foto de perfil
+async function updateAvatar(req, res) {
+  if (!req.file) return fail(res, 'No se recibió ninguna imagen');
+  if (!req.file.mimetype.startsWith('image/')) {
+    fs.unlinkSync(req.file.path);
+    return fail(res, 'El archivo debe ser una imagen (JPG, PNG, WebP…)');
+  }
+
+  let avatarUrl;
+  try {
+    avatarUrl = await uploadFile(req.file);
+  } catch (e) {
+    try { fs.unlinkSync(req.file.path); } catch (_) {}
+    return fail(res, 'Error al subir la imagen: ' + e.message);
+  }
+
+  await prisma.user.update({
+    where: { id: req.user.id },
+    data: { avatarUrl },
+  });
+
+  const fresh = await prisma.user.findUnique({
+    where: { id: req.user.id },
+    include: { artistProfile: true },
+  });
+
+  return ok(res, { user: sanitize(fresh), avatarUrl });
+}
+
+module.exports = { register, login, me, myReferral, updateProfile, updateAvatar, listArtists, setSecurityQuestions, recoverChallenge, recoverVerify };
