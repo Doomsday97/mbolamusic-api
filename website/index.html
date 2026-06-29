@@ -467,7 +467,7 @@ async function saveProfileWeb() {
     if (!j.success) throw new Error(j.error || 'Error');
     const updated = { ...user, ...body, avatarUrl: newAvatarUrl };
     localStorage.setItem('mbola_user', JSON.stringify(updated));
-    document.getElementById('nav-username').textContent = updated.username;
+    updateNavAuth(); // refresca avatar + username en el nav
     ok.textContent = t.epSaved || '✅ Perfil actualizado';
     ok.style.display = '';
   } catch(e) {
@@ -489,6 +489,20 @@ function updateNavAuth() {
     navLogin.style.display = 'none';
     navDownload.style.display = 'none';
     document.getElementById('nav-username').textContent = user.username;
+    // Avatar en nav
+    let navAv = document.getElementById('nav-avatar-circle');
+    if (!navAv) {
+      navAv = document.createElement('div');
+      navAv.id = 'nav-avatar-circle';
+      navAv.style.cssText = 'width:32px;height:32px;border-radius:50%;background:rgba(245,158,11,0.18);border:1.5px solid var(--amber);display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:800;color:var(--amber);overflow:hidden;flex-shrink:0;cursor:pointer;';
+      navAv.onclick = () => openMiCuenta();
+      navUser.insertBefore(navAv, navUser.firstChild);
+    }
+    if (user.avatarUrl) {
+      navAv.innerHTML = `<img src="${user.avatarUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+    } else {
+      navAv.textContent = (user.username || '?')[0].toUpperCase();
+    }
   } else {
     navUser.style.display = 'none';
     navLogin.style.display = '';
@@ -496,8 +510,24 @@ function updateNavAuth() {
   }
 }
 
+// Refresca el perfil del usuario desde el servidor para sincronizar avatar
+async function refreshUserFromServer() {
+  const token = localStorage.getItem('mbola_token');
+  if (!token) return;
+  try {
+    const r = await fetch(API_BASE + '/auth/me', { headers: { Authorization: 'Bearer ' + token } });
+    const j = await r.json();
+    if (j.success && j.data?.user) {
+      const fresh = { ...JSON.parse(localStorage.getItem('mbola_user') || '{}'), ...j.data.user };
+      localStorage.setItem('mbola_user', JSON.stringify(fresh));
+      updateNavAuth();
+    }
+  } catch(_) {}
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   updateNavAuth();
+  refreshUserFromServer(); // Sincronizar avatar con cambios hechos desde la app
   const saved = localStorage.getItem('mbola_lang') || 'es';
   setLang(saved, false);
 });
