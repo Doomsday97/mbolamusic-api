@@ -101,4 +101,22 @@ async function publicProfile(req, res) {
   });
 }
 
-module.exports = { dashboard, requestWithdraw, publicProfile };
+// GET /api/artist/monthly-earnings  -> ingresos por suscripción (últimos 24 meses)
+async function monthlyEarnings(req, res) {
+  if (!req.user.artistProfile) return fail(res, 'No eres artista', 403);
+  const artistId = req.user.artistProfile.id;
+
+  const earnings = await prisma.artistMonthlyEarning.findMany({
+    where:   { artistId },
+    orderBy: { month: 'desc' },
+    take:    24,
+    select:  { month: true, playsCount: true, amount: true, isPaid: true, paidAt: true },
+  });
+
+  const totalPending = earnings.filter(e => !e.isPaid).reduce((s, e) => s + e.amount, 0);
+  const totalPaid    = earnings.filter(e =>  e.isPaid).reduce((s, e) => s + e.amount, 0);
+
+  return ok(res, { earnings, totalPending, totalPaid, currency: 'FCFA' });
+}
+
+module.exports = { dashboard, requestWithdraw, publicProfile, monthlyEarnings };

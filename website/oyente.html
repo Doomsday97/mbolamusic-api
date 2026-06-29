@@ -78,6 +78,7 @@
         <div class="lang-opt" onclick="setLang('en')">EN</div>
       </div>
       <span id="nav-name" style="font-size:0.85rem;color:var(--text2);"></span>
+      <button class="btn-outline" onclick="openEditProfile()" id="btn-edit-profile" style="border-color:rgba(245,158,11,0.4);color:var(--amber);">✏ Perfil</button>
       <button class="btn-outline" id="btn-logout" onclick="logout()">Cerrar sesión</button>
     </div>
   </div>
@@ -120,6 +121,31 @@
 
 </div>
 
+<!-- EDIT PROFILE MODAL -->
+<div id="edit-modal" onclick="if(event.target===this)closeEditProfile()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:440px;position:relative;">
+    <button onclick="closeEditProfile()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;">✕</button>
+    <h3 id="ep-title" style="margin-bottom:1.5rem;font-size:1.15rem;">✏ Editar perfil</h3>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <label id="ep-user-lbl" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Usuario</label>
+        <input id="ep-username" type="text" style="width:100%;padding:11px 14px;background:#1f1f1f;border:1px solid #333;border-radius:10px;color:#fff;font-size:0.95rem;">
+      </div>
+      <div>
+        <label id="ep-country-lbl" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">País</label>
+        <input id="ep-country" type="text" style="width:100%;padding:11px 14px;background:#1f1f1f;border:1px solid #333;border-radius:10px;color:#fff;font-size:0.95rem;">
+      </div>
+      <div>
+        <label id="ep-city-lbl" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Ciudad</label>
+        <input id="ep-city" type="text" style="width:100%;padding:11px 14px;background:#1f1f1f;border:1px solid #333;border-radius:10px;color:#fff;font-size:0.95rem;">
+      </div>
+      <div id="ep-err" style="color:#f87171;font-size:0.85rem;display:none;"></div>
+      <div id="ep-ok" style="color:#22c55e;font-size:0.85rem;display:none;"></div>
+      <button id="ep-save-btn" onclick="saveProfile()" style="background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <div id="mini-player">
   <div class="mp-inner">
     <div class="mp-info">
@@ -152,6 +178,10 @@ const T = {
     catalogTitle:'🎶 Catálogo — Escuchar ahora',
     loadingTracks:'Cargando canciones…', noTracks:'No hay canciones disponibles aún.',
     errTracks:'Error al cargar canciones.',
+    editProfile:'✏ Perfil', epTitle:'✏ Editar perfil',
+    epUserLbl:'Usuario', epCountryLbl:'País', epCityLbl:'Ciudad',
+    saveChanges:'Guardar cambios', saving:'Guardando…',
+    profileSaved:'Perfil actualizado correctamente',
   },
   fr: {
     logout:'Se déconnecter', navName:'{0} (auditeur)',
@@ -167,6 +197,10 @@ const T = {
     catalogTitle:'🎶 Catalogue — Écouter maintenant',
     loadingTracks:'Chargement des chansons…', noTracks:'Aucune chanson disponible pour l\'instant.',
     errTracks:'Erreur lors du chargement des chansons.',
+    editProfile:'✏ Profil', epTitle:'✏ Modifier le profil',
+    epUserLbl:'Utilisateur', epCountryLbl:'Pays', epCityLbl:'Ville',
+    saveChanges:'Enregistrer les modifications', saving:'Enregistrement…',
+    profileSaved:'Profil mis à jour avec succès',
   },
   pt: {
     logout:'Terminar sessão', navName:'{0} (ouvinte)',
@@ -182,6 +216,10 @@ const T = {
     catalogTitle:'🎶 Catálogo — Ouvir agora',
     loadingTracks:'A carregar músicas…', noTracks:'Ainda não há músicas disponíveis.',
     errTracks:'Erro ao carregar músicas.',
+    editProfile:'✏ Perfil', epTitle:'✏ Editar perfil',
+    epUserLbl:'Utilizador', epCountryLbl:'País', epCityLbl:'Cidade',
+    saveChanges:'Guardar alterações', saving:'A guardar…',
+    profileSaved:'Perfil atualizado com sucesso',
   },
   en: {
     logout:'Log out', navName:'{0} (listener)',
@@ -197,6 +235,10 @@ const T = {
     catalogTitle:'🎶 Catalog — Listen now',
     loadingTracks:'Loading songs…', noTracks:'No songs available yet.',
     errTracks:'Error loading songs.',
+    editProfile:'✏ Profile', epTitle:'✏ Edit profile',
+    epUserLbl:'Username', epCountryLbl:'Country', epCityLbl:'City',
+    saveChanges:'Save changes', saving:'Saving…',
+    profileSaved:'Profile updated successfully',
   },
 };
 
@@ -212,14 +254,20 @@ function setLang(code, save = true) {
   document.querySelectorAll('.lang-opt').forEach(el => {
     el.classList.toggle('active', el.textContent.toLowerCase() === code);
   });
-  document.getElementById('btn-logout').textContent    = tr('logout');
-  document.getElementById('price1-period').textContent = tr('price1Period');
-  document.getElementById('price1-desc').textContent   = tr('price1Desc');
-  document.getElementById('price2-period').textContent = tr('price2Period');
-  document.getElementById('price2-desc').textContent   = tr('price2Desc');
-  document.getElementById('price3-period').textContent = tr('price3Period');
-  document.getElementById('price3-desc').textContent   = tr('price3Desc');
-  document.getElementById('catalog-title').textContent = tr('catalogTitle');
+  document.getElementById('btn-logout').textContent      = tr('logout');
+  document.getElementById('btn-edit-profile').textContent = tr('editProfile');
+  document.getElementById('price1-period').textContent   = tr('price1Period');
+  document.getElementById('price1-desc').textContent     = tr('price1Desc');
+  document.getElementById('price2-period').textContent   = tr('price2Period');
+  document.getElementById('price2-desc').textContent     = tr('price2Desc');
+  document.getElementById('price3-period').textContent   = tr('price3Period');
+  document.getElementById('price3-desc').textContent     = tr('price3Desc');
+  document.getElementById('catalog-title').textContent   = tr('catalogTitle');
+  document.getElementById('ep-title').textContent        = tr('epTitle');
+  document.getElementById('ep-user-lbl').textContent     = tr('epUserLbl');
+  document.getElementById('ep-country-lbl').textContent  = tr('epCountryLbl');
+  document.getElementById('ep-city-lbl').textContent     = tr('epCityLbl');
+  document.getElementById('ep-save-btn').textContent     = tr('saveChanges');
   if (_user.username) {
     document.getElementById('nav-name').textContent = tr('navName', _user.username);
   }
@@ -241,6 +289,44 @@ function logout() {
   localStorage.removeItem('mbola_token');
   localStorage.removeItem('mbola_user');
   window.location.href = '/';
+}
+
+function openEditProfile() {
+  document.getElementById('ep-username').value = _user.username || '';
+  document.getElementById('ep-country').value  = _user.country  || '';
+  document.getElementById('ep-city').value     = _user.city     || '';
+  document.getElementById('ep-err').style.display = 'none';
+  document.getElementById('ep-ok').style.display  = 'none';
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+function closeEditProfile() {
+  document.getElementById('edit-modal').style.display = 'none';
+}
+async function saveProfile() {
+  const btn = document.getElementById('ep-save-btn');
+  const err = document.getElementById('ep-err');
+  const ok  = document.getElementById('ep-ok');
+  err.style.display = 'none'; ok.style.display = 'none';
+  btn.disabled = true; btn.textContent = tr('saving') || 'Guardando…';
+  try {
+    const body = {
+      username: document.getElementById('ep-username').value.trim(),
+      country:  document.getElementById('ep-country').value.trim(),
+      city:     document.getElementById('ep-city').value.trim(),
+    };
+    const r = await apiFetch('/auth/profile', 'PUT', body);
+    _user = { ..._user, ...r.user };
+    localStorage.setItem('mbola_user', JSON.stringify(_user));
+    document.getElementById('nav-name').textContent = tr('navName', _user.username);
+    ok.textContent = '✅ ' + (tr('profileSaved') || 'Perfil actualizado');
+    ok.style.display = '';
+    setTimeout(closeEditProfile, 1500);
+  } catch(e) {
+    err.textContent = e.message;
+    err.style.display = '';
+  } finally {
+    btn.disabled = false; btn.textContent = tr('saveChanges') || 'Guardar cambios';
+  }
 }
 
 async function loadSubscription() {

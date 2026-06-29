@@ -30,4 +30,15 @@ router.patch('/tracks/:id/toggle',         admin.togglePublish);
 // Usuarios conectados
 router.get('/online',                      admin.onlineUsers);
 
+// Ganancias de la plataforma
+router.get('/platform-earnings',                    admin.platformEarnings);
+router.post('/platform-withdraw',                   admin.platformWithdraw);
+
+// Reparto mensual por suscripción
+router.get('/subscription-distributions',           admin.subscriptionDistributions);
+router.post('/subscription-distributions/run',      admin.runSubscriptionDistribution);
+router.get('/subscription-config',                  admin.subscriptionConfig);
+router.post('/subscription-config',                 admin.subscriptionConfig);
+router.get('/monthly-report/:month',                admin.monthlyReport);
+
 module.exports = router;

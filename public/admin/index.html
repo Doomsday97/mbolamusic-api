@@ -32,6 +32,7 @@
   header { background: var(--surface); padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
   header h1 { color: var(--accent); font-size: 18px; flex: 1; }
   header span { color: var(--muted); font-size: 13px; }
+  .lang-btn { width:auto;padding:5px 12px;background:var(--surface2);color:var(--muted);border-radius:6px;font-size:13px; }
   nav { display: flex; gap: 4px; background: var(--surface); padding: 0 24px; border-bottom: 1px solid var(--surface2); }
   nav button { background: none; color: var(--muted); border: none; border-bottom: 3px solid transparent;
                padding: 12px 16px; cursor: pointer; font-size: 14px; border-radius: 0; width: auto; }
@@ -89,6 +90,26 @@
                 padding: 10px 24px; font-weight: bold; font-size: 14px; cursor: pointer; width: auto; margin-top: 4px; }
   .btn-upload:disabled { opacity: .5; cursor: default; }
 
+  /* ── Chat ── */
+  .chat-layout { display: grid; grid-template-columns: 280px 1fr; gap: 16px; height: calc(100vh - 160px); }
+  .chat-list { background: var(--surface); border-radius: var(--radius); overflow-y: auto; }
+  .chat-list-item { padding: 12px 16px; border-bottom: 1px solid var(--surface2); cursor: pointer; transition: background .15s; }
+  .chat-list-item:hover, .chat-list-item.active { background: var(--surface2); }
+  .chat-list-item .cli-name { font-weight: 600; font-size: 14px; }
+  .chat-list-item .cli-preview { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chat-list-item .cli-badge { background: var(--error); color: #fff; border-radius: 99px; padding: 1px 7px; font-size: 11px; float: right; }
+  .chat-window { background: var(--surface); border-radius: var(--radius); display: flex; flex-direction: column; }
+  .chat-window-header { padding: 14px 18px; border-bottom: 1px solid var(--surface2); font-weight: 600; font-size: 15px; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .chat-bubble { max-width: 70%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.5; word-break: break-word; }
+  .chat-bubble.from-user  { background: var(--surface2); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .chat-bubble.from-admin { background: var(--accent); color: #000; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .chat-bubble .cb-meta { font-size: 10px; margin-top: 4px; opacity: .6; }
+  .chat-input-row { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--surface2); }
+  .chat-input-row textarea { flex: 1; resize: none; height: 42px; padding: 10px 12px; background: var(--surface2); border: none; border-radius: 8px; color: var(--text); font-size: 14px; font-family: inherit; }
+  .chat-input-row button { width: auto; padding: 0 20px; background: var(--accent); color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
+  .chat-empty-state { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 14px; }
+
   /* ── Modal ── */
   .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px; }
   .modal-overlay.hidden { display:none; }
@@ -140,7 +161,8 @@
   <header>
     <h1>🎵 MbôláMusic Admin</h1>
     <span id="admin-name"></span>
-    <button onclick="logout()" style="width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;">Salir</button>
+    <button class="lang-btn" onclick="toggleLang()" id="lang-toggle-btn">🇫🇷 FR</button>
+    <button onclick="logout()" style="width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;" data-i18n="logout">Salir</button>
   </header>
   <nav>
     <button class="active" onclick="showTab('stats', this)">Estadísticas</button>
@@ -148,6 +170,7 @@
     <button onclick="showTab('payments', this)">Pagos pendientes</button>
     <button onclick="showTab('tracks', this)">🎵 Canciones</button>
     <button onclick="showTab('online', this)" id="online-tab-btn">🟢 En línea <span id="online-badge" style="background:var(--success);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
+    <button onclick="showTab('chat', this)" id="chat-tab-btn">💬 Soporte <span id="chat-badge" style="display:none;background:var(--error);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
   </nav>
   <main>
     <div id="tab-stats"></div>
@@ -155,6 +178,7 @@
     <div id="tab-payments" style="display:none"></div>
     <div id="tab-tracks" style="display:none"></div>
     <div id="tab-online" style="display:none"></div>
+    <div id="tab-chat" style="display:none"></div>
   </main>
 </div>
 
@@ -187,6 +211,27 @@
       <button class="btn-secondary" onclick="closeUserModal()">Cerrar</button>
     </div>
     <div id="mu-msg" style="font-size:13px;margin-top:8px;"></div>
+  </div>
+</div>
+
+<!-- Platform withdraw modal -->
+<div id="platform-withdraw-modal" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width:420px">
+    <h3 data-i18n="platformWithdrawTitle">💰 Retirar ganancias de la plataforma</h3>
+    <div id="pw-available" style="font-size:14px;color:var(--muted);margin-bottom:16px;"></div>
+    <div class="mfield">
+      <label data-i18n="amountLabel">Importe (FCFA)</label>
+      <input id="pw-amount" type="number" min="1000" step="1000" placeholder="10000" />
+    </div>
+    <div class="mfield">
+      <label data-i18n="bankDetailsLabel">Referencia / Detalles del banco</label>
+      <input id="pw-bank" type="text" placeholder="Banco, nº de cuenta, referencia…" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="submitPlatformWithdraw()" data-i18n="withdrawBtn">Retirar</button>
+      <button class="btn-secondary" onclick="closePlatformWithdraw()" data-i18n="cancelBtn">Cancelar</button>
+    </div>
+    <div id="pw-msg" style="font-size:13px;margin-top:8px;"></div>
   </div>
 </div>
 
@@ -263,7 +308,7 @@ async function apiFetch(path, method = 'GET', body = null, auth = true) {
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 function showTab(name, btn) {
-  ['stats','users','payments','tracks','online'].forEach(t => {
+  ['stats','users','payments','tracks','online','chat'].forEach(t => {
     document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
   });
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -273,6 +318,7 @@ function showTab(name, btn) {
   if (name === 'payments') loadPayments(1);
   if (name === 'tracks')   loadTracks();
   if (name === 'online')   loadOnlineUsers();
+  if (name === 'chat')     loadChat();
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
@@ -281,21 +327,134 @@ async function loadStats() {
   el.innerHTML = '<div class="loading">Cargando…</div>';
   try {
     const d = await apiFetch('/admin/stats');
+    // Also load platform earnings for withdrawal
+    let platformData = { available: 0, totalEarned: 0, totalWithdrawn: 0 };
+    try { platformData = await apiFetch('/admin/platform-earnings'); } catch(_) {}
+
     el.innerHTML = `
       <div class="cards">
-        <div class="card"><div class="val">${fmt(d.totalUsers)}</div><div class="lbl">Usuarios totales</div></div>
-        <div class="card"><div class="val">${fmt(d.totalArtists)}</div><div class="lbl">Artistas</div></div>
-        <div class="card"><div class="val">${fmt(d.totalTracks)}</div><div class="lbl">Canciones publicadas</div></div>
-        <div class="card"><div class="val">${fmt(d.totalPlays)}</div><div class="lbl">Reproducciones</div></div>
-        <div class="card"><div class="val">${fmt(d.totalDownloads)}</div><div class="lbl">Descargas</div></div>
-        <div class="card"><div class="val">${fmt(d.pendingPayments)}</div><div class="lbl">Pagos pendientes</div></div>
-        <div class="card"><div class="val">${fmt(d.totalRevenue)}</div><div class="lbl">Ingresos totales (FCFA)</div></div>
-        <div class="card"><div class="val">${fmt(d.platformRevenue)}</div><div class="lbl">Plataforma (FCFA)</div></div>
-        <div class="card"><div class="val">${fmt(d.artistRevenue)}</div><div class="lbl">Artistas (FCFA)</div></div>
+        <div class="card"><div class="val">${fmt(d.totalUsers)}</div><div class="lbl" data-i18n="statUsers">Usuarios totales</div></div>
+        <div class="card"><div class="val">${fmt(d.totalArtists)}</div><div class="lbl" data-i18n="statArtists">Artistas</div></div>
+        <div class="card"><div class="val">${fmt(d.totalTracks)}</div><div class="lbl" data-i18n="statTracks">Canciones publicadas</div></div>
+        <div class="card"><div class="val">${fmt(d.totalPlays)}</div><div class="lbl" data-i18n="statPlays">Reproducciones</div></div>
+        <div class="card"><div class="val">${fmt(d.totalDownloads)}</div><div class="lbl" data-i18n="statDownloads">Descargas</div></div>
+        <div class="card"><div class="val">${fmt(d.pendingPayments)}</div><div class="lbl" data-i18n="statPending">Pagos pendientes</div></div>
+        <div class="card"><div class="val">${fmt(d.totalRevenue)}</div><div class="lbl" data-i18n="statRevenue">Ingresos totales (FCFA)</div></div>
+        <div class="card"><div class="val">${fmt(d.platformRevenue)}</div><div class="lbl" data-i18n="statPlatform">Plataforma (FCFA)</div></div>
+        <div class="card"><div class="val">${fmt(d.artistRevenue)}</div><div class="lbl" data-i18n="statArtist">Artistas (FCFA)</div></div>
+      </div>
+      <div style="background:var(--surface);border-radius:var(--radius);padding:20px;margin-top:8px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;" data-i18n="platformEarningsLabel">Ganancias disponibles de la plataforma</div>
+          <div style="font-size:28px;font-weight:bold;color:var(--accent)">${fmt(platformData.available)} FCFA</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;" data-i18n-template="platformEarningsDetail">Acumulado: ${fmt(platformData.totalEarned)} FCFA · Retirado: ${fmt(platformData.totalWithdrawn)} FCFA</div>
+        </div>
+        <button class="btn-sm btn-success" style="white-space:nowrap;" onclick="openPlatformWithdraw(${platformData.available})" data-i18n="withdrawPlatformBtn">💸 Solicitar retiro</button>
       </div>`;
+
+    // Subscription distribution table
+    el.innerHTML += await renderSubDistSection();
   } catch (e) {
     el.innerHTML = `<div class="empty">${e.message}</div>`;
   }
+}
+
+async function renderSubDistSection() {
+  // Load config for current/prev month and distribution history in parallel
+  const prevMonth = (() => {
+    const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - 1);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  })();
+
+  let cfg = { minPlaysThreshold: 1000, adminPct: 30, artistPct: 70, subscriptionValue: 2000 };
+  let rows = '<div class="loading">Cargando repartos…</div>';
+
+  try { cfg = (await apiFetch(`/admin/subscription-config?month=${prevMonth}`)).config; } catch(_) {}
+
+  try {
+    const data = await apiFetch('/admin/subscription-distributions');
+    if (!data.months || data.months.length === 0) {
+      rows = '<div class="empty">Sin repartos registrados aún. Configura los parámetros y ejecuta el reparto.</div>';
+    } else {
+      rows = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="color:var(--muted);text-align:left;">
+          <th style="padding:8px 10px">Mes</th>
+          <th style="padding:8px 10px">Suscriptores</th>
+          <th style="padding:8px 10px">Fondo total</th>
+          <th style="padding:8px 10px;color:var(--success)">Artistas</th>
+          <th style="padding:8px 10px;color:var(--accent)">Admin (30%)</th>
+          <th style="padding:8px 10px;color:var(--error)">Reserva</th>
+          <th></th>
+        </tr></thead><tbody>
+        ${data.months.map(m => `<tr style="border-top:1px solid var(--surface2);">
+          <td style="padding:8px 10px;font-weight:600">${m.month}</td>
+          <td style="padding:8px 10px">${fmt(m.subscribers)}</td>
+          <td style="padding:8px 10px">${fmt(m.totalFund)} FCFA</td>
+          <td style="padding:8px 10px;color:var(--success)">${fmt(m.artistDistributed)} FCFA</td>
+          <td style="padding:8px 10px;color:var(--accent)">${fmt(m.adminShare)} FCFA</td>
+          <td style="padding:8px 10px;color:var(--error)">${fmt(m.reserve)} FCFA</td>
+          <td style="padding:8px 10px">
+            <button class="btn-sm" onclick="showSubDistDetail('${m.month}')">Ver</button>
+          </td>
+        </tr>`).join('')}
+        </tbody></table>`;
+    }
+  } catch(_) {
+    rows = '<div class="empty">No se pudo cargar el historial de repartos.</div>';
+  }
+
+  return `
+    <div style="background:var(--surface);border-radius:var(--radius);padding:20px;margin-top:8px;">
+      <h3 style="margin:0 0 16px;font-size:15px;">📊 Reparto mensual de suscripciones</h3>
+
+      <!-- Config form -->
+      <details style="margin-bottom:16px;">
+        <summary style="cursor:pointer;font-size:13px;color:var(--muted);margin-bottom:8px;">⚙️ Parámetros del mes <b id="cfg-month-label">${prevMonth}</b></summary>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;align-items:flex-end;">
+          <div class="mfield" style="margin:0;flex:1;min-width:140px;">
+            <label>Mes (YYYY-MM)</label>
+            <input id="cfg-month" type="month" value="${prevMonth}" onchange="document.getElementById('cfg-month-label').textContent=this.value" style="padding:6px 10px;font-size:13px;"/>
+          </div>
+          <div class="mfield" style="margin:0;flex:1;min-width:120px;">
+            <label>Valor suscripción (FCFA)</label>
+            <input id="cfg-sub-val" type="number" value="${cfg.subscriptionValue}" min="100" step="100"/>
+          </div>
+          <div class="mfield" style="margin:0;flex:1;min-width:100px;">
+            <label>% Admin</label>
+            <input id="cfg-admin-pct" type="number" value="${cfg.adminPct}" min="1" max="99"/>
+          </div>
+          <div class="mfield" style="margin:0;flex:1;min-width:100px;">
+            <label>% Artistas</label>
+            <input id="cfg-artist-pct" type="number" value="${cfg.artistPct}" min="1" max="99"/>
+          </div>
+          <div class="mfield" style="margin:0;flex:1;min-width:140px;">
+            <label>Umbral mínimo de plays</label>
+            <input id="cfg-threshold" type="number" value="${cfg.minPlaysThreshold}" min="0" step="100"/>
+          </div>
+          <button class="btn-sm btn-primary" style="margin-bottom:2px;" onclick="saveSubDistConfig()">Guardar config</button>
+        </div>
+        <div id="cfg-msg" style="font-size:12px;margin-top:6px;"></div>
+      </details>
+
+      <!-- Action buttons -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <button class="btn-sm btn-primary" onclick="triggerSubDistribution()">▶ Ejecutar reparto del mes anterior</button>
+        <button class="btn-sm" onclick="loadStats()">↻ Actualizar</button>
+      </div>
+
+      ${rows}
+    </div>
+
+    <!-- Sub distribution detail modal -->
+    <div id="sub-dist-modal" class="modal-overlay hidden">
+      <div class="modal-box" style="max-width:660px;max-height:80vh;overflow-y:auto;">
+        <h3 id="sub-dist-modal-title">Informe mensual</h3>
+        <div id="sub-dist-modal-body"></div>
+        <div class="modal-actions" style="margin-top:12px;">
+          <button class="btn-secondary" onclick="document.getElementById('sub-dist-modal').classList.add('hidden')">Cerrar</button>
+        </div>
+      </div>
+    </div>`;
 }
 
 // ── Users ─────────────────────────────────────────────────────────────────────
@@ -500,6 +659,8 @@ async function loadPayments(page = 1) {
           ${(p.status === 'VERIFYING' || p.status === 'PENDING') ? `
             <button class="btn-sm btn-success" onclick="confirmPay('${p.id}')">✓ Confirmar</button>
             <button class="btn-sm btn-danger"  onclick="rejectPay('${p.id}')">✗ Rechazar</button>
+          ` : (p.status === 'COMPLETED' && p.purpose === 'WALLET_TOPUP') ? `
+            <button class="btn-sm btn-warn" onclick="refundPay('${p.id}', ${p.amount})">↩ Reembolso</button>
           ` : '—'}
         </td>
       </tr>`).join('');
@@ -540,6 +701,15 @@ async function rejectPay(id) {
   if (!confirm('¿Rechazar este pago?')) return;
   try { await apiFetch('/payments/' + id + '/reject', 'POST'); loadPayments(_pPage); }
   catch (e) { alert(e.message); }
+}
+async function refundPay(id, amount) {
+  if (!confirm(`¿Reembolsar ${fmt(amount)} FCFA al monedero del usuario? Esta acción descontará el saldo de su monedero.`)) return;
+  try {
+    await apiFetch('/payments/' + id + '/refund', 'POST');
+    alert('✅ Reembolso procesado. Se han descontado ' + fmt(amount) + ' FCFA del monedero.');
+    loadPayments(_pPage);
+  }
+  catch (e) { alert('❌ ' + e.message); }
 }
 
 // ── Tracks ────────────────────────────────────────────────────────────────────
@@ -765,6 +935,332 @@ async function refreshOnlineBadge() {
   } catch {}
 }
 
+// ── Chat ──────────────────────────────────────────────────────────────────────
+let _chatUserId = null;
+let _chatPollTimer = null;
+
+async function loadChat() {
+  const el = document.getElementById('tab-chat');
+  el.innerHTML = '<div class="loading">Cargando conversaciones…</div>';
+  try {
+    const convs = await apiFetch('/chat/admin/conversations');
+    // Update badge
+    const totalUnread = convs.reduce((s, c) => s + c.unreadFromUser, 0);
+    const badge = document.getElementById('chat-badge');
+    if (totalUnread > 0) {
+      badge.textContent = totalUnread;
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
+
+    el.innerHTML = `
+      <div class="section-header"><h2>💬 Soporte al usuario</h2></div>
+      <div class="chat-layout">
+        <div class="chat-list" id="chat-conv-list"></div>
+        <div class="chat-window" id="chat-window">
+          <div class="chat-empty-state">Selecciona una conversación</div>
+        </div>
+      </div>`;
+
+    const listEl = document.getElementById('chat-conv-list');
+    if (convs.length === 0) {
+      listEl.innerHTML = '<div class="empty">Sin conversaciones todavía</div>';
+      return;
+    }
+    convs.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'chat-list-item';
+      div.dataset.uid = c.user.id;
+      const badge = c.unreadFromUser > 0 ? `<span class="cli-badge">${c.unreadFromUser}</span>` : '';
+      const preview = esc(c.lastMessage?.body || '');
+      div.innerHTML = `
+        <div class="cli-name">${esc(c.user.username)} ${badge}</div>
+        <div class="cli-preview">${preview}</div>`;
+      div.onclick = () => openConversation(c.user.id, c.user.username, div);
+      listEl.appendChild(div);
+    });
+  } catch (e) {
+    el.innerHTML = `<div class="empty">Error: ${esc(e.message)}</div>`;
+  }
+}
+
+async function openConversation(userId, username, itemEl) {
+  // Highlight selected
+  document.querySelectorAll('.chat-list-item').forEach(i => i.classList.remove('active'));
+  itemEl.classList.add('active');
+  // Remove unread badge on item
+  const b = itemEl.querySelector('.cli-badge');
+  if (b) b.remove();
+
+  _chatUserId = userId;
+  // Clear old poll
+  if (_chatPollTimer) clearInterval(_chatPollTimer);
+
+  const win = document.getElementById('chat-window');
+  win.innerHTML = `
+    <div class="chat-window-header">💬 ${esc(username)}</div>
+    <div class="chat-messages" id="chat-msgs"><div class="loading">Cargando…</div></div>
+    <div class="chat-input-row">
+      <textarea id="chat-reply-input" placeholder="Escribe una respuesta…" onkeydown="chatKeydown(event)"></textarea>
+      <button onclick="adminReply()">Enviar</button>
+    </div>`;
+
+  await fetchMessages(userId);
+  // Poll every 5 seconds while this conversation is open
+  _chatPollTimer = setInterval(() => {
+    if (_chatUserId === userId) fetchMessages(userId);
+  }, 5000);
+}
+
+async function fetchMessages(userId) {
+  try {
+    const msgs = await apiFetch(`/chat/admin/conversations/${userId}`);
+    const el = document.getElementById('chat-msgs');
+    if (!el) return;
+    el.innerHTML = '';
+    if (msgs.length === 0) {
+      el.innerHTML = '<div class="empty">Sin mensajes aún</div>';
+      return;
+    }
+    msgs.forEach(m => {
+      const div = document.createElement('div');
+      div.className = `chat-bubble ${m.fromAdmin ? 'from-admin' : 'from-user'}`;
+      const time = new Date(m.createdAt).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+      div.innerHTML = `${esc(m.body)}<div class="cb-meta">${time}</div>`;
+      el.appendChild(div);
+    });
+    el.scrollTop = el.scrollHeight;
+    // Update global unread badge
+    refreshChatBadge();
+  } catch (_) {}
+}
+
+async function adminReply() {
+  const input = document.getElementById('chat-reply-input');
+  if (!input || !_chatUserId) return;
+  const body = input.value.trim();
+  if (!body) return;
+  input.value = '';
+  try {
+    await apiFetch(`/chat/admin/conversations/${_chatUserId}`, 'POST', { body });
+    await fetchMessages(_chatUserId);
+  } catch (e) {
+    alert('Error al enviar: ' + e.message);
+  }
+}
+
+function chatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); adminReply(); }
+}
+
+async function refreshChatBadge() {
+  try {
+    const convs = await apiFetch('/chat/admin/conversations');
+    const total = convs.reduce((s, c) => s + c.unreadFromUser, 0);
+    const badge = document.getElementById('chat-badge');
+    if (total > 0) { badge.textContent = total; badge.style.display = ''; }
+    else badge.style.display = 'none';
+  } catch (_) {}
+}
+
+// ── Reparto mensual suscripciones ─────────────────────────────────────────────
+async function saveSubDistConfig() {
+  const month = document.getElementById('cfg-month').value;
+  const msg   = document.getElementById('cfg-msg');
+  if (!month) { msg.style.color='var(--error)'; msg.textContent='Selecciona el mes.'; return; }
+  const params = {
+    month,
+    subscriptionValue: parseInt(document.getElementById('cfg-sub-val').value,10)   || 2000,
+    adminPct:          parseInt(document.getElementById('cfg-admin-pct').value,10)  || 30,
+    artistPct:         parseInt(document.getElementById('cfg-artist-pct').value,10) || 70,
+    minPlaysThreshold: parseInt(document.getElementById('cfg-threshold').value,10)  || 1000,
+  };
+  if (params.adminPct + params.artistPct !== 100) {
+    msg.style.color='var(--error)';
+    msg.textContent='% Admin + % Artistas debe sumar 100.';
+    return;
+  }
+  try {
+    await apiFetch('/admin/subscription-config', 'POST', params);
+    msg.style.color='var(--success)'; msg.textContent='✅ Configuración guardada.';
+  } catch(e) {
+    msg.style.color='var(--error)'; msg.textContent='❌ ' + e.message;
+  }
+}
+
+async function triggerSubDistribution() {
+  if (!confirm('¿Ejecutar el reparto del mes anterior?\n\nEsta operación es idempotente — los suscriptores ya procesados se omitirán.')) return;
+  try {
+    const r = await apiFetch('/admin/subscription-distributions/run', 'POST', {});
+    const msg = [
+      `✅ Reparto ${r.month} completado.`,
+      `Suscriptores válidos: ${r.total}`,
+      `Procesados: ${r.processed} · Omitidos: ${r.skipped} · Errores: ${r.errors?.length || 0}`,
+      `Fondo total: ${fmt(r.totalFund)} FCFA`,
+      `Admin (30%): ${fmt(r.adminEarnings)} FCFA`,
+      `Artistas distribuido: ${fmt(r.artistDistributed)} FCFA`,
+      `Reserva (umbral/sin escuchas): ${fmt(r.reserve)} FCFA`,
+      `Artistas elegibles: ${r.eligibleArtists}`,
+    ].join('\n');
+    alert(msg);
+    loadStats();
+  } catch(e) {
+    alert('❌ ' + e.message);
+  }
+}
+
+async function showSubDistDetail(month) {
+  const modal = document.getElementById('sub-dist-modal');
+  const title = document.getElementById('sub-dist-modal-title');
+  const body  = document.getElementById('sub-dist-modal-body');
+  title.textContent = `Informe de reparto — ${month}`;
+  body.innerHTML = '<div class="loading">Cargando…</div>';
+  modal.classList.remove('hidden');
+  try {
+    const d = await apiFetch(`/admin/monthly-report/${month}`);
+    const adm = d.admin || {};
+    const cfg = d.config || {};
+    const detail = await apiFetch(`/admin/subscription-distributions?month=${month}`);
+    const artists = detail.artists || [];
+
+    body.innerHTML = `
+      <!-- Admin summary -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
+        <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:11px;color:var(--muted)">Suscriptores</div>
+          <div style="font-size:20px;font-weight:bold">${fmt(adm.totalSubscribers||0)}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:11px;color:var(--muted)">Fondo total</div>
+          <div style="font-size:20px;font-weight:bold;color:var(--accent)">${fmt(adm.totalFund||0)} FCFA</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:11px;color:var(--muted)">Admin 30%</div>
+          <div style="font-size:20px;font-weight:bold;color:var(--accent)">${fmt(adm.adminAmount||0)} FCFA</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:11px;color:var(--muted)">Pool artistas (tope)</div>
+          <div style="font-size:16px;font-weight:bold;color:var(--success)">${fmt(adm.artistPool||0)} FCFA</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:11px;color:var(--muted)">Distribuido</div>
+          <div style="font-size:16px;font-weight:bold;color:var(--success)">${fmt(adm.distributedAmount||0)} FCFA</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:11px;color:var(--muted)">Reserva (no distribuido)</div>
+          <div style="font-size:16px;font-weight:bold;color:var(--error)">${fmt(adm.reserveAmount||0)} FCFA</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">
+        Umbral mínimo aplicado: <b>${fmt(cfg.minPlaysThreshold||0)} plays</b>
+      </div>
+      <!-- Per-artist breakdown -->
+      ${artists.length === 0
+        ? '<div class="empty">Sin artistas elegibles para este mes.</div>'
+        : `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead><tr style="color:var(--muted);text-align:left;">
+            <th style="padding:6px 8px">#</th>
+            <th style="padding:6px 8px">Artista</th>
+            <th style="padding:6px 8px">Reproducciones</th>
+            <th style="padding:6px 8px">Ingresos (FCFA)</th>
+          </tr></thead><tbody>
+          ${artists.map((a,i) => `<tr style="border-top:1px solid var(--surface2);">
+            <td style="padding:6px 8px;color:var(--muted)">${i+1}</td>
+            <td style="padding:6px 8px;font-weight:500">${esc(a.artistName)}</td>
+            <td style="padding:6px 8px">${fmt(a.playsCount)}</td>
+            <td style="padding:6px 8px;color:var(--success);font-weight:600">${fmt(a.amount)}</td>
+          </tr>`).join('')}
+          </tbody></table>`}`;
+  } catch(e) {
+    body.innerHTML = `<div class="empty">${e.message}</div>`;
+  }
+}
+
+// ── Plataforma: retiro de ganancias ───────────────────────────────────────────
+let _platformAvailable = 0;
+function openPlatformWithdraw(available) {
+  _platformAvailable = available;
+  document.getElementById('pw-available').textContent =
+    i18n('platformAvailable', `Disponible: ${fmt(available)} FCFA`);
+  document.getElementById('pw-amount').value = '';
+  document.getElementById('pw-bank').value   = '';
+  document.getElementById('pw-msg').textContent = '';
+  document.getElementById('platform-withdraw-modal').classList.remove('hidden');
+}
+function closePlatformWithdraw() {
+  document.getElementById('platform-withdraw-modal').classList.add('hidden');
+}
+async function submitPlatformWithdraw() {
+  const amount = parseInt(document.getElementById('pw-amount').value, 10);
+  const bank   = document.getElementById('pw-bank').value.trim();
+  const msg    = document.getElementById('pw-msg');
+  if (!amount || amount <= 0) { msg.style.color='var(--error)'; msg.textContent=i18n('invalidAmount','Monto inválido'); return; }
+  if (amount > _platformAvailable) { msg.style.color='var(--error)'; msg.textContent=i18n('insufficientFunds','Saldo insuficiente'); return; }
+  msg.style.color='var(--muted)'; msg.textContent=i18n('processing','Procesando…');
+  try {
+    const d = await apiFetch('/admin/platform-withdraw', 'POST', { amount, bankDetails: bank });
+    msg.style.color='var(--success)';
+    msg.textContent=`✅ ${i18n('withdrawSuccess','Retiro registrado')}: ${fmt(amount)} FCFA. ${i18n('remaining','Restante')}: ${fmt(d.remaining)} FCFA`;
+    loadStats();
+  } catch(e) {
+    msg.style.color='var(--error)';
+    msg.textContent='❌ ' + e.message;
+  }
+}
+
+// ── Cambio de idioma ──────────────────────────────────────────────────────────
+const _translations = {
+  fr: {
+    logout:'Déconnexion', statUsers:'Utilisateurs', statArtists:'Artistes',
+    statTracks:'Chansons publiées', statPlays:'Écoutes', statDownloads:'Téléchargements',
+    statPending:'Paiements en attente', statRevenue:'Revenus totaux (FCFA)',
+    statPlatform:'Plateforme (FCFA)', statArtist:'Artistes (FCFA)',
+    platformEarningsLabel:'Gains disponibles de la plateforme',
+    withdrawPlatformBtn:'💸 Demander un retrait', platformAvailable:'Disponible',
+    platformWithdrawTitle:'💰 Retirer les gains de la plateforme',
+    amountLabel:'Montant (FCFA)', bankDetailsLabel:'Référence / Détails bancaires',
+    withdrawBtn:'Retirer', cancelBtn:'Annuler', invalidAmount:'Montant invalide',
+    insufficientFunds:'Solde insuffisant', processing:'Traitement…',
+    withdrawSuccess:'Retrait enregistré', remaining:'Restant',
+    tabStats:'Statistiques', tabUsers:'Utilisateurs', tabPayments:'Paiements en attente',
+    tabTracks:'🎵 Chansons', tabOnline:'🟢 En ligne', tabChat:'💬 Support',
+  },
+};
+let _lang = localStorage.getItem('adminLang') || 'es';
+
+function i18n(key, fallback) {
+  if (_lang === 'es' || !_translations[_lang]) return fallback;
+  return _translations[_lang][key] || fallback;
+}
+
+function applyLang() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const t = i18n(key, null);
+    if (t) el.textContent = t;
+  });
+  // Nav tabs
+  const tabMap = { stats:'tabStats', users:'tabUsers', payments:'tabPayments',
+                   tracks:'tabTracks', online:'tabOnline', chat:'tabChat' };
+  document.querySelectorAll('nav button').forEach(btn => {
+    const fn = btn.getAttribute('onclick') || '';
+    const match = fn.match(/showTab\('(\w+)'/);
+    if (match && tabMap[match[1]]) {
+      const t = i18n(tabMap[match[1]], null);
+      if (t) btn.innerHTML = btn.innerHTML.replace(/^[^<]+/, t + ' ');
+    }
+  });
+  const btn = document.getElementById('lang-toggle-btn');
+  if (btn) btn.textContent = _lang === 'fr' ? '🇪🇸 ES' : '🇫🇷 FR';
+}
+
+function toggleLang() {
+  _lang = _lang === 'es' ? 'fr' : 'es';
+  localStorage.setItem('adminLang', _lang);
+  applyLang();
+}
+
 // ── Utils ─────────────────────────────────────────────────────────────────────
 function fmt(n) { return Number(n || 0).toLocaleString('es'); }
 function esc(s) {
@@ -774,12 +1270,15 @@ function esc(s) {
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
+applyLang();
 tryAutoLogin();
 document.getElementById('login-pw').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
 });
 // Refresca el badge de usuarios en línea cada 60 segundos
 setInterval(refreshOnlineBadge, 60000);
+// Refresca el badge de chat cada 30 segundos
+setInterval(refreshChatBadge, 30000);
 </script>
 </body>
 </html>

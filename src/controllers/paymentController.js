@@ -190,6 +190,41 @@ async function walletTopup(req, res) {
   return ok(res, { payment, result, monthlyUsed: monthTotal + (result.status === 'COMPLETED' ? amount : 0), monthlyLimit: MONTHLY_WALLET_LIMIT });
 }
 
+// POST /api/payments/artist-earnings-withdraw  body: { amount }
+// El artista transfiere parte de sus ganancias (totalEarnings) a su monedero interno
+async function artistEarningsWithdraw(req, res) {
+  if (req.user.role !== 'ARTIST') return fail(res, 'Solo artistas pueden retirar ganancias', 403);
+  const { amount } = req.body;
+  if (!amount || amount <= 0) return fail(res, 'Monto inválido');
+
+  const profile = await prisma.artistProfile.findUnique({ where: { userId: req.user.id } });
+  if (!profile) return fail(res, 'Perfil de artista no encontrado', 404);
+  if (profile.totalEarnings < amount) return fail(res, `Ganancias disponibles insuficientes. Tienes ${profile.totalEarnings} FCFA.`);
+
+  await prisma.$transaction([
+    prisma.artistProfile.update({
+      where: { id: profile.id },
+      data: { totalEarnings: { decrement: amount } },
+    }),
+    prisma.user.update({
+      where: { id: req.user.id },
+      data: { walletBalance: { increment: amount } },
+    }),
+    prisma.payment.create({
+      data: {
+        userId: req.user.id,
+        amount,
+        method: 'WALLET',
+        status: 'COMPLETED',
+        purpose: 'WALLET_TOPUP',
+      },
+    }),
+  ]);
+
+  const fresh = await prisma.user.findUnique({ where: { id: req.user.id } });
+  return ok(res, { walletBalance: fresh.walletBalance, earningsRemaining: profile.totalEarnings - amount });
+}
+
 // POST /api/payments/wallet-withdraw  body: { amount }
 async function walletWithdraw(req, res) {
   const { amount } = req.body;
@@ -313,6 +348,50 @@ async function adminConfirmPayment(req, res) {
   return ok(res, { message: 'Pago confirmado' });
 }
 
+// POST /api/payments/:id/refund  (solo ADMIN) — devuelve fondos de un WALLET_TOPUP completado
+async function adminRefundPayment(req, res) {
+  const payment = await prisma.payment.findUnique({ where: { id: req.params.id } });
+  if (!payment) return fail(res, 'Pago no encontrado', 404);
+  if (payment.status !== 'COMPLETED') return fail(res, 'Solo se pueden reembolsar pagos completados');
+  if (payment.purpose !== 'WALLET_TOPUP') return fail(res, 'Solo se pueden reembolsar recargas de monedero');
+
+  const user = await prisma.user.findUnique({ where: { id: payment.userId } });
+  if (!user) return fail(res, 'Usuario no encontrado', 404);
+  if (user.walletBalance < payment.amount) {
+    return fail(res, `Saldo insuficiente. El usuario tiene ${user.walletBalance} FCFA, se intenta reembolsar ${payment.amount} FCFA`);
+  }
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: payment.userId },
+      data: { walletBalance: { decrement: payment.amount } },
+    }),
+    prisma.payment.update({
+      where: { id: payment.id },
+      data: { status: 'FAILED' },
+    }),
+    prisma.payment.create({
+      data: {
+        userId: payment.userId,
+        amount: payment.amount,
+        method: payment.method,
+        status: 'COMPLETED',
+        purpose: 'WALLET_WITHDRAW',
+        completedAt: new Date(),
+      },
+    }),
+  ]);
+
+  notif.create(
+    payment.userId,
+    'PAYMENT_REJECTED',
+    'Reembolso procesado',
+    `Se han devuelto ${payment.amount} FCFA de tu monedero por reembolso del pago confirmado anteriormente.`,
+  );
+
+  return ok(res, { refunded: true, amount: payment.amount });
+}
+
 // POST /api/payments/:id/reject  (solo ADMIN)
 async function adminRejectPayment(req, res) {
   const payment = await prisma.payment.findUnique({ where: { id: req.params.id } });
@@ -375,7 +454,9 @@ async function _finalizePayment(payment, status) {
 }
 
 async function registerPlay(userId, track, bySubscription) {
-  await prisma.play.create({ data: { userId, trackId: track.id, bySubscription } });
+  await prisma.play.create({
+    data: { userId, trackId: track.id, artistId: track.artistId ?? null, bySubscription },
+  });
   await prisma.track.update({
     where: { id: track.id },
     data: { playCount: { increment: 1 } },
@@ -397,11 +478,13 @@ module.exports = {
   payPerDownload,
   walletTopup,
   walletWithdraw,
+  artistEarningsWithdraw,
   listPayments,
   registerPlay,
   flutterwaveWebhook,
   adminConfirmPayment,
   adminRejectPayment,
+  adminRefundPayment,
   currentSubscription,
   cancelSubscription,
   enableAutoRenew,

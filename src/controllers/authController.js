@@ -177,6 +177,63 @@ async function updateProfile(req, res) {
   return ok(res, { user: sanitize(fresh) });
 }
 
+// POST /api/auth/security-questions  — guarda/actualiza las 4 preguntas de seguridad
+async function setSecurityQuestions(req, res) {
+  const { questions } = req.body; // [{ question, answer }, ...]
+  if (!Array.isArray(questions) || questions.length !== 4) {
+    return fail(res, 'Se requieren exactamente 4 preguntas de seguridad');
+  }
+  for (const q of questions) {
+    if (!q.question || !q.answer || q.answer.trim().length < 2) {
+      return fail(res, 'Cada pregunta debe tener una respuesta de al menos 2 caracteres');
+    }
+  }
+  const uniqueQs = new Set(questions.map(q => q.question));
+  if (uniqueQs.size !== 4) return fail(res, 'Las 4 preguntas deben ser distintas');
+
+  // Borrar las anteriores y crear las nuevas
+  await prisma.securityQuestion.deleteMany({ where: { userId: req.user.id } });
+  await prisma.securityQuestion.createMany({
+    data: await Promise.all(questions.map(async (q) => ({
+      userId: req.user.id,
+      question: q.question,
+      answerHash: await bcrypt.hash(q.answer.trim().toLowerCase(), 10),
+    }))),
+  });
+  return ok(res, { saved: true });
+}
+
+// POST /api/auth/recover-password/challenge  — devuelve 1 pregunta aleatoria
+async function recoverChallenge(req, res) {
+  const { identifier } = req.body;
+  if (!identifier) return fail(res, 'Indica email, teléfono o usuario');
+  const user = await prisma.user.findFirst({
+    where: { OR: [{ email: identifier }, { phone: identifier }, { username: identifier }] },
+  });
+  if (!user) return fail(res, 'Usuario no encontrado', 404);
+  const questions = await prisma.securityQuestion.findMany({ where: { userId: user.id } });
+  if (!questions.length) return fail(res, 'Este usuario no tiene preguntas de seguridad configuradas');
+  const q = questions[Math.floor(Math.random() * questions.length)];
+  return ok(res, { userId: user.id, questionId: q.id, question: q.question });
+}
+
+// POST /api/auth/recover-password/verify  — verifica respuesta y cambia contraseña
+async function recoverVerify(req, res) {
+  const { userId, questionId, answer, newPassword } = req.body;
+  if (!userId || !questionId || !answer || !newPassword) return fail(res, 'Faltan campos');
+  if (newPassword.length < 6) return fail(res, 'La contraseña debe tener al menos 6 caracteres');
+
+  const q = await prisma.securityQuestion.findFirst({ where: { id: questionId, userId } });
+  if (!q) return fail(res, 'Pregunta no válida', 400);
+
+  const valid = await bcrypt.compare(answer.trim().toLowerCase(), q.answerHash);
+  if (!valid) return fail(res, 'Respuesta incorrecta', 401);
+
+  const hash = await bcrypt.hash(newPassword, 10);
+  await prisma.user.update({ where: { id: userId }, data: { passwordHash: hash } });
+  return ok(res, { reset: true });
+}
+
 // GET /api/auth/artists  (solo ADMIN) — lista de artistas para el panel de subida
 async function listArtists(req, res) {
   const artists = await prisma.user.findMany({
@@ -196,4 +253,4 @@ function sanitize(user) {
   return rest;
 }
 
-module.exports = { register, login, me, myReferral, updateProfile, listArtists };
+module.exports = { register, login, me, myReferral, updateProfile, listArtists, setSecurityQuestions, recoverChallenge, recoverVerify };

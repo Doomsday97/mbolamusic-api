@@ -7,7 +7,8 @@ router.get('/profile/:userId', artist.publicProfile);
 
 router.use(authenticate, requireRole('ARTIST'));
 
-router.get('/dashboard', artist.dashboard);
-router.post('/withdraw', artist.requestWithdraw);
+router.get('/dashboard',        artist.dashboard);
+router.post('/withdraw',        artist.requestWithdraw);
+router.get('/monthly-earnings', artist.monthlyEarnings);
 
 module.exports = router;

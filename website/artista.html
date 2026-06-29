@@ -96,6 +96,7 @@
         <div class="lang-opt" onclick="setLang('en')">EN</div>
       </div>
       <span id="nav-name" style="font-size:0.85rem;color:var(--text2);"></span>
+      <button class="btn-outline" onclick="openEditProfile()" id="btn-edit-profile" style="border-color:rgba(245,158,11,0.4);color:var(--amber);">✏ Perfil</button>
       <button class="btn-outline" id="btn-logout" onclick="logout()">Cerrar sesión</button>
     </div>
   </div>
@@ -151,6 +152,41 @@
 
 </div>
 
+<!-- EDIT PROFILE MODAL -->
+<div id="edit-modal" onclick="if(event.target===this)closeEditProfile()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;position:relative;">
+    <button onclick="closeEditProfile()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;">✕</button>
+    <h3 id="ep-title" style="margin-bottom:1.5rem;font-size:1.15rem;">✏ Editar perfil</h3>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <label id="ep-user-lbl" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Usuario</label>
+        <input id="ep-username" type="text" style="width:100%;padding:11px 14px;background:#1f1f1f;border:1px solid #333;border-radius:10px;color:#fff;font-size:0.95rem;">
+      </div>
+      <div>
+        <label id="ep-country-lbl" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">País</label>
+        <input id="ep-country" type="text" style="width:100%;padding:11px 14px;background:#1f1f1f;border:1px solid #333;border-radius:10px;color:#fff;font-size:0.95rem;">
+      </div>
+      <div>
+        <label id="ep-city-lbl" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Ciudad</label>
+        <input id="ep-city" type="text" style="width:100%;padding:11px 14px;background:#1f1f1f;border:1px solid #333;border-radius:10px;color:#fff;font-size:0.95rem;">
+      </div>
+      <hr style="border-color:rgba(255,255,255,0.08);">
+      <p id="ep-artist-section-lbl" style="font-size:0.72rem;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:-6px;">Perfil artístico</p>
+      <div>
+        <label id="ep-artname-lbl" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Nombre artístico</label>
+        <input id="ep-artistname" type="text" style="width:100%;padding:11px 14px;background:#1f1f1f;border:1px solid #333;border-radius:10px;color:#fff;font-size:0.95rem;">
+      </div>
+      <div>
+        <label id="ep-bio-lbl" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Biografía</label>
+        <textarea id="ep-bio" rows="3" style="width:100%;padding:11px 14px;background:#1f1f1f;border:1px solid #333;border-radius:10px;color:#fff;font-size:0.95rem;resize:vertical;font-family:inherit;"></textarea>
+      </div>
+      <div id="ep-err" style="color:#f87171;font-size:0.85rem;display:none;"></div>
+      <div id="ep-ok" style="color:#22c55e;font-size:0.85rem;display:none;"></div>
+      <button id="ep-save-btn" onclick="saveProfile()" style="background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <div id="mini-player">
   <div class="mp-inner">
     <div class="mp-info">
@@ -186,6 +222,10 @@ const T = {
     errTitle:'❌ Escribe un título', errAudio:'❌ Selecciona un archivo de audio',
     uploadOk:'✅ "{0}" subida correctamente', uploadErr:'❌ Error al subir',
     payErr:'Error al procesar pago: ', navName:'{0} (artista)',
+    editProfile:'✏ Perfil', epTitle:'✏ Editar perfil', epUserLbl:'Usuario',
+    epCountryLbl:'País', epCityLbl:'Ciudad', epArtistSection:'Perfil artístico',
+    epArtnameLbl:'Nombre artístico', epBioLbl:'Biografía',
+    saveChanges:'Guardar cambios', saving:'Guardando…', profileSaved:'Perfil actualizado',
   },
   fr: {
     logout:'Se déconnecter', subLoading:'Chargement de l\'abonnement…',
@@ -204,6 +244,10 @@ const T = {
     errTitle:'❌ Saisissez un titre', errAudio:'❌ Sélectionnez un fichier audio',
     uploadOk:'✅ «{0}» uploadée avec succès', uploadErr:'❌ Erreur lors de l\'upload',
     payErr:'Erreur de paiement : ', navName:'{0} (artiste)',
+    editProfile:'✏ Profil', epTitle:'✏ Modifier le profil', epUserLbl:'Utilisateur',
+    epCountryLbl:'Pays', epCityLbl:'Ville', epArtistSection:'Profil artistique',
+    epArtnameLbl:'Nom d\'artiste', epBioLbl:'Biographie',
+    saveChanges:'Enregistrer', saving:'Enregistrement…', profileSaved:'Profil mis à jour',
   },
   pt: {
     logout:'Terminar sessão', subLoading:'A carregar estado da subscrição…',
@@ -222,6 +266,10 @@ const T = {
     errTitle:'❌ Escreva um título', errAudio:'❌ Selecione um ficheiro de áudio',
     uploadOk:'✅ «{0}» carregada com sucesso', uploadErr:'❌ Erro ao carregar',
     payErr:'Erro no pagamento: ', navName:'{0} (artista)',
+    editProfile:'✏ Perfil', epTitle:'✏ Editar perfil', epUserLbl:'Utilizador',
+    epCountryLbl:'País', epCityLbl:'Cidade', epArtistSection:'Perfil artístico',
+    epArtnameLbl:'Nome artístico', epBioLbl:'Biografia',
+    saveChanges:'Guardar alterações', saving:'A guardar…', profileSaved:'Perfil atualizado',
   },
   en: {
     logout:'Log out', subLoading:'Loading subscription status…',
@@ -240,6 +288,10 @@ const T = {
     errTitle:'❌ Enter a title', errAudio:'❌ Select an audio file',
     uploadOk:'✅ "{0}" uploaded successfully', uploadErr:'❌ Upload error',
     payErr:'Payment error: ', navName:'{0} (artist)',
+    editProfile:'✏ Profile', epTitle:'✏ Edit profile', epUserLbl:'Username',
+    epCountryLbl:'Country', epCityLbl:'City', epArtistSection:'Artist profile',
+    epArtnameLbl:'Artist name', epBioLbl:'Biography',
+    saveChanges:'Save changes', saving:'Saving…', profileSaved:'Profile updated',
   },
 };
 
@@ -266,8 +318,17 @@ function setLang(code, save = true) {
   document.getElementById('lbl-cover').textContent        = tr('lblCover');
   document.getElementById('lbl-album').textContent        = tr('lblAlbum');
   document.getElementById('opt-other').textContent        = tr('optOther');
-  document.getElementById('btn-upload-text').textContent  = tr('btnUpload');
-  document.getElementById('title-mytracks').textContent   = tr('titleMyTracks');
+  document.getElementById('btn-upload-text').textContent    = tr('btnUpload');
+  document.getElementById('title-mytracks').textContent     = tr('titleMyTracks');
+  document.getElementById('btn-edit-profile').textContent   = tr('editProfile');
+  document.getElementById('ep-title').textContent           = tr('epTitle');
+  document.getElementById('ep-user-lbl').textContent        = tr('epUserLbl');
+  document.getElementById('ep-country-lbl').textContent     = tr('epCountryLbl');
+  document.getElementById('ep-city-lbl').textContent        = tr('epCityLbl');
+  document.getElementById('ep-artist-section-lbl').textContent = tr('epArtistSection');
+  document.getElementById('ep-artname-lbl').textContent     = tr('epArtnameLbl');
+  document.getElementById('ep-bio-lbl').textContent         = tr('epBioLbl');
+  document.getElementById('ep-save-btn').textContent        = tr('saveChanges');
   if (_user.username) {
     document.getElementById('nav-name').textContent = tr('navName', _user.username);
   }
@@ -281,6 +342,48 @@ function init() {
   setLang(_lang, false);
   loadDashboard();
   loadMyTracks();
+}
+
+function openEditProfile() {
+  document.getElementById('ep-username').value   = _user.username   || '';
+  document.getElementById('ep-country').value    = _user.country    || '';
+  document.getElementById('ep-city').value       = _user.city       || '';
+  document.getElementById('ep-artistname').value = _user.artistName || '';
+  document.getElementById('ep-bio').value        = '';
+  document.getElementById('ep-err').style.display = 'none';
+  document.getElementById('ep-ok').style.display  = 'none';
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+function closeEditProfile() {
+  document.getElementById('edit-modal').style.display = 'none';
+}
+async function saveProfile() {
+  const btn = document.getElementById('ep-save-btn');
+  const err = document.getElementById('ep-err');
+  const ok  = document.getElementById('ep-ok');
+  err.style.display = 'none'; ok.style.display = 'none';
+  btn.disabled = true; btn.textContent = tr('saving') || 'Guardando…';
+  try {
+    const body = {
+      username:   document.getElementById('ep-username').value.trim(),
+      country:    document.getElementById('ep-country').value.trim(),
+      city:       document.getElementById('ep-city').value.trim(),
+      artistName: document.getElementById('ep-artistname').value.trim(),
+      bio:        document.getElementById('ep-bio').value.trim(),
+    };
+    const r = await apiFetch('/auth/profile', 'PUT', body);
+    _user = { ..._user, ...r.user, artistName: body.artistName };
+    localStorage.setItem('mbola_user', JSON.stringify(_user));
+    document.getElementById('nav-name').textContent = tr('navName', _user.username);
+    ok.textContent = '✅ ' + (tr('profileSaved') || 'Perfil actualizado');
+    ok.style.display = '';
+    setTimeout(closeEditProfile, 1500);
+  } catch(e) {
+    err.textContent = e.message;
+    err.style.display = '';
+  } finally {
+    btn.disabled = false; btn.textContent = tr('saveChanges') || 'Guardar cambios';
+  }
 }
 
 function logout() {

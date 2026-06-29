@@ -1,0 +1,2 @@
+-- Add PLATFORM_WITHDRAW value to PaymentPurpose enum
+ALTER TYPE "PaymentPurpose" ADD VALUE IF NOT EXISTS 'PLATFORM_WITHDRAW';

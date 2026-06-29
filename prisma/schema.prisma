@@ -54,6 +54,7 @@ enum PaymentPurpose {
   PER_DOWNLOAD
   WALLET_TOPUP
   WALLET_WITHDRAW
+  PLATFORM_WITHDRAW
 }
 
 // ------------------------------------------------------------------
@@ -79,19 +80,46 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  artistProfile ArtistProfile?
-  subscriptions Subscription[]
-  payments      Payment[]
-  plays         Play[]
-  downloads     Download[]
-  playlists     Playlist[]
-  following      Follow[]       @relation("Follower")
-  followers      Follow[]       @relation("Following")
-  referralsMade  Referral[]     @relation("Referrer")
-  referralUsed   Referral?      @relation("Referred")
-  notifications  Notification[]
+  artistProfile    ArtistProfile?
+  subscriptions    Subscription[]
+  payments         Payment[]
+  plays            Play[]
+  downloads        Download[]
+  playlists        Playlist[]
+  following        Follow[]           @relation("Follower")
+  followers        Follow[]           @relation("Following")
+  referralsMade    Referral[]         @relation("Referrer")
+  referralUsed     Referral?          @relation("Referred")
+  notifications    Notification[]
+  securityQuestions SecurityQuestion[]
+  chatMessages     ChatMessage[]
+  monthlyDistributions MonthlyDistribution[]
 
   @@index([role])
+}
+
+model SecurityQuestion {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question   String
+  answerHash String
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, question])
+  @@index([userId])
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  userId    String   // non-admin participant of the conversation
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromAdmin Boolean  @default(false)  // true = sent by admin, false = sent by user
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 model Notification {
@@ -121,6 +149,8 @@ model ArtistProfile {
   totalEarnings   Int      @default(0) // ganancias acumuladas en FCFA (no retiradas)
 
   tracks          Track[]
+  plays           Play[]
+  monthlyEarnings ArtistMonthlyEarning[]
   createdAt       DateTime @default(now())
 }
 
@@ -217,12 +247,15 @@ model Play {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   trackId   String
   track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  artistId  String?
+  artist    ArtistProfile? @relation(fields: [artistId], references: [id], onDelete: SetNull)
   // true si fue cubierta por suscripción, false si fue pago por reproducción
   bySubscription Boolean @default(false)
   createdAt DateTime @default(now())
 
   @@index([userId])
   @@index([trackId])
+  @@index([artistId])
 }
 
 model Download {
@@ -289,4 +322,65 @@ model Referral {
   referred    User?   @relation("Referred", fields: [referredId], references: [id])
   rewardGiven Boolean @default(false)
   createdAt   DateTime @default(now())
+}
+
+// ------------------------------------------------------------------
+// REPARTO MENSUAL POR SUSCRIPCIÓN
+// ------------------------------------------------------------------
+
+// Configuración mensual del reparto (umbrales y porcentajes ajustables)
+model MonthlyConfig {
+  id                String   @id @default(uuid())
+  month             String   @unique // "YYYY-MM"
+  subscriptionValue Int      @default(2000) // FCFA por suscriptor
+  adminPct          Int      @default(30)   // porcentaje plataforma
+  artistPct         Int      @default(70)   // porcentaje artistas
+  minPlaysThreshold Int      @default(1000) // reproducciones globales mínimas del artista
+  createdAt         DateTime @default(now())
+}
+
+// Registro agregado de las ganancias del administrador por mes
+model AdminMonthlyEarning {
+  id                String   @id @default(uuid())
+  month             String   @unique // "YYYY-MM"
+  totalSubscribers  Int
+  totalFund         Int      // S × 2000 FCFA
+  adminAmount       Int      // 30% de totalFund
+  artistPool        Int      // 70% de totalFund (tope máximo)
+  distributedAmount Int      // realmente repartido entre artistas elegibles
+  reserveAmount     Int      // no distribuido (umbral no alcanzado / sin escuchas)
+  processedAt       DateTime @default(now())
+}
+
+model MonthlyDistribution {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  month         String   // formato "YYYY-MM"
+  totalPlays    Int
+  artistPool    Int      @default(1400) // FCFA dirigidos a artistas (neto después de umbral)
+  adminShare    Int      @default(600)  // FCFA de la plataforma
+  reserveAmount Int      @default(0)    // FCFA no distribuidos (umbral / sin escuchas)
+  processedAt   DateTime @default(now())
+  artistEarnings ArtistMonthlyEarning[]
+
+  @@unique([userId, month])
+  @@index([month])
+}
+
+model ArtistMonthlyEarning {
+  id             String   @id @default(uuid())
+  distributionId String
+  distribution   MonthlyDistribution @relation(fields: [distributionId], references: [id], onDelete: Cascade)
+  artistId       String
+  artist         ArtistProfile @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  month          String
+  playsCount     Int
+  amount         Int      // FCFA redondeados
+  isPaid         Boolean  @default(false)
+  paidAt         DateTime?
+
+  @@unique([distributionId, artistId])
+  @@index([artistId, month])
+  @@index([month])
 }

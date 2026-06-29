@@ -7,6 +7,7 @@ router.use('/artist',   require('./artistRoutes'));
 router.use('/admin',     require('./adminRoutes'));
 router.use('/playlists',      require('./playlistRoutes'));
 router.use('/notifications',  require('./notificationRoutes'));
+router.use('/chat',           require('./chatRoutes'));
 
 router.get('/', (req, res) => {
   res.json({

@@ -26,4 +26,13 @@ module.exports = {
   referral: {
     rewardDaysForReferrer: 15, // días gratis que gana quien refiere
   },
+
+  // Reparto mensual de la suscripción de oyente (2.000 FCFA/mes)
+  subscriptionSplit: {
+    artistPool:    1400, // 70% → artistas (proporcional a reproducciones)
+    platformShare:  600, // 30% → plataforma
+  },
+
+  // Umbral mínimo de ganancias acumuladas para efectuar el pago al artista
+  payoutThreshold: 5000, // FCFA
 };

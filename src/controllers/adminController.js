@@ -260,9 +260,108 @@ async function onlineUsers(req, res) {
   return ok(res, { users: onlineTracker.getOnline() });
 }
 
+// GET /api/admin/subscription-distributions?month=YYYY-MM
+async function subscriptionDistributions(req, res) {
+  const distSvc = require('../services/subscriptionDistributionService');
+  if (req.query.month) {
+    const detail = await distSvc.getMonthDetail(req.query.month);
+    return ok(res, { month: req.query.month, ...detail });
+  }
+  const months = await distSvc.getMonthlySummary();
+  return ok(res, { months });
+}
+
+// POST /api/admin/subscription-distributions/run  body: { month? }
+async function runSubscriptionDistribution(req, res) {
+  const distSvc = require('../services/subscriptionDistributionService');
+  const month   = req.body?.month || distSvc.previousMonth();
+  const result  = await distSvc.runDistribution(month);
+  return ok(res, result);
+}
+
+// GET  /api/admin/subscription-config?month=YYYY-MM  -> config del mes
+// POST /api/admin/subscription-config  body: { month, subscriptionValue?, adminPct?, artistPct?, minPlaysThreshold? }
+async function subscriptionConfig(req, res) {
+  const distSvc = require('../services/subscriptionDistributionService');
+  if (req.method === 'POST') {
+    const { month, ...params } = req.body;
+    if (!month) return fail(res, 'Falta el campo month (YYYY-MM)');
+    const cfg = await distSvc.setConfig(month, params);
+    return ok(res, { config: cfg });
+  }
+  // GET
+  const month = req.query.month || distSvc.previousMonth();
+  const cfg   = await distSvc.getConfig(month);
+  return ok(res, { config: cfg });
+}
+
+// GET /api/admin/monthly-report/:month  -> informe admin completo
+async function monthlyReport(req, res) {
+  const distSvc = require('../services/subscriptionDistributionService');
+  const { month } = req.params;
+  const data = await distSvc.getAdminReport(month);
+  return ok(res, data);
+}
+
+// GET /api/admin/platform-earnings  -> ganancias disponibles de la plataforma
+async function platformEarnings(req, res) {
+  const [earned, withdrawn] = await Promise.all([
+    prisma.payment.aggregate({
+      where: { status: 'COMPLETED' },
+      _sum: { platformShare: true },
+    }),
+    prisma.payment.aggregate({
+      where: { status: 'COMPLETED', purpose: 'PLATFORM_WITHDRAW' },
+      _sum: { amount: true },
+    }),
+  ]);
+  const totalEarned    = earned._sum.platformShare || 0;
+  const totalWithdrawn = withdrawn._sum.amount     || 0;
+  return ok(res, {
+    totalEarned,
+    totalWithdrawn,
+    available: Math.max(0, totalEarned - totalWithdrawn),
+  });
+}
+
+// POST /api/admin/platform-withdraw  body: { amount, bankDetails }
+async function platformWithdraw(req, res) {
+  const { amount, bankDetails } = req.body;
+  if (!amount || amount <= 0) return fail(res, 'Monto inválido');
+
+  const [earned, withdrawn] = await Promise.all([
+    prisma.payment.aggregate({
+      where: { status: 'COMPLETED' },
+      _sum: { platformShare: true },
+    }),
+    prisma.payment.aggregate({
+      where: { status: 'COMPLETED', purpose: 'PLATFORM_WITHDRAW' },
+      _sum: { amount: true },
+    }),
+  ]);
+  const available = (earned._sum.platformShare || 0) - (withdrawn._sum.amount || 0);
+  if (amount > available) {
+    return fail(res, `Saldo insuficiente. Disponible: ${available} FCFA.`);
+  }
+
+  const payment = await prisma.payment.create({
+    data: {
+      userId: req.user.id,
+      amount,
+      method: 'BANK_TRANSFER',
+      status: 'COMPLETED',
+      purpose: 'PLATFORM_WITHDRAW',
+      externalRef: bankDetails || 'Retiro plataforma',
+    },
+  });
+  return ok(res, { payment, remaining: available - amount });
+}
+
 module.exports = {
   stats, listUsers, getUser, updateUser, resetPassword,
   blockArtist, unblockArtist, listPayments,
   listAllTracks, listArtists, adminUploadTrack, adminDeleteTrack, togglePublish,
-  onlineUsers,
+  onlineUsers, platformEarnings, platformWithdraw,
+  subscriptionDistributions, runSubscriptionDistribution,
+  subscriptionConfig, monthlyReport,
 };
