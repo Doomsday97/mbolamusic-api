@@ -523,7 +523,7 @@ const T = {
     stat1: '<strong>Gratis</strong><span>1 mes al registrarse</span>',
     stat2: '<strong>70%</strong><span>ganancias al artista</span>',
     stat3: '<strong>Offline</strong><span>descarga con cifrado</span>',
-    navFeatures:'Características', navPrices:'Precios', navListen:'🎵 Escuchar',
+    navFeatures:'Características', navTrend:'Tendencias', navGenres:'Géneros', navPrices:'Precios', navListen:'🎵 Escuchar',
     navArtists:'Artistas', navDownload:'Descargar', navAdmin:'Admin',
     navCta:'Descargar APK',
     tabLogin:'Iniciar sesión', tabRegister:'Registrarse',
@@ -617,7 +617,7 @@ const T = {
     stat1: '<strong>Gratuit</strong><span>1 mois à l\'inscription</span>',
     stat2: '<strong>70%</strong><span>revenus pour l\'artiste</span>',
     stat3: '<strong>Hors ligne</strong><span>téléchargement chiffré</span>',
-    navFeatures:'Fonctionnalités', navPrices:'Tarifs', navListen:'🎵 Écouter',
+    navFeatures:'Fonctionnalités', navTrend:'Tendances', navGenres:'Genres', navPrices:'Tarifs', navListen:'🎵 Écouter',
     navArtists:'Artistes', navDownload:'Télécharger', navAdmin:'Admin',
     navCta:'Télécharger APK',
     tabLogin:'Se connecter', tabRegister:"S'inscrire",
@@ -700,7 +700,7 @@ const T = {
     stat1: '<strong>Grátis</strong><span>1 mês ao registar</span>',
     stat2: '<strong>70%</strong><span>ganhos para o artista</span>',
     stat3: '<strong>Offline</strong><span>download cifrado</span>',
-    navFeatures:'Funcionalidades', navPrices:'Preços', navListen:'🎵 Ouvir',
+    navFeatures:'Funcionalidades', navTrend:'Tendências', navGenres:'Géneros', navPrices:'Preços', navListen:'🎵 Ouvir',
     navArtists:'Artistas', navDownload:'Descarregar', navAdmin:'Admin',
     navCta:'Descarregar APK',
     tabLogin:'Iniciar sessão', tabRegister:'Registar',
@@ -783,7 +783,7 @@ const T = {
     stat1: '<strong>Free</strong><span>1 month on sign up</span>',
     stat2: '<strong>70%</strong><span>earnings for artists</span>',
     stat3: '<strong>Offline</strong><span>encrypted download</span>',
-    navFeatures:'Features', navPrices:'Pricing', navListen:'🎵 Listen',
+    navFeatures:'Features', navTrend:'Trending', navGenres:'Genres', navPrices:'Pricing', navListen:'🎵 Listen',
     navArtists:'Artists', navDownload:'Download', navAdmin:'Admin',
     navCta:'Download APK',
     tabLogin:'Log in', tabRegister:'Sign up',
@@ -886,7 +886,7 @@ function setLang(code, save = true) {
   if (stats[2]) stats[2].innerHTML = t.stat3;
   // Nav
   const navLinks = document.querySelectorAll('.nav-links a');
-  const nk = ['navFeatures','navPrices','navListen','navArtists','navDownload','navAdmin'];
+  const nk = ['navFeatures','navTrend','navGenres','navPrices','navListen','navArtists','navDownload','navAdmin'];
   navLinks.forEach((a, i) => { if (t[nk[i]]) a.textContent = t[nk[i]]; });
   const navCta = document.getElementById('nav-download-btn');
   if (navCta) navCta.textContent = t.navCta;
