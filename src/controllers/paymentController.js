@@ -68,9 +68,9 @@ async function payArtistSubscription(req, res) {
   return ok(res, { payment, result });
 }
 
-// POST /api/payments/listener-subscription
+// POST /api/payments/listener-subscription  body: { method, autoRenew? }
 async function payListenerSubscription(req, res) {
-  const { method } = req.body;
+  const { method, autoRenew } = req.body;
   const { payment, result } = await processPayment({
     user: req.user,
     amount: business.prices.listenerMonthly,
@@ -79,7 +79,13 @@ async function payListenerSubscription(req, res) {
   });
 
   if (result.status === 'COMPLETED') {
-    await subscriptionService.createSubscription(req.user.id, 'LISTENER_MONTHLY');
+    const sub = await subscriptionService.createSubscription(req.user.id, 'LISTENER_MONTHLY');
+    if (autoRenew) {
+      await prisma.subscription.update({
+        where: { id: sub.id },
+        data: { autoRenew: true },
+      });
+    }
   }
 
   return ok(res, { payment, result });
@@ -133,10 +139,10 @@ async function payPerDownload(req, res) {
   return ok(res, { payment, result, audioUrl: track.audioUrl });
 }
 
-// POST /api/payments/wallet-topup  body: { amount, method }
-// Límite: 100.000 FCFA por mes entre recarga y retiro
+// Límite mensual de 100.000 FCFA entre recargas y retiros
 const MONTHLY_WALLET_LIMIT = 100000;
 
+// Suma de recargas + retiros completados en el mes actual
 async function getMonthlyWalletTotal(userId) {
   const start = new Date();
   start.setDate(1);
@@ -144,7 +150,7 @@ async function getMonthlyWalletTotal(userId) {
   const agg = await prisma.payment.aggregate({
     where: {
       userId,
-      purpose: 'WALLET_TOPUP',
+      purpose: { in: ['WALLET_TOPUP', 'WALLET_WITHDRAW'] },
       status: 'COMPLETED',
       createdAt: { gte: start },
     },
@@ -152,6 +158,8 @@ async function getMonthlyWalletTotal(userId) {
   });
   return agg._sum.amount || 0;
 }
+
+// POST /api/payments/wallet-topup  body: { amount, method }
 
 async function walletTopup(req, res) {
   const { amount, method } = req.body;
@@ -180,6 +188,39 @@ async function walletTopup(req, res) {
   }
 
   return ok(res, { payment, result, monthlyUsed: monthTotal + (result.status === 'COMPLETED' ? amount : 0), monthlyLimit: MONTHLY_WALLET_LIMIT });
+}
+
+// POST /api/payments/wallet-withdraw  body: { amount }
+async function walletWithdraw(req, res) {
+  const { amount } = req.body;
+  if (!amount || amount <= 0) return fail(res, 'Monto inválido');
+  if (amount > MONTHLY_WALLET_LIMIT) return fail(res, `El monto máximo por operación es ${MONTHLY_WALLET_LIMIT} FCFA`);
+
+  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  if (!user || user.walletBalance < amount) return fail(res, 'Saldo insuficiente en el monedero');
+
+  const monthTotal = await getMonthlyWalletTotal(req.user.id);
+  if (monthTotal + amount > MONTHLY_WALLET_LIMIT) {
+    const remaining = MONTHLY_WALLET_LIMIT - monthTotal;
+    return fail(res, `Límite mensual de ${MONTHLY_WALLET_LIMIT} FCFA superado. Puedes retirar ${remaining} FCFA más este mes.`);
+  }
+
+  const payment = await prisma.payment.create({
+    data: {
+      userId: req.user.id,
+      amount,
+      method: 'WALLET',
+      status: 'COMPLETED',
+      purpose: 'WALLET_WITHDRAW',
+    },
+  });
+
+  await prisma.user.update({
+    where: { id: req.user.id },
+    data: { walletBalance: { decrement: amount } },
+  });
+
+  return ok(res, { payment, monthlyUsed: monthTotal + amount, monthlyLimit: MONTHLY_WALLET_LIMIT });
 }
 
 // POST /api/payments/listener-subscription  body: { method, autoRenew }
@@ -355,6 +396,7 @@ module.exports = {
   payPerPlay,
   payPerDownload,
   walletTopup,
+  walletWithdraw,
   listPayments,
   registerPlay,
   flutterwaveWebhook,

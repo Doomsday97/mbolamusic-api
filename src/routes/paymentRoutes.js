@@ -13,6 +13,7 @@ router.post('/listener-subscription', pay.payListenerSubscription);
 router.post('/per-play',             pay.payPerPlay);
 router.post('/per-download',         pay.payPerDownload);
 router.post('/wallet-topup',         pay.walletTopup);
+router.post('/wallet-withdraw',      pay.walletWithdraw);
 router.get('/',                      pay.listPayments);
 
 // Gestión de suscripciones

@@ -53,6 +53,7 @@ enum PaymentPurpose {
   PER_PLAY
   PER_DOWNLOAD
   WALLET_TOPUP
+  WALLET_WITHDRAW
 }
 
 // ------------------------------------------------------------------

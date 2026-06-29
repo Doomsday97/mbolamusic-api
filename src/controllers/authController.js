@@ -177,9 +177,23 @@ async function updateProfile(req, res) {
   return ok(res, { user: sanitize(fresh) });
 }
 
+// GET /api/auth/artists  (solo ADMIN) — lista de artistas para el panel de subida
+async function listArtists(req, res) {
+  const artists = await prisma.user.findMany({
+    where: { role: 'ARTIST' },
+    select: {
+      id: true,
+      username: true,
+      artistProfile: { select: { id: true, artistName: true } },
+    },
+    orderBy: { username: 'asc' },
+  });
+  return ok(res, { artists });
+}
+
 function sanitize(user) {
   const { passwordHash, ...rest } = user;
   return rest;
 }
 
-module.exports = { register, login, me, myReferral, updateProfile };
+module.exports = { register, login, me, myReferral, updateProfile, listArtists };

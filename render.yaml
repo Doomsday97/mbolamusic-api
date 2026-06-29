@@ -24,7 +24,7 @@ services:
         value: mock
       # STORAGE: Cloudflare R2 / AWS S3. Las credenciales (S3_*) deben estar en el dashboard.
       - key: STORAGE_PROVIDER
-        value: s3
+        value: local
       - key: UPLOAD_DIR
         value: uploads
       # Cloudflare R2 / AWS S3 (solo necesario si STORAGE_PROVIDER=s3)
