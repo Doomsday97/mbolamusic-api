@@ -15,26 +15,25 @@
   }
   body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
 
-  /* NAV */
   nav { background: rgba(8,8,8,0.95); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
   .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 60px; }
   .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 700; }
   .logo-icon { width: 34px; height: 34px; background: var(--amber); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
   .nav-actions { display: flex; align-items: center; gap: 10px; }
   .btn-outline { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--text2); padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
-  .btn-amber  { background: var(--amber); border: none; color: #000; padding: 7px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; }
 
-  /* LAYOUT */
+  .lang-sel { display: flex; gap: 4px; }
+  .lang-opt { padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; color: var(--text2); transition: background .15s; }
+  .lang-opt:hover { background: rgba(255,255,255,0.08); }
+  .lang-opt.active { background: rgba(245,158,11,0.18); color: var(--amber); font-weight: 600; }
+
   .page { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
-
-  /* CARDS */
   .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; }
   .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.5rem; }
   .stat-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; text-align: center; }
   .stat-card .val { font-size: 1.8rem; font-weight: 800; color: var(--amber); }
   .stat-card .lbl { font-size: 0.78rem; color: var(--text2); margin-top: 4px; text-transform: uppercase; letter-spacing: .04em; }
 
-  /* SUBSCRIPTION BANNER */
   .sub-banner { border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
   .sub-active  { background: rgba(34,197,94,0.1);  border: 1px solid rgba(34,197,94,0.3); }
   .sub-inactive { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); }
@@ -42,7 +41,6 @@
   .sub-banner p  { font-size: 0.82rem; color: var(--text2); margin-top: 2px; }
   .btn-pay { background: var(--amber); border: none; color: #000; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.9rem; }
 
-  /* UPLOAD FORM */
   .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .fg { display: flex; flex-direction: column; gap: 6px; }
@@ -55,7 +53,6 @@
   .btn-upload:disabled { opacity: .5; cursor: default; }
   .upload-msg { font-size: 0.85rem; margin-top: 8px; }
 
-  /* TRACK LIST */
   .track-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
   .track-row:last-child { border-bottom: none; }
   .track-cover { width: 44px; height: 44px; border-radius: 8px; background: var(--bg3); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
@@ -70,17 +67,13 @@
   .btn-play   { background: rgba(245,158,11,0.2); color: var(--amber); }
   .btn-delete { background: rgba(239,68,68,0.15); color: var(--red); }
 
-  /* MINI PLAYER */
   #mini-player { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.97); border-top: 1px solid rgba(245,158,11,0.3); padding: 12px 1.5rem; z-index: 9999; backdrop-filter: blur(12px); }
   .mp-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .mp-info { flex: 1; min-width: 100px; }
   .mp-info strong { display: block; font-size: 0.9rem; }
   .mp-info span { font-size: 0.75rem; color: var(--text2); }
 
-  /* SECTIONS */
   .section { margin-bottom: 2rem; }
-
-  /* EMPTY */
   .empty { color: var(--text2); text-align: center; padding: 3rem; opacity: .6; }
 
   @media(max-width:640px) {
@@ -96,40 +89,40 @@
   <div class="nav-inner">
     <a class="logo" href="/"><div class="logo-icon">🎵</div> MbôláMusic</a>
     <div class="nav-actions">
+      <div class="lang-sel">
+        <div class="lang-opt" onclick="setLang('es')">ES</div>
+        <div class="lang-opt" onclick="setLang('fr')">FR</div>
+        <div class="lang-opt" onclick="setLang('pt')">PT</div>
+        <div class="lang-opt" onclick="setLang('en')">EN</div>
+      </div>
       <span id="nav-name" style="font-size:0.85rem;color:var(--text2);"></span>
-      <button class="btn-outline" onclick="logout()">Cerrar sesión</button>
+      <button class="btn-outline" id="btn-logout" onclick="logout()">Cerrar sesión</button>
     </div>
   </div>
 </nav>
 
 <div class="page">
 
-  <!-- Subscription banner -->
   <div id="sub-banner" class="sub-banner sub-inactive">
     <div>
-      <h3 id="sub-title">Cargando estado de suscripción…</h3>
+      <h3 id="sub-title">…</h3>
       <p id="sub-detail"></p>
     </div>
-    <button class="btn-pay" id="sub-btn" onclick="paySubscription()" style="display:none;">💳 Pagar suscripción — 10.000 FCFA</button>
+    <button class="btn-pay" id="sub-btn" onclick="paySubscription()" style="display:none;"></button>
   </div>
 
-  <!-- Stats row -->
-  <div class="grid-3" id="stats-row">
-    <div class="stat-card"><div class="val" id="st-tracks">—</div><div class="lbl">Canciones</div></div>
-    <div class="stat-card"><div class="val" id="st-plays">—</div><div class="lbl">Reproducciones</div></div>
-    <div class="stat-card"><div class="val" id="st-earn">—</div><div class="lbl">Ganancias FCFA</div></div>
+  <div class="grid-3">
+    <div class="stat-card"><div class="val" id="st-tracks">—</div><div class="lbl" id="lbl-songs">Canciones</div></div>
+    <div class="stat-card"><div class="val" id="st-plays">—</div><div class="lbl" id="lbl-plays">Reproducciones</div></div>
+    <div class="stat-card"><div class="val" id="st-earn">—</div><div class="lbl" id="lbl-earn">Ganancias FCFA</div></div>
   </div>
 
-  <!-- Upload form -->
   <div class="section card">
-    <div class="section-title">➕ Subir nueva canción</div>
+    <div class="section-title" id="title-upload">➕ Subir nueva canción</div>
     <div class="form-grid">
+      <div class="fg"><label id="lbl-title">Título *</label><input id="up-title" type="text"></div>
       <div class="fg">
-        <label>Título *</label>
-        <input id="up-title" type="text" placeholder="Nombre de la canción">
-      </div>
-      <div class="fg">
-        <label>Género *</label>
+        <label id="lbl-genre">Género *</label>
         <select id="up-genre">
           <option value="afrobeat">Afrobeat</option>
           <option value="reggaeton">Reggaeton</option>
@@ -138,37 +131,26 @@
           <option value="hiphop">Hip-Hop</option>
           <option value="pop">Pop</option>
           <option value="tradicional">Tradicional</option>
-          <option value="otro">Otro</option>
+          <option value="otro" id="opt-other">Otro</option>
         </select>
       </div>
-      <div class="fg">
-        <label>Archivo de audio (MP3/AAC) *</label>
-        <input id="up-audio" type="file" accept="audio/*">
-      </div>
-      <div class="fg">
-        <label>Portada (imagen)</label>
-        <input id="up-cover" type="file" accept="image/*">
-      </div>
-      <div class="fg full">
-        <label>Álbum (opcional)</label>
-        <input id="up-album" type="text" placeholder="Nombre del álbum">
-      </div>
+      <div class="fg"><label id="lbl-audio">Archivo de audio (MP3/AAC) *</label><input id="up-audio" type="file" accept="audio/*"></div>
+      <div class="fg"><label id="lbl-cover">Portada (imagen)</label><input id="up-cover" type="file" accept="image/*"></div>
+      <div class="fg full"><label id="lbl-album">Álbum (opcional)</label><input id="up-album" type="text"></div>
     </div>
     <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-      <button class="btn-upload" id="up-btn" onclick="uploadTrack()">⬆ Subir canción</button>
+      <button class="btn-upload" id="up-btn" onclick="uploadTrack()">⬆ <span id="btn-upload-text">Subir canción</span></button>
       <span class="upload-msg" id="up-msg"></span>
     </div>
   </div>
 
-  <!-- My tracks -->
   <div class="section card">
-    <div class="section-title">🎵 Mis canciones</div>
-    <div id="track-list"><div class="empty">Cargando…</div></div>
+    <div class="section-title" id="title-mytracks">🎵 Mis canciones</div>
+    <div id="track-list"><div class="empty" id="loading-tracks">Cargando…</div></div>
   </div>
 
 </div>
 
-<!-- Mini player -->
 <div id="mini-player">
   <div class="mp-inner">
     <div class="mp-info">
@@ -184,16 +166,119 @@
 const API = 'https://mbolamusic-api-1.onrender.com/api';
 let _token = '';
 let _user  = {};
+let _lang  = 'es';
 
-// ── Auth guard ────────────────────────────────────────────────────────────────
+const T = {
+  es: {
+    logout:'Cerrar sesión', subLoading:'Cargando estado de suscripción…',
+    subActive:'✅ Suscripción activa', subInactive:'⚠️ Sin suscripción activa',
+    subValidUntil:'Válida hasta:', subCanPublish:'· Puedes publicar y subir música',
+    subPayMsg:'Paga 10.000 FCFA/mes para publicar y subir música',
+    subPayBtn:'💳 Pagar suscripción — 10.000 FCFA', subProcessing:'Procesando…',
+    subError:'Error al cargar', lblSongs:'Canciones', lblPlays:'Reproducciones',
+    lblEarn:'Ganancias FCFA', titleUpload:'➕ Subir nueva canción', lblTitle:'Título *',
+    lblGenre:'Género *', lblAudio:'Archivo de audio (MP3/AAC) *',
+    lblCover:'Portada (imagen)', lblAlbum:'Álbum (opcional)', optOther:'Otro',
+    btnUpload:'Subir canción', uploading:'Subiendo…', titleMyTracks:'🎵 Mis canciones',
+    noTracks:'No tienes canciones subidas aún.', plays:'plays', downloads:'descargas',
+    badgePub:'Publicada', badgeHidden:'Oculta', btnPlayer:'▶ Player', btnDelete:'🗑 Borrar',
+    deleteConfirm:'¿Eliminar "{0}"? Esta acción no se puede deshacer.',
+    errTitle:'❌ Escribe un título', errAudio:'❌ Selecciona un archivo de audio',
+    uploadOk:'✅ "{0}" subida correctamente', uploadErr:'❌ Error al subir',
+    payErr:'Error al procesar pago: ', navName:'{0} (artista)',
+  },
+  fr: {
+    logout:'Se déconnecter', subLoading:'Chargement de l\'abonnement…',
+    subActive:'✅ Abonnement actif', subInactive:'⚠️ Aucun abonnement actif',
+    subValidUntil:'Valable jusqu\'au :', subCanPublish:'· Vous pouvez publier et uploader',
+    subPayMsg:'Payez 10 000 FCFA/mois pour publier et uploader de la musique',
+    subPayBtn:'💳 Payer l\'abonnement — 10 000 FCFA', subProcessing:'Traitement…',
+    subError:'Erreur de chargement', lblSongs:'Chansons', lblPlays:'Lectures',
+    lblEarn:'Gains FCFA', titleUpload:'➕ Uploader une chanson', lblTitle:'Titre *',
+    lblGenre:'Genre *', lblAudio:'Fichier audio (MP3/AAC) *',
+    lblCover:'Pochette (image)', lblAlbum:'Album (optionnel)', optOther:'Autre',
+    btnUpload:'Uploader la chanson', uploading:'Envoi en cours…', titleMyTracks:'🎵 Mes chansons',
+    noTracks:'Vous n\'avez pas encore de chansons.', plays:'lectures', downloads:'téléchargements',
+    badgePub:'Publiée', badgeHidden:'Masquée', btnPlayer:'▶ Lecteur', btnDelete:'🗑 Supprimer',
+    deleteConfirm:'Supprimer «{0}» ? Cette action est irréversible.',
+    errTitle:'❌ Saisissez un titre', errAudio:'❌ Sélectionnez un fichier audio',
+    uploadOk:'✅ «{0}» uploadée avec succès', uploadErr:'❌ Erreur lors de l\'upload',
+    payErr:'Erreur de paiement : ', navName:'{0} (artiste)',
+  },
+  pt: {
+    logout:'Terminar sessão', subLoading:'A carregar estado da subscrição…',
+    subActive:'✅ Subscrição ativa', subInactive:'⚠️ Sem subscrição ativa',
+    subValidUntil:'Válida até:', subCanPublish:'· Pode publicar e carregar música',
+    subPayMsg:'Pague 10.000 FCFA/mês para publicar e carregar música',
+    subPayBtn:'💳 Pagar subscrição — 10.000 FCFA', subProcessing:'A processar…',
+    subError:'Erro ao carregar', lblSongs:'Músicas', lblPlays:'Reproduções',
+    lblEarn:'Ganhos FCFA', titleUpload:'➕ Carregar nova música', lblTitle:'Título *',
+    lblGenre:'Género *', lblAudio:'Ficheiro de áudio (MP3/AAC) *',
+    lblCover:'Capa (imagem)', lblAlbum:'Álbum (opcional)', optOther:'Outro',
+    btnUpload:'Carregar música', uploading:'A carregar…', titleMyTracks:'🎵 As minhas músicas',
+    noTracks:'Ainda não tem músicas carregadas.', plays:'reproduções', downloads:'transferências',
+    badgePub:'Publicada', badgeHidden:'Oculta', btnPlayer:'▶ Leitor', btnDelete:'🗑 Apagar',
+    deleteConfirm:'Eliminar «{0}»? Esta ação não pode ser desfeita.',
+    errTitle:'❌ Escreva um título', errAudio:'❌ Selecione um ficheiro de áudio',
+    uploadOk:'✅ «{0}» carregada com sucesso', uploadErr:'❌ Erro ao carregar',
+    payErr:'Erro no pagamento: ', navName:'{0} (artista)',
+  },
+  en: {
+    logout:'Log out', subLoading:'Loading subscription status…',
+    subActive:'✅ Active subscription', subInactive:'⚠️ No active subscription',
+    subValidUntil:'Valid until:', subCanPublish:'· You can publish and upload music',
+    subPayMsg:'Pay 10,000 FCFA/month to publish and upload music',
+    subPayBtn:'💳 Pay subscription — 10,000 FCFA', subProcessing:'Processing…',
+    subError:'Error loading', lblSongs:'Songs', lblPlays:'Plays',
+    lblEarn:'Earnings FCFA', titleUpload:'➕ Upload new song', lblTitle:'Title *',
+    lblGenre:'Genre *', lblAudio:'Audio file (MP3/AAC) *',
+    lblCover:'Cover art (image)', lblAlbum:'Album (optional)', optOther:'Other',
+    btnUpload:'Upload song', uploading:'Uploading…', titleMyTracks:'🎵 My songs',
+    noTracks:'You have no songs uploaded yet.', plays:'plays', downloads:'downloads',
+    badgePub:'Published', badgeHidden:'Hidden', btnPlayer:'▶ Player', btnDelete:'🗑 Delete',
+    deleteConfirm:'Delete "{0}"? This action cannot be undone.',
+    errTitle:'❌ Enter a title', errAudio:'❌ Select an audio file',
+    uploadOk:'✅ "{0}" uploaded successfully', uploadErr:'❌ Upload error',
+    payErr:'Payment error: ', navName:'{0} (artist)',
+  },
+};
+
+function tr(key, ...args) {
+  let s = (T[_lang] || T.es)[key] ?? T.es[key] ?? key;
+  args.forEach((a, i) => { s = s.replace('{' + i + '}', a); });
+  return s;
+}
+
+function setLang(code, save = true) {
+  _lang = code;
+  if (save) localStorage.setItem('mbola_lang', code);
+  document.querySelectorAll('.lang-opt').forEach(el => {
+    el.classList.toggle('active', el.textContent.toLowerCase() === code);
+  });
+  document.getElementById('btn-logout').textContent       = tr('logout');
+  document.getElementById('lbl-songs').textContent        = tr('lblSongs');
+  document.getElementById('lbl-plays').textContent        = tr('lblPlays');
+  document.getElementById('lbl-earn').textContent         = tr('lblEarn');
+  document.getElementById('title-upload').textContent     = tr('titleUpload');
+  document.getElementById('lbl-title').textContent        = tr('lblTitle');
+  document.getElementById('lbl-genre').textContent        = tr('lblGenre');
+  document.getElementById('lbl-audio').textContent        = tr('lblAudio');
+  document.getElementById('lbl-cover').textContent        = tr('lblCover');
+  document.getElementById('lbl-album').textContent        = tr('lblAlbum');
+  document.getElementById('opt-other').textContent        = tr('optOther');
+  document.getElementById('btn-upload-text').textContent  = tr('btnUpload');
+  document.getElementById('title-mytracks').textContent   = tr('titleMyTracks');
+  if (_user.username) {
+    document.getElementById('nav-name').textContent = tr('navName', _user.username);
+  }
+}
+
 function init() {
+  _lang  = localStorage.getItem('mbola_lang') || 'es';
   _token = localStorage.getItem('mbola_token') || '';
   _user  = JSON.parse(localStorage.getItem('mbola_user') || '{}');
-  if (!_token || _user.role !== 'ARTIST') {
-    window.location.href = '/';
-    return;
-  }
-  document.getElementById('nav-name').textContent = _user.username + ' (artista)';
+  if (!_token || _user.role !== 'ARTIST') { window.location.href = '/'; return; }
+  setLang(_lang, false);
   loadDashboard();
   loadMyTracks();
 }
@@ -204,81 +289,66 @@ function logout() {
   window.location.href = '/';
 }
 
-// ── Dashboard ─────────────────────────────────────────────────────────────────
 async function loadDashboard() {
   try {
     const r = await apiFetch('/artist/dashboard');
-    document.getElementById('st-tracks').textContent  = r.totalTracks;
-    document.getElementById('st-plays').textContent   = fmt(r.totalPlays);
-    document.getElementById('st-earn').textContent    = fmt(r.totalEarnings);
-
+    document.getElementById('st-tracks').textContent = r.totalTracks;
+    document.getElementById('st-plays').textContent  = fmt(r.totalPlays);
+    document.getElementById('st-earn').textContent   = fmt(r.totalEarnings);
     const banner = document.getElementById('sub-banner');
     const title  = document.getElementById('sub-title');
     const detail = document.getElementById('sub-detail');
     const btn    = document.getElementById('sub-btn');
-
     if (r.subscriptionActive) {
       banner.className = 'sub-banner sub-active';
-      title.textContent  = '✅ Suscripción activa';
-      const end = r.subscriptionEndsAt ? new Date(r.subscriptionEndsAt).toLocaleDateString('es') : '—';
-      detail.textContent = 'Válida hasta: ' + end + ' · Puedes publicar y subir música';
+      title.textContent  = tr('subActive');
+      const end = r.subscriptionEndsAt ? new Date(r.subscriptionEndsAt).toLocaleDateString(_lang) : '—';
+      detail.textContent = tr('subValidUntil') + ' ' + end + ' ' + tr('subCanPublish');
       btn.style.display = 'none';
     } else {
       banner.className = 'sub-banner sub-inactive';
-      title.textContent  = '⚠️ Sin suscripción activa';
-      detail.textContent = 'Paga 10.000 FCFA/mes para publicar y subir música';
+      title.textContent  = tr('subInactive');
+      detail.textContent = tr('subPayMsg');
+      btn.textContent    = tr('subPayBtn');
       btn.style.display  = '';
     }
   } catch(e) {
-    document.getElementById('sub-title').textContent = 'Error al cargar';
+    document.getElementById('sub-title').textContent = tr('subError');
   }
 }
 
-// ── Subscription ──────────────────────────────────────────────────────────────
 async function paySubscription() {
   const btn = document.getElementById('sub-btn');
-  btn.disabled = true;
-  btn.textContent = 'Procesando…';
+  btn.disabled = true; btn.textContent = tr('subProcessing');
   try {
     await apiFetch('/payments/artist-subscription', 'POST', { method: 'MOCK' });
-    loadDashboard();
-    loadMyTracks();
-  } catch(e) {
-    alert('Error al procesar pago: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '💳 Pagar suscripción — 10.000 FCFA';
-  }
+    loadDashboard(); loadMyTracks();
+  } catch(e) { alert(tr('payErr') + e.message); }
+  finally { btn.disabled = false; btn.textContent = tr('subPayBtn'); }
 }
 
-// ── My tracks ─────────────────────────────────────────────────────────────────
 async function loadMyTracks() {
   const el = document.getElementById('track-list');
   try {
     const d = await apiFetch('/tracks/mine');
     const tracks = d.tracks || [];
-    if (!tracks.length) { el.innerHTML = '<div class="empty">No tienes canciones subidas aún.</div>'; return; }
-    el.innerHTML = tracks.map(t => `
-      <div class="track-row" id="tr-${t.id}">
-        <div class="track-cover">
-          ${t.coverUrl ? `<img src="${t.coverUrl}" onerror="this.style.display='none'">` : '🎵'}
-        </div>
+    if (!tracks.length) { el.innerHTML = '<div class="empty">' + tr('noTracks') + '</div>'; return; }
+    el.innerHTML = tracks.map(t2 => `
+      <div class="track-row" id="tr-${t2.id}">
+        <div class="track-cover">${t2.coverUrl ? `<img src="${esc(t2.coverUrl)}" onerror="this.style.display='none'">` : '🎵'}</div>
         <div class="track-info">
-          <strong>${esc(t.title)}</strong>
-          <span>${esc(t.genre)} · ${t.playCount||0} plays · ${t.downloadCount||0} descargas</span>
+          <strong>${esc(t2.title)}</strong>
+          <span>${esc(t2.genre)} · ${t2.playCount||0} ${tr('plays')} · ${t2.downloadCount||0} ${tr('downloads')}</span>
         </div>
-        <span class="${t.isPublished ? 'badge-pub' : 'badge-hidden'}">${t.isPublished ? 'Publicada' : 'Oculta'}</span>
+        <span class="${t2.isPublished ? 'badge-pub' : 'badge-hidden'}">${t2.isPublished ? tr('badgePub') : tr('badgeHidden')}</span>
         <div class="track-actions">
-          <button class="btn-sm btn-play" onclick="window.location.href='/player.html?id=${t.id}'">▶ Player</button>
-          <button class="btn-sm btn-delete" onclick="deleteTrack('${t.id}','${esc(t.title)}')">🗑 Borrar</button>
+          <button class="btn-sm btn-play" onclick="window.location.href='/player.html?id=${t2.id}'">${tr('btnPlayer')}</button>
+          <button class="btn-sm btn-delete" onclick="deleteTrack('${t2.id}','${esc(t2.title)}')">${tr('btnDelete')}</button>
         </div>
       </div>`).join('');
-  } catch(e) {
-    el.innerHTML = '<div class="empty">' + e.message + '</div>';
-  }
+  } catch(e) { el.innerHTML = '<div class="empty">' + e.message + '</div>'; }
 }
 
-// ── Upload ────────────────────────────────────────────────────────────────────
 async function uploadTrack() {
   const title = document.getElementById('up-title').value.trim();
   const genre = document.getElementById('up-genre').value;
@@ -287,84 +357,60 @@ async function uploadTrack() {
   const cover = document.getElementById('up-cover').files[0];
   const msg   = document.getElementById('up-msg');
   const btn   = document.getElementById('up-btn');
-
-  if (!title) { showMsg(msg, '❌ Escribe un título', 'red'); return; }
-  if (!audio) { showMsg(msg, '❌ Selecciona un archivo de audio', 'red'); return; }
-
-  btn.disabled = true;
-  showMsg(msg, 'Subiendo…', 'gray');
-
+  if (!title) { showMsg(msg, tr('errTitle'), 'red'); return; }
+  if (!audio) { showMsg(msg, tr('errAudio'), 'red'); return; }
+  btn.disabled = true; showMsg(msg, tr('uploading'), 'gray');
   try {
     const fd = new FormData();
-    fd.append('title', title);
-    fd.append('genre', genre);
+    fd.append('title', title); fd.append('genre', genre);
     if (album) fd.append('album', album);
     fd.append('audio', audio);
     if (cover) fd.append('cover', cover);
-
-    const r = await fetch(API + '/tracks', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + _token },
-      body: fd,
-    });
+    const r = await fetch(API + '/tracks', { method:'POST', headers:{'Authorization':'Bearer '+_token}, body:fd });
     const j = await r.json();
-    if (!j.success) throw new Error(j.error || 'Error al subir');
-    showMsg(msg, '✅ "' + j.data.track.title + '" subida correctamente', 'green');
+    if (!j.success) throw new Error(j.error || tr('uploadErr'));
+    showMsg(msg, tr('uploadOk', j.data.track.title), 'green');
     document.getElementById('up-title').value = '';
     document.getElementById('up-audio').value = '';
     document.getElementById('up-cover').value = '';
     loadMyTracks();
-  } catch(e) {
-    showMsg(msg, '❌ ' + e.message, 'red');
-  } finally {
-    btn.disabled = false;
-  }
+  } catch(e) { showMsg(msg, tr('uploadErr') + ': ' + e.message, 'red'); }
+  finally { btn.disabled = false; }
 }
 
 function showMsg(el, text, color) {
   el.textContent = text;
-  el.style.color = color === 'green' ? 'var(--green)' : color === 'red' ? 'var(--red)' : 'var(--text2)';
+  el.style.color = color==='green'?'var(--green)':color==='red'?'var(--red)':'var(--text2)';
 }
 
-// ── Delete ────────────────────────────────────────────────────────────────────
 async function deleteTrack(id, title) {
-  if (!confirm('¿Eliminar "' + title + '"? Esta acción no se puede deshacer.')) return;
+  if (!confirm(tr('deleteConfirm', title))) return;
   try {
-    await apiFetch('/tracks/' + id, 'DELETE');
-    const row = document.getElementById('tr-' + id);
+    await apiFetch('/tracks/'+id, 'DELETE');
+    const row = document.getElementById('tr-'+id);
     if (row) row.remove();
   } catch(e) { alert(e.message); }
 }
 
-// ── Player ────────────────────────────────────────────────────────────────────
 function playTrack(urlEnc, title, artist) {
   const audio = document.getElementById('mp-audio');
   document.getElementById('mp-title').textContent  = title;
   document.getElementById('mp-artist').textContent = artist;
-  audio.src = decodeURIComponent(urlEnc);
-  audio.play().catch(()=>{});
+  audio.src = decodeURIComponent(urlEnc); audio.play().catch(()=>{});
   document.getElementById('mini-player').style.display = '';
 }
+function closePlayer() { document.getElementById('mp-audio').pause(); document.getElementById('mini-player').style.display='none'; }
 
-function closePlayer() {
-  document.getElementById('mp-audio').pause();
-  document.getElementById('mini-player').style.display = 'none';
-}
-
-// ── Utils ─────────────────────────────────────────────────────────────────────
 async function apiFetch(path, method='GET', body=null) {
   const opts = { method, headers: { 'Authorization': 'Bearer ' + _token } };
-  if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
-  const r = await fetch(API + path, opts);
+  if (body) { opts.headers['Content-Type']='application/json'; opts.body=JSON.stringify(body); }
+  const r = await fetch(API+path, opts);
   const j = await r.json();
-  if (!j.success) throw new Error(j.error || 'Error del servidor');
+  if (!j.success) throw new Error(j.error||'Error');
   return j.data;
 }
-
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-function fmt(n) { return Number(n||0).toLocaleString('es'); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function fmt(n) { return Number(n||0).toLocaleString(_lang); }
 
 init();
 </script>

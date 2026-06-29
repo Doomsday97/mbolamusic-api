@@ -12,38 +12,31 @@
   }
   body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
 
-  /* NAV */
   nav { background: rgba(8,8,8,0.95); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
   .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; height: 60px; display: flex; align-items: center; gap: 12px; }
-  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 700; }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 700; margin-left: auto; }
   .logo-icon { width: 34px; height: 34px; background: var(--amber); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
   .back-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--text2); padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; text-decoration: none; }
 
-  /* PLAYER SECTION */
+  .lang-sel { display: flex; gap: 4px; margin-left: auto; }
+  .lang-opt { padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; color: var(--text2); transition: background .15s; }
+  .lang-opt:hover { background: rgba(255,255,255,0.08); }
+  .lang-opt.active { background: rgba(245,158,11,0.18); color: var(--amber); font-weight: 600; }
+
   .player-wrap { max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem 2rem; }
 
   .player-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    min-height: 340px;
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 24px;
+    overflow: hidden; display: grid; grid-template-columns: 280px 1fr; min-height: 340px;
   }
 
-  /* Cover */
   .cover-area {
-    position: relative;
-    background: rgba(245,158,11,0.12);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 5rem;
-    overflow: hidden;
+    position: relative; background: rgba(245,158,11,0.12);
+    display: flex; align-items: center; justify-content: center; font-size: 5rem; overflow: hidden;
   }
   .cover-area img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .cover-blur { position: absolute; inset: 0; background: rgba(0,0,0,0.15); }
 
-  /* Info + controls */
   .controls-area { padding: 2rem 2rem 1.5rem; display: flex; flex-direction: column; justify-content: space-between; }
   .track-meta { margin-bottom: 1.5rem; }
   .track-meta .genre-tag { font-size: 0.72rem; color: var(--amber); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-bottom: 10px; display: block; }
@@ -53,7 +46,6 @@
   .track-meta .stat { display: flex; align-items: center; gap: 5px; font-size: 0.82rem; color: var(--text2); }
   .track-meta .stat span { color: var(--text); font-weight: 600; }
 
-  /* Audio controls */
   .audio-section { display: flex; flex-direction: column; gap: 12px; }
   .progress-wrap { position: relative; }
   .progress-bar { width: 100%; height: 5px; background: rgba(255,255,255,0.1); border-radius: 9px; cursor: pointer; appearance: none; accent-color: var(--amber); }
@@ -63,8 +55,7 @@
   .btn-play-big {
     width: 56px; height: 56px; border-radius: 50%; background: var(--amber);
     border: none; color: #000; font-size: 1.4rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; transition: transform .1s;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform .1s;
   }
   .btn-play-big:active { transform: scale(0.95); }
   .volume-row { display: flex; align-items: center; gap: 8px; }
@@ -73,7 +64,6 @@
 
   .native-audio { width: 100%; margin-top: 8px; height: 36px; }
 
-  /* RELATED */
   .related-section { margin-top: 2.5rem; }
   .related-section h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; }
   .related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
@@ -85,7 +75,6 @@
   .related-info strong { font-size: 0.85rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .related-info span { font-size: 0.75rem; color: var(--text2); }
 
-  /* LOADING / ERROR */
   .center { display: flex; align-items: center; justify-content: center; min-height: 60vh; flex-direction: column; gap: 1rem; color: var(--text2); }
 
   @media(max-width: 640px) {
@@ -93,6 +82,9 @@
     .cover-area { height: 220px; }
     .controls-area { padding: 1.5rem; }
     .track-meta h1 { font-size: 1.35rem; }
+    .lang-sel { margin-left: 0; }
+    .logo { margin-left: 0; }
+    .nav-inner { flex-wrap: wrap; height: auto; padding: 8px 1rem; gap: 8px; }
   }
 </style>
 </head>
@@ -100,40 +92,43 @@
 
 <nav>
   <div class="nav-inner">
-    <a class="back-btn" href="javascript:history.back()">← Volver</a>
+    <a class="back-btn" id="btn-back" href="javascript:history.back()">← Volver</a>
     <a class="logo" href="/"><div class="logo-icon">🎵</div> MbôláMusic</a>
+    <div class="lang-sel">
+      <div class="lang-opt" onclick="setLang('es')">ES</div>
+      <div class="lang-opt" onclick="setLang('fr')">FR</div>
+      <div class="lang-opt" onclick="setLang('pt')">PT</div>
+      <div class="lang-opt" onclick="setLang('en')">EN</div>
+    </div>
   </div>
 </nav>
 
 <div class="player-wrap">
   <div id="loading" class="center">
     <div style="font-size:2.5rem;">🎵</div>
-    <p>Cargando canción…</p>
+    <p id="loading-text">Cargando canción…</p>
   </div>
 
   <div id="player-content" style="display:none;">
     <div class="player-card">
-      <!-- Portada -->
       <div class="cover-area" id="cover-area">
         <span id="cover-emoji">🎵</span>
-        <img id="cover-img" style="display:none;" alt="Portada">
+        <img id="cover-img" style="display:none;" alt="">
         <div class="cover-blur"></div>
       </div>
 
-      <!-- Info + controles -->
       <div class="controls-area">
         <div class="track-meta">
           <span class="genre-tag" id="genre-tag">—</span>
           <h1 id="track-title">—</h1>
           <p class="artist" id="track-artist">—</p>
           <div class="stats">
-            <div class="stat">▶ <span id="play-count">0</span> reproducciones</div>
-            <div class="stat">⬇ <span id="dl-count">0</span> descargas</div>
+            <div class="stat">▶ <span id="play-count">0</span> <em id="lbl-plays">reproducciones</em></div>
+            <div class="stat">⬇ <span id="dl-count">0</span> <em id="lbl-downloads">descargas</em></div>
           </div>
         </div>
 
         <div class="audio-section">
-          <!-- Barra de progreso custom -->
           <div class="progress-wrap">
             <input type="range" class="progress-bar" id="seek-bar" min="0" max="100" value="0">
             <div class="time-row">
@@ -141,8 +136,6 @@
               <span id="time-dur">0:00</span>
             </div>
           </div>
-
-          <!-- Controles -->
           <div class="btn-row">
             <button class="btn-play-big" id="play-btn" onclick="togglePlay()">▶</button>
             <div class="volume-row" style="flex:1;">
@@ -150,18 +143,15 @@
               <input type="range" class="volume-bar" id="vol-bar" min="0" max="1" step="0.01" value="1" style="flex:1;" oninput="setVolume(this.value)">
             </div>
           </div>
-
-          <!-- Reproductor nativo de fallback -->
           <audio id="main-audio"></audio>
         </div>
       </div>
     </div>
 
-    <!-- Canciones relacionadas -->
     <div class="related-section">
-      <h2>Más canciones del mismo género</h2>
+      <h2 id="related-title">Más canciones del mismo género</h2>
       <div class="related-grid" id="related-grid">
-        <div class="center" style="grid-column:1/-1;min-height:80px;"><p>Cargando…</p></div>
+        <div class="center" style="grid-column:1/-1;min-height:80px;"><p id="related-loading">Cargando…</p></div>
       </div>
     </div>
   </div>
@@ -169,12 +159,61 @@
   <div id="error-state" class="center" style="display:none;">
     <div style="font-size:2.5rem;">😕</div>
     <p id="error-msg">No se encontró la canción.</p>
-    <a href="/" style="color:var(--amber);text-decoration:none;font-weight:600;">← Volver al inicio</a>
+    <a id="error-back" href="/" style="color:var(--amber);text-decoration:none;font-weight:600;">← Volver al inicio</a>
   </div>
 </div>
 
 <script>
 const API = 'https://mbolamusic-api-1.onrender.com/api';
+let _lang = 'es';
+
+const T = {
+  es: {
+    back:'← Volver', loading:'Cargando canción…', plays:'reproducciones', downloads:'descargas',
+    relatedTitle:'Más canciones del mismo género', relatedLoading:'Cargando…',
+    noRelated:'Sin canciones relacionadas.', unknownArtist:'Artista desconocido',
+    errNotFound:'No se encontró la canción.', errLoad:'No se pudo cargar la canción.',
+    errNoId:'No se especificó ninguna canción.', errBack:'← Volver al inicio',
+  },
+  fr: {
+    back:'← Retour', loading:'Chargement de la chanson…', plays:'lectures', downloads:'téléchargements',
+    relatedTitle:'Plus de chansons du même genre', relatedLoading:'Chargement…',
+    noRelated:'Aucune chanson associée.', unknownArtist:'Artiste inconnu',
+    errNotFound:'Chanson introuvable.', errLoad:'Impossible de charger la chanson.',
+    errNoId:'Aucune chanson spécifiée.', errBack:'← Retour à l\'accueil',
+  },
+  pt: {
+    back:'← Voltar', loading:'A carregar música…', plays:'reproduções', downloads:'transferências',
+    relatedTitle:'Mais músicas do mesmo género', relatedLoading:'A carregar…',
+    noRelated:'Sem músicas relacionadas.', unknownArtist:'Artista desconhecido',
+    errNotFound:'Música não encontrada.', errLoad:'Não foi possível carregar a música.',
+    errNoId:'Nenhuma música especificada.', errBack:'← Voltar ao início',
+  },
+  en: {
+    back:'← Back', loading:'Loading song…', plays:'plays', downloads:'downloads',
+    relatedTitle:'More songs in the same genre', relatedLoading:'Loading…',
+    noRelated:'No related songs.', unknownArtist:'Unknown artist',
+    errNotFound:'Song not found.', errLoad:'Could not load the song.',
+    errNoId:'No song specified.', errBack:'← Back to home',
+  },
+};
+
+function tr(key) { return (T[_lang] || T.es)[key] ?? T.es[key] ?? key; }
+
+function setLang(code, save = true) {
+  _lang = code;
+  if (save) localStorage.setItem('mbola_lang', code);
+  document.querySelectorAll('.lang-opt').forEach(el => {
+    el.classList.toggle('active', el.textContent.toLowerCase() === code);
+  });
+  document.getElementById('btn-back').textContent      = tr('back');
+  document.getElementById('loading-text').textContent  = tr('loading');
+  document.getElementById('lbl-plays').textContent     = tr('plays');
+  document.getElementById('lbl-downloads').textContent = tr('downloads');
+  document.getElementById('related-title').textContent = tr('relatedTitle');
+  document.getElementById('error-back').textContent    = tr('errBack');
+}
+
 const params = new URLSearchParams(location.search);
 const trackId = params.get('id');
 const audio = document.getElementById('main-audio');
@@ -183,22 +222,21 @@ function fmt(s) {
   s = Math.floor(s || 0);
   return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
 }
-function numFmt(n) { return Number(n||0).toLocaleString('es'); }
+function numFmt(n) { return Number(n||0).toLocaleString(_lang); }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 async function loadTrack() {
-  if (!trackId) { showError('No se especificó ninguna canción.'); return; }
+  if (!trackId) { showError(tr('errNoId')); return; }
   try {
     const r = await fetch(API + '/tracks/' + trackId);
     const j = await r.json();
     if (!j.success) throw new Error(j.error);
     const t = j.data.track;
 
-    // Rellenar UI
     document.title = t.title + ' — MbôláMusic';
     document.getElementById('genre-tag').textContent    = t.genre.toUpperCase();
     document.getElementById('track-title').textContent  = t.title;
-    document.getElementById('track-artist').textContent = t.artist?.artistName || 'Artista desconocido';
+    document.getElementById('track-artist').textContent = t.artist?.artistName || tr('unknownArtist');
     document.getElementById('play-count').textContent   = numFmt(t._count?.plays);
     document.getElementById('dl-count').textContent     = numFmt(t._count?.downloads);
 
@@ -209,11 +247,9 @@ async function loadTrack() {
       document.getElementById('cover-emoji').style.display = 'none';
     }
 
-    // Audio
     audio.src = t.audioUrl;
     audio.load();
 
-    // Seek bar
     audio.addEventListener('timeupdate', () => {
       if (!audio.duration) return;
       const pct = (audio.currentTime / audio.duration) * 100;
@@ -221,22 +257,17 @@ async function loadTrack() {
       document.getElementById('time-cur').textContent = fmt(audio.currentTime);
       document.getElementById('time-dur').textContent = fmt(audio.duration);
     });
-    audio.addEventListener('ended', () => {
-      document.getElementById('play-btn').textContent = '▶';
-    });
+    audio.addEventListener('ended', () => { document.getElementById('play-btn').textContent = '▶'; });
     document.getElementById('seek-bar').addEventListener('input', function() {
       if (audio.duration) audio.currentTime = (this.value / 100) * audio.duration;
     });
 
-    // Mostrar
     document.getElementById('loading').style.display = 'none';
     document.getElementById('player-content').style.display = '';
 
-    // Cargar relacionadas
     loadRelated(t.genre, t.id);
-
   } catch(e) {
-    showError(e.message || 'No se pudo cargar la canción.');
+    showError(e.message || tr('errLoad'));
   }
 }
 
@@ -259,13 +290,16 @@ async function loadRelated(genre, excludeId) {
     const r = await fetch(API + '/tracks?genre=' + encodeURIComponent(genre) + '&limit=8');
     const j = await r.json();
     const tracks = (j?.data?.tracks || []).filter(t => t.id !== excludeId).slice(0, 8);
-    if (!tracks.length) { grid.innerHTML = '<p style="color:var(--text2);padding:1rem;grid-column:1/-1;">Sin canciones relacionadas.</p>'; return; }
+    if (!tracks.length) {
+      grid.innerHTML = '<p style="color:var(--text2);padding:1rem;grid-column:1/-1;">' + tr('noRelated') + '</p>';
+      return;
+    }
     const bgColors = ['rgba(245,158,11,0.12)','rgba(63,81,181,0.18)','rgba(0,154,68,0.12)','rgba(239,68,68,0.12)'];
     grid.innerHTML = tracks.map((t, i) => `
       <div class="related-card" onclick="window.location.href='/player.html?id=${t.id}'">
         <div class="related-thumb" style="background:${bgColors[i%4]};">
           🎵
-          ${t.coverUrl ? `<img src="${t.coverUrl}" onerror="this.remove()">` : ''}
+          ${t.coverUrl ? `<img src="${esc(t.coverUrl)}" onerror="this.remove()">` : ''}
         </div>
         <div class="related-info">
           <strong>${esc(t.title)}</strong>
@@ -281,6 +315,9 @@ function showError(msg) {
   document.getElementById('error-state').style.display = '';
 }
 
+// Init
+_lang = localStorage.getItem('mbola_lang') || 'es';
+setLang(_lang, false);
 loadTrack();
 </script>
 </body>
