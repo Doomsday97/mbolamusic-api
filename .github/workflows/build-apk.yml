@@ -40,7 +40,7 @@ jobs:
           echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
           echo "sdk.dir=$ANDROID_HOME"    >> android/local.properties
 
-      - name: Gradle init — forzar compileSdk 36 en todos los plugins
+      - name: Gradle init — forzar compileSdk 36 y coreLibraryDesugaring
         run: |
           mkdir -p ~/.gradle/init.d
           cat > ~/.gradle/init.d/sdk_override.gradle << 'EOF'
@@ -48,6 +48,19 @@ jobs:
               afterEvaluate { project ->
                   if (project.hasProperty('android')) {
                       project.android { compileSdkVersion 36 }
+                      // Para el modulo app: garantizar coreLibraryDesugaring incluso si
+                      // el bloque compileOptions del KTS fue parcialmente sobreescrito
+                      if (project.name == 'app') {
+                          try {
+                              project.android.compileOptions.coreLibraryDesugaringEnabled = true
+                          } catch (Exception ignored) {}
+                          try {
+                              if (!project.configurations.findByName('coreLibraryDesugaring')) {
+                                  project.configurations.create('coreLibraryDesugaring')
+                              }
+                              project.dependencies.add('coreLibraryDesugaring', 'com.android.tools:desugar_jdk_libs:2.1.4')
+                          } catch (Exception ignored) {}
+                      }
                   }
               }
           }
@@ -56,6 +69,15 @@ jobs:
       - name: Instalar dependencias Flutter
         working-directory: mobile
         run: flutter pub get
+
+      - name: Verificar configuracion coreLibraryDesugaring
+        working-directory: mobile
+        run: |
+          echo "=== android/app/build.gradle.kts ==="
+          cat android/app/build.gradle.kts
+          echo ""
+          echo "=== Verificando isCoreLibraryDesugaringEnabled ==="
+          grep -n "isCoreLibraryDesugaringEnabled\|coreLibraryDesugaring\|minSdk" android/app/build.gradle.kts || echo "AVISO: propiedades no encontradas"
 
       - name: Build APK release (ARM64)
         working-directory: mobile
