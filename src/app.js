@@ -34,8 +34,10 @@ if (process.env.STORAGE_PROVIDER !== 's3') {
 // API
 app.use('/api', routes);
 
-// Salud
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+// Salud (ambas rutas para compatibilidad con Render)
+const healthHandler = (req, res) => res.json({ status: 'ok' });
+app.get('/health', healthHandler);
+app.get('/health-check', healthHandler);
 
 // Sitio web (al final para no interferir con /api ni /admin)
 app.use('/', express.static(path.join(__dirname, '../website')));
