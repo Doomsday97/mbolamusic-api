@@ -1788,6 +1788,15 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
       <button onclick="closeMiCuenta();openUploadModal();" style="width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;">🎵 Subir nueva canción</button>
     </div>
 
+    <!-- Artista: mis canciones -->
+    <div id="mc-tracks-section" style="display:none;margin-bottom:1.25rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+        <span style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Mis canciones</span>
+        <span id="mc-tracks-count" style="font-size:0.75rem;color:var(--text2);"></span>
+      </div>
+      <div id="mc-tracks-list" style="display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;padding-right:2px;"></div>
+    </div>
+
     <!-- Artista: ganancias -->
     <div id="mc-artist-section" style="display:none;margin-bottom:1.25rem;">
       <div style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.5rem;">Ganancias de artista</div>
@@ -1847,13 +1856,14 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
     <div style="margin-bottom:1rem;">
       <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Género *</label>
       <select id="up-genre" style="width:100%;padding:11px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;font-family:inherit;">
-        <option value="Afrosounds">Afrosounds</option>
-        <option value="Hip-Hop">Hip-Hop</option>
-        <option value="Urbano">Urbano</option>
-        <option value="Bikutsi">Bikutsi</option>
-        <option value="Caribbean">Caribbean</option>
-        <option value="Gospel">Gospel</option>
-        <option value="Pop">Pop</option>
+        <option>Afrosounds</option><option>Afrobeats</option><option>Afropop</option>
+        <option>Hip-Hop</option><option>Trap</option><option>R&amp;B</option>
+        <option>Urbano</option><option>Reggaeton</option><option>Bikutsi</option>
+        <option>Makossa</option><option>Soukous</option><option>Ndombolo</option>
+        <option>Rumba Congolesa</option><option>Highlife</option><option>Bongo Flava</option>
+        <option>Caribbean</option><option>Soca</option><option>Zouk</option>
+        <option>Salsa</option><option>Gospel</option><option>Pop</option>
+        <option>Balada</option><option>Jazz</option><option>Electronic</option>
       </select>
     </div>
 
@@ -1884,6 +1894,58 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
 
     <div id="up-result" style="display:none;padding:12px;border-radius:10px;font-size:0.85rem;margin-bottom:1rem;"></div>
     <button id="up-btn" onclick="doUploadTrack()" style="width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:0.95rem;cursor:pointer;">Publicar canción →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     EDITAR CANCIÓN MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="edit-track-overlay" onclick="if(event.target===this)closeEditTrack()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:12000;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;position:relative;">
+    <button onclick="closeEditTrack()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;">✕</button>
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;color:var(--amber);">✏️ Editar canción</h3>
+    <input type="hidden" id="et-id">
+
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Título *</label>
+      <input id="et-title" type="text" style="width:100%;padding:11px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;font-family:inherit;box-sizing:border-box;">
+    </div>
+
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Género *</label>
+      <select id="et-genre" style="width:100%;padding:11px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;">
+        <option>Afrosounds</option><option>Afrobeats</option><option>Afropop</option>
+        <option>Hip-Hop</option><option>Trap</option><option>R&amp;B</option>
+        <option>Urbano</option><option>Reggaeton</option><option>Bikutsi</option>
+        <option>Makossa</option><option>Soukous</option><option>Ndombolo</option>
+        <option>Rumba Congolesa</option><option>Highlife</option><option>Bongo Flava</option>
+        <option>Caribbean</option><option>Soca</option><option>Zouk</option>
+        <option>Salsa</option><option>Gospel</option><option>Pop</option>
+        <option>Balada</option><option>Jazz</option><option>Electronic</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Álbum (opcional)</label>
+      <input id="et-album" type="text" style="width:100%;padding:11px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;font-family:inherit;box-sizing:border-box;">
+    </div>
+
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Letra (opcional)</label>
+      <textarea id="et-lyrics" rows="4" style="width:100%;padding:11px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.88rem;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+    </div>
+
+    <div style="margin-bottom:1.25rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Nueva carátula (opcional)</label>
+      <label for="et-cover-input" style="display:flex;align-items:center;gap:10px;padding:12px;background:#1a1a1a;border:1px dashed rgba(255,255,255,0.15);border-radius:10px;cursor:pointer;">
+        <div id="et-cover-preview" style="width:48px;height:48px;border-radius:8px;background:rgba(245,158,11,0.08);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;overflow:hidden;">🖼️</div>
+        <span id="et-cover-name" style="color:var(--text2);font-size:0.88rem;">Cambiar carátula…</span>
+      </label>
+      <input type="file" id="et-cover-input" accept="image/*" style="display:none;" onchange="etCoverChosen(event)">
+    </div>
+
+    <div id="et-result" style="display:none;padding:10px 12px;border-radius:9px;font-size:0.85rem;margin-bottom:1rem;"></div>
+    <button id="et-save-btn" onclick="saveTrackEditWeb()" style="width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:0.95rem;cursor:pointer;">Guardar cambios</button>
   </div>
 </div>
 
@@ -2014,9 +2076,153 @@ async function openMiCuenta() {
     artistSec.style.display = 'none';
   }
 
+  // Artista: cargar canciones
+  const tracksSec = document.getElementById('mc-tracks-section');
+  if (user.role === 'ARTIST') {
+    tracksSec.style.display = '';
+    loadArtistTracksWeb(token);
+  } else {
+    tracksSec.style.display = 'none';
+  }
+
   document.getElementById('mi-cuenta-overlay').style.display = 'flex';
 }
 function closeMiCuenta() { document.getElementById('mi-cuenta-overlay').style.display = 'none'; }
+
+// ── Gestión de canciones del artista (web) ────────────────────────────────────
+async function loadArtistTracksWeb(token) {
+  const list = document.getElementById('mc-tracks-list');
+  const count = document.getElementById('mc-tracks-count');
+  list.innerHTML = '<div style="color:var(--text2);font-size:0.85rem;padding:8px 0;">Cargando…</div>';
+  try {
+    const r = await fetch(API_BASE + '/tracks/mine', { headers: { Authorization: 'Bearer ' + token } });
+    const j = await r.json();
+    const tracks = (j && j.data && j.data.tracks) ? j.data.tracks : [];
+    count.textContent = tracks.length + ' canciones';
+    if (tracks.length === 0) {
+      list.innerHTML = '<div style="color:var(--text2);font-size:0.85rem;padding:8px 0;">Aún no has subido canciones.</div>';
+      return;
+    }
+    list.innerHTML = tracks.map(t => `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,0.04);border-radius:10px;">
+        <div style="width:44px;height:44px;border-radius:8px;flex-shrink:0;overflow:hidden;background:#222;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">
+          ${t.coverUrl ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='🎵'">` : '🎵'}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(t.title)}</div>
+          <div style="font-size:0.75rem;color:var(--amber);">${escHtml(t.genre)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+          <span style="font-size:0.68rem;padding:2px 8px;border-radius:20px;background:${t.isPublished ? 'rgba(74,222,128,0.12)' : 'rgba(248,113,113,0.12)'};color:${t.isPublished ? '#4ade80' : '#f87171'};">${t.isPublished ? 'Publicada' : 'Oculta'}</span>
+          <button onclick='openEditTrackWeb(${JSON.stringify(t)})' title="Editar" style="background:rgba(245,158,11,0.12);border:none;border-radius:7px;padding:6px 8px;cursor:pointer;color:var(--amber);font-size:0.85rem;">✏️</button>
+          <button onclick="deleteTrackWeb('${t.id}','${escHtml(t.title).replace(/'/g,"\\'")}');" title="Eliminar" style="background:rgba(248,113,113,0.1);border:none;border-radius:7px;padding:6px 8px;cursor:pointer;color:#f87171;font-size:0.85rem;">🗑</button>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    list.innerHTML = '<div style="color:#f87171;font-size:0.85rem;">Error al cargar canciones.</div>';
+  }
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function openEditTrackWeb(track) {
+  document.getElementById('et-id').value     = track.id;
+  document.getElementById('et-title').value  = track.title || '';
+  document.getElementById('et-album').value  = track.album || '';
+  document.getElementById('et-lyrics').value = track.lyrics || '';
+  const genreSel = document.getElementById('et-genre');
+  for (let o of genreSel.options) { if (o.value === track.genre) { o.selected = true; break; } }
+  document.getElementById('et-cover-preview').innerHTML = track.coverUrl
+    ? `<img src="${track.coverUrl}" style="width:100%;height:100%;object-fit:cover;">`
+    : '🖼️';
+  document.getElementById('et-cover-name').textContent = 'Cambiar carátula…';
+  document.getElementById('et-cover-input').value = '';
+  const res = document.getElementById('et-result');
+  res.style.display = 'none';
+  document.getElementById('et-save-btn').disabled = false;
+  document.getElementById('edit-track-overlay').style.display = 'flex';
+}
+function closeEditTrack() { document.getElementById('edit-track-overlay').style.display = 'none'; }
+
+function etCoverChosen(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  document.getElementById('et-cover-name').textContent = file.name;
+  const rd = new FileReader();
+  rd.onload = e => {
+    document.getElementById('et-cover-preview').innerHTML =
+      `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+  };
+  rd.readAsDataURL(file);
+}
+
+async function saveTrackEditWeb() {
+  const token = localStorage.getItem('mbola_token');
+  const id    = document.getElementById('et-id').value;
+  const title = document.getElementById('et-title').value.trim();
+  if (!title) { showEtResult('El título es obligatorio.', false); return; }
+
+  const btn = document.getElementById('et-save-btn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+
+  const fd = new FormData();
+  fd.append('title',  title);
+  fd.append('genre',  document.getElementById('et-genre').value);
+  fd.append('album',  document.getElementById('et-album').value.trim());
+  fd.append('lyrics', document.getElementById('et-lyrics').value.trim());
+  const coverFile = document.getElementById('et-cover-input').files[0];
+  if (coverFile) fd.append('cover', coverFile);
+
+  try {
+    const r = await fetch(API_BASE + '/tracks/' + id, {
+      method: 'PATCH',
+      headers: { Authorization: 'Bearer ' + token },
+      body: fd,
+    });
+    const j = await r.json();
+    if (r.ok) {
+      showEtResult('✅ Cambios guardados correctamente.', true);
+      const tk = localStorage.getItem('mbola_token');
+      loadArtistTracksWeb(tk);
+      setTimeout(closeEditTrack, 1200);
+    } else {
+      showEtResult('❌ ' + (j.error || 'Error al guardar.'), false);
+      btn.disabled = false; btn.textContent = 'Guardar cambios';
+    }
+  } catch(e) {
+    showEtResult('❌ Error de red.', false);
+    btn.disabled = false; btn.textContent = 'Guardar cambios';
+  }
+}
+
+function showEtResult(msg, ok) {
+  const el = document.getElementById('et-result');
+  el.textContent = msg;
+  el.style.display = '';
+  el.style.background = ok ? 'rgba(74,222,128,0.1)' : 'rgba(248,113,113,0.1)';
+  el.style.color = ok ? '#4ade80' : '#f87171';
+}
+
+async function deleteTrackWeb(id, title) {
+  if (!confirm('¿Eliminar "' + title + '"? Esta acción no se puede deshacer.')) return;
+  const token = localStorage.getItem('mbola_token');
+  try {
+    const r = await fetch(API_BASE + '/tracks/' + id, {
+      method: 'DELETE',
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    if (r.ok) {
+      loadArtistTracksWeb(token);
+    } else {
+      const j = await r.json();
+      alert('Error: ' + (j.error || 'No se pudo eliminar.'));
+    }
+  } catch(e) {
+    alert('Error de red al eliminar.');
+  }
+}
 
 // ── Suscripción ───────────────────────────────────────────────────────────────
 function openSubscribeModal() {
