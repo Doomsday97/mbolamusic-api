@@ -15,12 +15,20 @@ jobs:
       - name: Checkout mbolamusic-api (este repo)
         uses: actions/checkout@v4
 
+      - name: Limpiar directorio mobile previo
+        run: rm -rf mobile
+
       - name: Checkout mbolamusic-mobile
         uses: actions/checkout@v4
         with:
           repository: Doomsday97/mbolamusic-mobile
           token: ${{ secrets.API_DEPLOY_TOKEN }}
           path: mobile
+          ref: main
+          clean: true
+
+      - name: Verificar modelo Track (debug)
+        run: grep -A 5 "class Track" mobile/lib/models/models.dart | head -20
 
       - name: Configurar Java 17
         uses: actions/setup-java@v4
