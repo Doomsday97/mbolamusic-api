@@ -198,7 +198,7 @@ const T = {
   },
 };
 
-function tr(key) { return (T[_lang] || T.es)[key] ?? T.es[key] ?? key; }
+function tr(key) { var _v = (T[_lang] || T.es)[key]; return _v != null ? _v : (T.es[key] != null ? T.es[key] : key); }
 
 function setLang(code, save = true) {
   _lang = code;
@@ -236,9 +236,9 @@ async function loadTrack() {
     document.title = t.title + ' — MbôláMusic';
     document.getElementById('genre-tag').textContent    = t.genre.toUpperCase();
     document.getElementById('track-title').textContent  = t.title;
-    document.getElementById('track-artist').textContent = t.artist?.artistName || tr('unknownArtist');
-    document.getElementById('play-count').textContent   = numFmt(t._count?.plays);
-    document.getElementById('dl-count').textContent     = numFmt(t._count?.downloads);
+    document.getElementById('track-artist').textContent = (t.artist && t.artist.artistName) || tr('unknownArtist');
+    document.getElementById('play-count').textContent   = numFmt(t._count && t._count.plays);
+    document.getElementById('dl-count').textContent     = numFmt(t._count && t._count.downloads);
 
     if (t.coverUrl) {
       const img = document.getElementById('cover-img');
@@ -289,7 +289,7 @@ async function loadRelated(genre, excludeId) {
   try {
     const r = await fetch(API + '/tracks?genre=' + encodeURIComponent(genre) + '&limit=8');
     const j = await r.json();
-    const tracks = (j?.data?.tracks || []).filter(t => t.id !== excludeId).slice(0, 8);
+    const tracks = ((j && j.data && j.data.tracks) || []).filter(t => t.id !== excludeId).slice(0, 8);
     if (!tracks.length) {
       grid.innerHTML = '<p style="color:var(--text2);padding:1rem;grid-column:1/-1;">' + tr('noRelated') + '</p>';
       return;
@@ -303,7 +303,7 @@ async function loadRelated(genre, excludeId) {
         </div>
         <div class="related-info">
           <strong>${esc(t.title)}</strong>
-          <span>${esc(t.artist?.artistName||'')}</span>
+          <span>${esc((t.artist && t.artist.artistName)||'')}</span>
         </div>
       </div>`).join('');
   } catch { grid.innerHTML = ''; }

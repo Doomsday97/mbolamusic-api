@@ -1374,7 +1374,7 @@ function renderTrackCard(t, i) {
     <div style="padding:14px;">
       <div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div>
       <div style="font-size:0.78rem;color:var(--text2);margin-top:4px;">${(t.artist && t.artist.artistName) || t.artistName || ''}</div>
-      <div style="font-size:0.72rem;color:rgba(245,158,11,.7);margin-top:4px;text-transform:uppercase;letter-spacing:.04em;">${t.genre}</div>
+      <div style="font-size:0.72rem;color:rgba(245,158,11,.7);margin-top:4px;text-transform:uppercase;letter-spacing:.04em;">${t.genre || ''}</div>
     </div>
   </div>`;
 }
@@ -1508,9 +1508,14 @@ function loadTrending() {
 loadTrending();
 
 function playTrack(urlEnc, titleEnc, artistEnc) {
-  const url    = decodeURIComponent(urlEnc);
-  const title  = decodeURIComponent(titleEnc);
-  const artist = decodeURIComponent(artistEnc);
+  var url, title, artist;
+  try {
+    url    = decodeURIComponent(urlEnc);
+    title  = decodeURIComponent(titleEnc);
+    artist = decodeURIComponent(artistEnc);
+  } catch(_) {
+    url = urlEnc; title = titleEnc; artist = artistEnc;
+  }
   document.getElementById('wp-title').textContent  = title;
   document.getElementById('wp-artist').textContent = artist;
   const audio = document.getElementById('web-audio');

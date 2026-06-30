@@ -243,7 +243,7 @@ const T = {
 };
 
 function tr(key, ...args) {
-  let s = (T[_lang] || T.es)[key] ?? T.es[key] ?? key;
+  var _tv = (T[_lang] || T.es)[key]; var s = _tv != null ? _tv : (T.es[key] != null ? T.es[key] : key);
   args.forEach((a, i) => { s = s.replace('{' + i + '}', a); });
   return s;
 }
@@ -380,7 +380,7 @@ async function loadTracks() {
   const grid = document.getElementById('track-grid');
   try {
     const d = await fetch(API + '/tracks?limit=48').then(r => r.json());
-    const tracks = d?.data?.tracks || d?.data || [];
+    const tracks = (d && d.data && d.data.tracks) || (d && d.data) || [];
     if (!tracks.length) {
       grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">' + tr('noTracks') + '</div>';
       return;
@@ -394,7 +394,7 @@ async function loadTracks() {
         </div>
         <div class="track-card-info">
           <strong>${esc(t.title)}</strong>
-          <span>${esc(t.artist?.artistName||'')}</span>
+          <span>${esc((t.artist && t.artist.artistName)||'')}</span>
           <span class="genre-tag">${esc(t.genre)}</span>
         </div>
       </div>`).join('');

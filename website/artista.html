@@ -296,7 +296,7 @@ const T = {
 };
 
 function tr(key, ...args) {
-  let s = (T[_lang] || T.es)[key] ?? T.es[key] ?? key;
+  var _tv = (T[_lang] || T.es)[key]; var s = _tv != null ? _tv : (T.es[key] != null ? T.es[key] : key);
   args.forEach((a, i) => { s = s.replace('{' + i + '}', a); });
   return s;
 }
