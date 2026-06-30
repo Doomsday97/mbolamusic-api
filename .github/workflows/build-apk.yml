@@ -74,6 +74,10 @@ jobs:
           }
           EOF
 
+      - name: Limpiar compilacion anterior de Flutter
+        working-directory: mobile
+        run: flutter clean
+
       - name: Instalar dependencias Flutter
         working-directory: mobile
         run: flutter pub get
