@@ -81,7 +81,7 @@ jobs:
 
       - name: Build APK release (ARM64)
         working-directory: mobile
-        run: flutter build apk --release --target-platform android-arm64 --split-per-abi
+        run: flutter build apk --release --target-platform android-arm64 --split-per-abi --dart-define=ENV=prod --dart-define=API_URL=https://mbolamusic-apionrender.com/api
 
       - name: Localizar APK generado
         run: |
