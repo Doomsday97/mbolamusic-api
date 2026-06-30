@@ -171,6 +171,7 @@
     <button onclick="showTab('tracks', this)">🎵 Canciones</button>
     <button onclick="showTab('online', this)" id="online-tab-btn">🟢 En línea <span id="online-badge" style="background:var(--success);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
     <button onclick="showTab('chat', this)" id="chat-tab-btn">💬 Soporte <span id="chat-badge" style="display:none;background:var(--error);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
+    <button onclick="showTab('tools', this)">🛠️ Herramientas</button>
   </nav>
   <main>
     <div id="tab-stats"></div>
@@ -179,6 +180,23 @@
     <div id="tab-tracks" style="display:none"></div>
     <div id="tab-online" style="display:none"></div>
     <div id="tab-chat" style="display:none"></div>
+    <div id="tab-tools" style="display:none">
+      <h2 style="margin-bottom:24px;font-size:18px;">🛠️ Herramientas de mantenimiento</h2>
+
+      <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
+        <h3 style="margin-bottom:8px;">📸 Corregir URLs de medios (CDN)</h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Actualiza las URLs de audio, carátulas y avatares en la base de datos para que usen el CDN público configurado en CDN_BASE_URL. Necesario cuando se cambia el proveedor de almacenamiento.</p>
+        <button onclick="runAdminTool('fix-media-urls','Corregiendo URLs...')" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;">Corregir URLs de medios</button>
+        <div id="tool-fix-media-urls-result" style="margin-top:12px;font-size:13px;"></div>
+      </div>
+
+      <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
+        <h3 style="margin-bottom:8px;">🎤 Activar prueba gratuita a artistas existentes</h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Da 30 días de suscripción gratuita a todos los artistas que aún no tienen una suscripción activa, para que puedan subir y publicar música de inmediato.</p>
+        <button onclick="runAdminTool('fix-artist-trials','Activando pruebas...')" style="width:auto;padding:10px 24px;background:var(--success);color:#fff;border-radius:8px;font-weight:bold;">Activar prueba artistas</button>
+        <div id="tool-fix-artist-trials-result" style="margin-top:12px;font-size:13px;"></div>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -275,6 +293,20 @@ async function doLogin() {
 function logout() {
   localStorage.removeItem('adminToken');
   location.reload();
+}
+
+async function runAdminTool(endpoint, loadingMsg) {
+  const resultEl = document.getElementById(`tool-${endpoint}-result`);
+  resultEl.style.color = 'var(--muted)';
+  resultEl.textContent = loadingMsg;
+  try {
+    const data = await apiFetch(`/admin/${endpoint}`, 'POST');
+    resultEl.style.color = 'var(--success)';
+    resultEl.textContent = '✅ ' + JSON.stringify(data, null, 2);
+  } catch (e) {
+    resultEl.style.color = 'var(--error)';
+    resultEl.textContent = '❌ ' + (e.message || 'Error desconocido');
+  }
 }
 
 async function tryAutoLogin() {
