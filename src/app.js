@@ -28,6 +28,7 @@ app.use(helmet({
     directives: {
       defaultSrc:     ["'self'"],
       scriptSrc:      ["'self'", "'unsafe-inline'"],   // inline JS en admin/web
+      scriptSrcAttr:  ["'unsafe-inline'"],              // onclick= onchange= etc.
       styleSrc:       ["'self'", "'unsafe-inline'"],
       imgSrc:         ["'self'", 'data:', 'blob:', 'https:'],
       mediaSrc:       ["'self'", 'https:'],             // audio streaming
