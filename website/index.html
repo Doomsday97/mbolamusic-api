@@ -517,8 +517,8 @@ async function refreshUserFromServer() {
   try {
     const r = await fetch(API_BASE + '/auth/me', { headers: { Authorization: 'Bearer ' + token } });
     const j = await r.json();
-    if (j.success && j.data?.user) {
-      const fresh = { ...JSON.parse(localStorage.getItem('mbola_user') || '{}'), ...j.data.user };
+    if (j.success && j.data && j.data.user) {
+      const fresh = Object.assign({}, JSON.parse(localStorage.getItem('mbola_user') || '{}'), j.data.user);
       localStorage.setItem('mbola_user', JSON.stringify(fresh));
       updateNavAuth();
     }
@@ -1373,7 +1373,7 @@ function renderTrackCard(t, i) {
     </div>
     <div style="padding:14px;">
       <div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div>
-      <div style="font-size:0.78rem;color:var(--text2);margin-top:4px;">${t.artist?.artistName || t.artistName || ''}</div>
+      <div style="font-size:0.78rem;color:var(--text2);margin-top:4px;">${(t.artist && t.artist.artistName) || t.artistName || ''}</div>
       <div style="font-size:0.72rem;color:rgba(245,158,11,.7);margin-top:4px;text-transform:uppercase;letter-spacing:.04em;">${t.genre}</div>
     </div>
   </div>`;
@@ -1457,7 +1457,7 @@ function loadTracks() {
   fetchWithRetry(API + '/tracks', 70000, 5000)
     .then(r => r.json())
     .then(j => {
-      _allTracks = j?.data?.tracks || j?.data || [];
+      _allTracks = (j && j.data && j.data.tracks) || (j && j.data) || [];
       if (!_allTracks.length) {
         el.innerHTML = `<p style="color:var(--text2);text-align:center;grid-column:1/-1;padding:2rem;">${tl.playerEmpty}</p>`;
         return;
@@ -1480,7 +1480,7 @@ function loadTrending() {
   fetchWithRetry(API + '/tracks/charts', 70000, 5000)
     .then(r => r.json())
     .then(j => {
-      const tracks = (j?.data?.tracks || j?.data || []).slice(0, 12);
+      const tracks = ((j && j.data && j.data.tracks) || (j && j.data) || []).slice(0, 12);
       if (!tracks.length) { el.innerHTML = '<p style="color:var(--text2);opacity:.6;padding:1rem;">Sin datos disponibles.</p>'; return; }
       el.innerHTML = tracks.map(t => `
         <div onclick="window.location.href='/player.html?id=${t.id}'"
@@ -1493,7 +1493,7 @@ function loadTrending() {
           </div>
           <div style="padding:10px 12px;">
             <div style="font-weight:700;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div>
-            <div style="font-size:0.75rem;color:var(--text2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.artist?.artistName || t.artistName || ''}</div>
+            <div style="font-size:0.75rem;color:var(--text2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${(t.artist && t.artist.artistName) || t.artistName || ''}</div>
             <div style="font-size:0.7rem;color:rgba(245,158,11,.7);margin-top:3px;text-transform:uppercase;letter-spacing:.04em;">${t.genre}</div>
           </div>
         </div>`).join('');
@@ -1900,13 +1900,13 @@ async function openMiCuenta() {
   }
   document.getElementById('mc-username').textContent = user.username || '';
   document.getElementById('mc-role-label').textContent = user.role === 'ARTIST' ? '🎤 Artista' : '🎧 Oyente';
-  document.getElementById('mc-balance-val').textContent = (user.walletBalance ?? 0) + ' FCFA';
+  document.getElementById('mc-balance-val').textContent = (user.walletBalance != null ? user.walletBalance : 0) + ' FCFA';
 
   // Suscripción
   try {
     const sr = await fetch(API_BASE + '/payments/subscription/current', { headers: { Authorization: 'Bearer ' + token } });
     const sj = await sr.json();
-    const sub = sj?.data?.subscription;
+    const sub = sj && sj.data && sj.data.subscription;
     const badge = document.getElementById('mc-sub-badge');
     const info  = document.getElementById('mc-sub-info');
     const btn   = document.getElementById('mc-subscribe-btn');
@@ -1938,7 +1938,7 @@ async function openMiCuenta() {
     try {
       const pr = await fetch(API_BASE + '/artist/dashboard', { headers: { Authorization: 'Bearer ' + token } });
       const pj = await pr.json();
-      const earnings = pj?.data?.totalEarnings ?? pj?.data?.availableEarnings ?? 0;
+      const earnings = (pj && pj.data && pj.data.totalEarnings != null ? pj.data.totalEarnings : (pj && pj.data && pj.data.availableEarnings != null ? pj.data.availableEarnings : 0));
       document.getElementById('mc-earnings-val').textContent = earnings + ' FCFA';
     } catch(_) { document.getElementById('mc-earnings-val').textContent = '— FCFA'; }
   } else {
@@ -1961,7 +1961,8 @@ function closeSubscribeModal() { document.getElementById('subscribe-overlay').st
 
 async function doSubscribeWeb() {
   const token  = localStorage.getItem('mbola_token');
-  const method = document.querySelector('input[name="sub-method"]:checked')?.value || 'BANK_TRANSFER';
+  const _subChecked = document.querySelector('input[name="sub-method"]:checked');
+  const method = _subChecked ? _subChecked.value : 'BANK_TRANSFER';
   const res    = document.getElementById('sm-result');
   const btn    = document.getElementById('sm-btn');
   btn.disabled = true; btn.textContent = 'Procesando…';
@@ -1974,13 +1975,13 @@ async function doSubscribeWeb() {
     });
     const j = await r.json();
     if (!j.success) throw new Error(j.error || 'Error');
-    const status = j.data?.result?.status;
+    const status = j.data && j.data.result && j.data.result.status;
     if (status === 'COMPLETED') {
       res.style.display = ''; res.style.background = 'rgba(74,222,128,0.1)'; res.style.color = '#4ade80';
       res.textContent = '✅ Suscripción activada. ¡Disfruta MbôláMusic!';
     } else {
       res.style.display = ''; res.style.background = 'rgba(245,158,11,0.08)'; res.style.color = 'var(--amber)';
-      const bankInfo = j.data?.result?.bankDetails;
+      const bankInfo = j.data && j.data.result && j.data.result.bankDetails;
       if (bankInfo) {
         res.innerHTML = '⏳ Pago en verificación. Realiza la transferencia:<br>'
           + `<strong>Banco:</strong> ${bankInfo.bankName}<br>`
@@ -2028,7 +2029,8 @@ function closeWalletModal() { document.getElementById('wallet-overlay').style.di
 async function doWalletAction() {
   const token  = localStorage.getItem('mbola_token');
   const amount = parseInt(document.getElementById('wm-amount').value, 10);
-  const method = document.querySelector('input[name="wm-method"]:checked')?.value || 'BANK_TRANSFER';
+  const _wmChecked = document.querySelector('input[name="wm-method"]:checked');
+  const method = _wmChecked ? _wmChecked.value : 'BANK_TRANSFER';
   const res    = document.getElementById('wm-result');
   const btn    = document.getElementById('wm-btn');
   btn.disabled = true; btn.textContent = 'Procesando…';
@@ -2053,17 +2055,18 @@ async function doWalletAction() {
     const j = await r.json();
     if (!j.success) throw new Error(j.error || 'Error');
     res.style.display = ''; res.style.background = 'rgba(74,222,128,0.1)'; res.style.color = '#4ade80';
-    const status = j.data?.result?.status;
+    const status = j.data && j.data.result && j.data.result.status;
     if (status === 'VERIFYING') {
       res.style.background = 'rgba(245,158,11,0.08)'; res.style.color = 'var(--amber)';
       res.textContent = '⏳ Solicitud enviada. Un administrador la procesará en 24h.';
     } else if (_walletMode === 'topup') {
-      res.textContent = `✅ Monedero recargado. Nuevo saldo: ${j.data?.walletBalance ?? '—'} FCFA`;
-      // Actualizar user en localStorage
+      var _bal = j.data && j.data.walletBalance != null ? j.data.walletBalance : '—';
+      res.textContent = '✅ Monedero recargado. Nuevo saldo: ' + _bal + ' FCFA';
       const u = JSON.parse(localStorage.getItem('mbola_user') || '{}');
-      if (j.data?.walletBalance != null) { u.walletBalance = j.data.walletBalance; localStorage.setItem('mbola_user', JSON.stringify(u)); }
+      if (j.data && j.data.walletBalance != null) { u.walletBalance = j.data.walletBalance; localStorage.setItem('mbola_user', JSON.stringify(u)); }
     } else {
-      res.textContent = `✅ Operación completada. Saldo: ${j.data?.walletBalance ?? '—'} FCFA`;
+      var _bal2 = j.data && j.data.walletBalance != null ? j.data.walletBalance : '—';
+      res.textContent = '✅ Operación completada. Saldo: ' + _bal2 + ' FCFA';
     }
   } catch(e) {
     res.style.display = ''; res.style.background = 'rgba(248,113,113,0.1)'; res.style.color = '#f87171';
@@ -2208,7 +2211,7 @@ const _origLoginFunc = typeof doLoginWeb !== 'undefined' ? null : null;
 document.addEventListener('DOMContentLoaded', () => {
   const origLogin = window.doLoginWeb;
   window.doLoginWeb = async function() {
-    await origLogin?.();
+    if (origLogin) await origLogin();
     if (_pendingAction && localStorage.getItem('mbola_token')) {
       const a = _pendingAction; _pendingAction = null;
       setTimeout(() => requireLoginThen(a), 300);
