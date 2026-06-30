@@ -37,8 +37,38 @@
   .nav-links a:hover { color: var(--amber); }
   .nav-cta { background: var(--amber); color: #000; padding: 0.5rem 1.25rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: background 0.2s; }
   .nav-cta:hover { background: var(--amber-light); }
-  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; }
-  .hamburger span { display: block; width: 24px; height: 2px; background: var(--text); border-radius: 2px; }
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+  .hamburger span { display: block; width: 24px; height: 2px; background: var(--text); border-radius: 2px; transition: transform 0.25s, opacity 0.25s; }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* MOBILE DROPDOWN MENU */
+  #mobile-menu {
+    display: none;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    background: rgba(8,8,8,0.97);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 0;
+    flex-direction: column;
+  }
+  #mobile-menu.open { display: flex; }
+  #mobile-menu a {
+    display: block;
+    color: var(--text2);
+    text-decoration: none;
+    padding: 0.9rem 1.5rem;
+    font-size: 0.95rem;
+    border-bottom: 1px solid var(--border);
+    transition: color 0.2s, background 0.2s;
+  }
+  #mobile-menu a:last-child { border-bottom: none; }
+  #mobile-menu a:active, #mobile-menu a:hover { color: var(--amber); background: rgba(245,158,11,0.06); }
 
   /* HERO */
   .hero { min-height: 100vh; display: flex; align-items: center; padding: 80px 1.5rem 4rem; position: relative; overflow: hidden; }
@@ -241,11 +271,23 @@
       <button id="nav-login-btn" onclick="openModal('login')" class="nav-cta" style="display:none;">Iniciar sesión</button>
       <a class="nav-cta" href="#descargar" id="nav-download-btn">Descargar APK</a>
     </div>
-    <button class="hamburger" onclick="document.querySelector('.nav-links').style.display='flex';document.querySelector('.nav-links').style.flexDirection='column';" aria-label="Menú">
+    <button class="hamburger" id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Menú">
       <span></span><span></span><span></span>
     </button>
   </div>
 </nav>
+
+<!-- MENÚ MÓVIL -->
+<div id="mobile-menu">
+  <a href="#caracteristicas" onclick="closeMobileMenu()">Características</a>
+  <a href="#tendencias"      onclick="closeMobileMenu()">Tendencias</a>
+  <a href="#generos"         onclick="closeMobileMenu()">Géneros</a>
+  <a href="#precios"         onclick="closeMobileMenu()">Precios</a>
+  <a href="#escuchar"        onclick="closeMobileMenu()">🎵 Escuchar</a>
+  <a href="#artistas"        onclick="closeMobileMenu()">Artistas</a>
+  <a href="#descargar"       onclick="closeMobileMenu()">⬇ Descargar APK</a>
+  <a href="#admin"           onclick="closeMobileMenu()">Admin</a>
+</div>
 
 <!-- MODAL LOGIN / REGISTRO -->
 <div id="auth-overlay" onclick="if(event.target===this)closeModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;align-items:center;justify-content:center;padding:1rem;">
@@ -295,6 +337,27 @@
     </div>
   </div>
 </div>
+
+<script>
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobile-menu');
+  const btn  = document.getElementById('hamburger-btn');
+  const isOpen = menu.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+}
+function closeMobileMenu() {
+  document.getElementById('mobile-menu').classList.remove('open');
+  document.getElementById('hamburger-btn').classList.remove('open');
+}
+// Cerrar menú al pulsar fuera
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('mobile-menu');
+  const btn  = document.getElementById('hamburger-btn');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+    closeMobileMenu();
+  }
+});
+</script>
 
 <script>
 const API_BASE = 'https://mbolamusic-apionrender.com/api';
