@@ -34,6 +34,8 @@ async function getActiveSubscription(userId) {
 // Intenta renovar una suscripción de oyente desde el wallet interno.
 // Devuelve la nueva suscripción, o null si no hay saldo suficiente.
 async function tryAutoRenew(userId, expiredSub) {
+  // Los periodos gratuitos no se auto-renuevan
+  if (expiredSub.type === 'ARTIST_FREE' || expiredSub.type === 'LISTENER_FREE') return null;
   const cost = expiredSub.type === 'ARTIST_MONTHLY'
     ? 10000
     : 2000; // LISTENER_MONTHLY
@@ -79,7 +81,9 @@ async function tryAutoRenew(userId, expiredSub) {
 async function createSubscription(userId, type) {
   const days = type === 'LISTENER_FREE'
     ? business.trials.listenerFreeDays
-    : business.subscriptionDurationDays;
+    : type === 'ARTIST_FREE'
+      ? business.trials.artistFreeDays
+      : business.subscriptionDurationDays;
 
   const sub = await prisma.subscription.create({
     data: {

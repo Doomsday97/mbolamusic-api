@@ -30,6 +30,9 @@ router.patch('/tracks/:id/toggle',         admin.togglePublish);
 // Migración de URLs de medios al CDN público
 router.post('/fix-media-urls',             admin.fixMediaUrls);
 
+// Dar prueba gratuita de 30 días a todos los artistas sin suscripción activa
+router.post('/fix-artist-trials',          admin.fixArtistTrials);
+
 // Usuarios conectados
 router.get('/online',                      admin.onlineUsers);
 

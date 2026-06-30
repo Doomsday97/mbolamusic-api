@@ -422,11 +422,32 @@ async function fixMediaUrls(req, res) {
   });
 }
 
+// POST /api/admin/fix-artist-trials
+// Da 30 días gratis a todos los artistas existentes que no tienen suscripción activa.
+async function fixArtistTrials(req, res) {
+  const subscriptionService = require('../services/subscriptionService');
+  const artists = await prisma.user.findMany({
+    where: { role: 'ARTIST' },
+    select: { id: true, username: true },
+  });
+
+  let fixed = 0;
+  for (const a of artists) {
+    const active = await subscriptionService.getActiveSubscription(a.id);
+    if (!active) {
+      await subscriptionService.createSubscription(a.id, 'ARTIST_FREE');
+      fixed++;
+    }
+  }
+
+  return ok(res, { fixed, total: artists.length });
+}
+
 module.exports = {
   stats, listUsers, getUser, updateUser, resetPassword,
   blockArtist, unblockArtist, listPayments,
   listAllTracks, listArtists, adminUploadTrack, adminDeleteTrack, togglePublish,
   onlineUsers, platformEarnings, platformWithdraw,
   subscriptionDistributions, runSubscriptionDistribution,
-  subscriptionConfig, monthlyReport, fixMediaUrls,
+  subscriptionConfig, monthlyReport, fixMediaUrls, fixArtistTrials,
 };

@@ -19,6 +19,7 @@ module.exports = {
 
   trials: {
     listenerFreeDays: 30,    // 1 mes gratis para oyentes nuevos
+    artistFreeDays: 30,      // 1 mes gratis para artistas nuevos
   },
 
   subscriptionDurationDays: 30, // duración de un ciclo de suscripción

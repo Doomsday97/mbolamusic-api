@@ -70,6 +70,10 @@ async function register(req, res) {
   if (d.role === 'LISTENER') {
     await subscriptionService.createSubscription(user.id, 'LISTENER_FREE');
   }
+  // Artista nuevo -> 30 días gratis automático para poder publicar desde el principio
+  if (d.role === 'ARTIST') {
+    await subscriptionService.createSubscription(user.id, 'ARTIST_FREE');
+  }
 
   // Crear código de referido propio para el nuevo usuario
   let myCode = genReferralCode();
