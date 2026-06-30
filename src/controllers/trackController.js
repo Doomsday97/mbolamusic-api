@@ -230,6 +230,35 @@ async function deleteTrack(req, res) {
   return ok(res, { deleted: true });
 }
 
+// PATCH /api/tracks/:id  -> editar metadatos (título, género, álbum, letra, carátula)
+async function updateTrack(req, res) {
+  const track = await prisma.track.findUnique({ where: { id: req.params.id } });
+  if (!track) return fail(res, 'No encontrada', 404);
+
+  const isAdmin = req.user.role === 'ADMIN';
+  const isOwner = req.user.artistProfile && track.artistId === req.user.artistProfile.id;
+  if (!isAdmin && !isOwner) return fail(res, 'No es tu canción', 403);
+
+  const { title, genre, album, lyrics } = req.body;
+  const data = {};
+  if (title)  data.title  = title;
+  if (genre)  data.genre  = genre;
+  if (album  !== undefined) data.album  = album;
+  if (lyrics !== undefined) data.lyrics = lyrics;
+
+  // Si se sube nueva carátula, reemplazar la anterior
+  const coverFile = req.files?.cover?.[0];
+  if (coverFile) {
+    if (track.coverUrl) storage.deleteFile(track.coverUrl).catch(() => {});
+    data.coverUrl = await storage.upload(coverFile);
+  }
+
+  if (Object.keys(data).length === 0) return fail(res, 'Sin cambios que guardar');
+
+  const updated = await prisma.track.update({ where: { id: track.id }, data });
+  return ok(res, { track: updated });
+}
+
 // GET /api/tracks/:id  -> info pública de una canción (player page)
 async function getTrack(req, res) {
   const track = await prisma.track.findFirst({
@@ -244,6 +273,6 @@ async function getTrack(req, res) {
 }
 
 module.exports = {
-  uploadTrack, listTracks, charts, myTracks, playTrack, deleteTrack,
+  uploadTrack, updateTrack, listTracks, charts, myTracks, playTrack, deleteTrack,
   feed, followArtist, unfollowArtist, myFollowing, getTrack,
 };

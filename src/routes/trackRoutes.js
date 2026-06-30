@@ -21,6 +21,12 @@ router.post(
   upload.fields([{ name: 'audio', maxCount: 1 }, { name: 'cover', maxCount: 1 }]),
   tracks.uploadTrack,
 );
+router.patch(
+  '/:id',
+  authenticate,
+  upload.fields([{ name: 'cover', maxCount: 1 }]),
+  tracks.updateTrack,
+);
 router.delete('/:id', authenticate, tracks.deleteTrack);
 
 // Reproducción (oyente)
