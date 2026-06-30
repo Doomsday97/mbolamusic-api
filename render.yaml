@@ -8,26 +8,55 @@ services:
     startCommand: npm run start:prod
     healthCheckPath: /health
     envVars:
-      # DATABASE_URL debe estar seteada manualmente en Render dashboard.
-      # sync: false indica que Render NO la sobrescribe en cada deploy.
+      # ── Base de datos ──────────────────────────────────────────────────────────
+      # Configurar manualmente en Render dashboard (Neon.tech connection string)
       - key: DATABASE_URL
         sync: false
+
+      # ── Servidor ──────────────────────────────────────────────────────────────
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
+
+      # ── Seguridad JWT ─────────────────────────────────────────────────────────
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRES_IN
         value: 30d
+
+      # ── CORS ─────────────────────────────────────────────────────────────────
+      # En producción no necesitamos orígenes extra: OWN_DOMAINS cubre la web.
+      # La APK envía peticiones sin Origin y también está permitida.
+      - key: ALLOWED_ORIGINS
+        value: ""
+
+      # ── Pagos ────────────────────────────────────────────────────────────────
       - key: PAYMENT_PROVIDER
         value: mock
-      # STORAGE: Cloudflare R2 / AWS S3. Las credenciales (S3_*) deben estar en el dashboard.
+      - key: BANK_NAME
+        value: BGFI Bank Guinea Ecuatorial
+      - key: BANK_ACCOUNT_NAME
+        value: "MbôláMusic SARL"
+      - key: BANK_ACCOUNT_NUMBER
+        value: "000000000000"
+      # Flutterwave: configurar en dashboard si se activa
+      - key: FLW_PUBLIC_KEY
+        sync: false
+      - key: FLW_SECRET_KEY
+        sync: false
+      - key: FLW_ENCRYPTION_KEY
+        sync: false
+      - key: FLW_WEBHOOK_HASH
+        sync: false
+
+      # ── Almacenamiento (Cloudflare R2) ────────────────────────────────────────
+      # sync: false = Render usa el valor del dashboard y NO lo sobreescribe en cada deploy.
+      # IMPORTANTE: cambiar STORAGE_PROVIDER a "s3" en el dashboard para activar R2.
       - key: STORAGE_PROVIDER
-        value: local
+        sync: false
       - key: UPLOAD_DIR
         value: uploads
-      # Cloudflare R2 / AWS S3 (solo necesario si STORAGE_PROVIDER=s3)
       - key: S3_BUCKET
         sync: false
       - key: S3_ENDPOINT
@@ -42,10 +71,5 @@ services:
         value: auto
       - key: S3_ACL
         value: public-read
-      - key: BANK_NAME
-        value: BGFI Bank Guinea Ecuatorial
-      - key: BANK_ACCOUNT_NAME
-        value: MbôláMusic SARL
-      - key: BANK_ACCOUNT_NUMBER
-        value: 000000000000
-
+      - key: S3_FORCE_PATH_STYLE
+        value: "false"

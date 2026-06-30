@@ -66,10 +66,13 @@ const allowedOrigins = rawOrigins
   .map(o => o.trim())
   .filter(Boolean);
 
-// Dominios propios siempre incluidos aunque la env var no los tenga
+// Dominios propios siempre permitidos aunque ALLOWED_ORIGINS esté vacía.
+// La APK no envía Origin y también está permitida (ver `if (!origin)` abajo).
 const OWN_DOMAINS = [
   'https://mbolamusic-apionrender.com',
   'https://www.mbolamusic-apionrender.com',
+  'https://mbolamusic.com',
+  'https://www.mbolamusic.com',
 ];
 const ALL_ORIGINS = [...new Set([...OWN_DOMAINS, ...allowedOrigins])];
 
