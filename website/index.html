@@ -1432,10 +1432,23 @@ function skeletonTrend() {
   </div>`;
 }
 
+// Ping silencioso para despertar el servidor antes de las peticiones de datos.
+// El plan gratuito de Render necesita hasta 60s para arrancar.
+(function wakeServer() {
+  fetch(API.replace('/api', '/health'), { method: 'GET', signal: AbortSignal.timeout(90000) }).catch(() => {});
+})();
+
 function fetchWithTimeout(url, ms) {
   const ctrl = new AbortController();
   const id = setTimeout(() => ctrl.abort(), ms);
   return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(id));
+}
+
+// Auto-retry transparente: espera `delay` ms y reintenta la llamada una vez.
+function fetchWithRetry(url, ms, delay) {
+  return fetchWithTimeout(url, ms).catch(() =>
+    new Promise(res => setTimeout(res, delay)).then(() => fetchWithTimeout(url, ms))
+  );
 }
 
 // ── Cargar tracks ─────────────────────────────────────────────────────────────
@@ -1444,7 +1457,7 @@ function loadTracks() {
   el.innerHTML = Array(8).fill(0).map(skeletonTrack).join('');
   const lang = localStorage.getItem('mbola_lang') || 'es';
   const tl = T[lang] || T['es'];
-  fetchWithTimeout(API + '/tracks?limit=48', 18000)
+  fetchWithRetry(API + '/tracks', 70000, 5000)
     .then(r => r.json())
     .then(j => {
       _allTracks = j?.data?.tracks || j?.data || [];
@@ -1463,14 +1476,14 @@ function loadTracks() {
 }
 loadTracks();
 
-// ── Cargar Tendencias ─────────────────────────────────────────────────────────
+// ── Cargar Tendencias (ordenadas por nº de reproducciones) ────────────────────
 function loadTrending() {
   const el = document.getElementById('trend-scroll');
   el.innerHTML = Array(6).fill(0).map(skeletonTrend).join('');
-  fetchWithTimeout(API + '/tracks?limit=12', 18000)
+  fetchWithRetry(API + '/tracks/charts', 70000, 5000)
     .then(r => r.json())
     .then(j => {
-      const tracks = j?.data?.tracks || j?.data || [];
+      const tracks = (j?.data?.tracks || j?.data || []).slice(0, 12);
       if (!tracks.length) { el.innerHTML = '<p style="color:var(--text2);opacity:.6;padding:1rem;">Sin datos disponibles.</p>'; return; }
       el.innerHTML = tracks.map(t => `
         <div onclick="window.location.href='/player.html?id=${t.id}'"
