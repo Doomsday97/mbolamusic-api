@@ -1432,11 +1432,8 @@ function skeletonTrend() {
   </div>`;
 }
 
-// Ping silencioso para despertar el servidor antes de las peticiones de datos.
-// El plan gratuito de Render necesita hasta 60s para arrancar.
-(function wakeServer() {
-  fetch(API.replace('/api', '/health'), { method: 'GET', signal: AbortSignal.timeout(90000) }).catch(() => {});
-})();
+// Ping silencioso para despertar el servidor (Render free tier puede tardar 60s).
+fetch(API.replace('/api', '/health')).catch(function() {});
 
 function fetchWithTimeout(url, ms) {
   const ctrl = new AbortController();
