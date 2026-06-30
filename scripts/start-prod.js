@@ -25,4 +25,13 @@ if (dbOk) {
   console.warn('[start:prod] ⚠ El servidor arrancara pero las peticiones a la DB fallaran.');
 }
 
+// RLS: idempotente, seguro ejecutar en cada arranque
+if (dbOk) {
+  try {
+    execSync('node scripts/setup-rls.js', { stdio: 'inherit', timeout: 30000 });
+  } catch (e) {
+    console.warn('[start:prod] ⚠ RLS con advertencia (no crítico):', e.message.split('\n')[0]);
+  }
+}
+
 require('../src/server.js');

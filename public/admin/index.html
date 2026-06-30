@@ -290,7 +290,7 @@ async function tryAutoLogin() {
 function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-  document.getElementById('admin-name').textContent = _user?.username || '';
+  document.getElementById('admin-name').textContent = (_user && _user.username) || '';
   loadStats();
 }
 
@@ -483,7 +483,7 @@ async function loadUsers(page = 1) {
         <td>${esc(u.username)}</td>
         <td>${esc(u.email || u.phone || '—')}</td>
         <td><span class="badge badge-${u.role.toLowerCase()}">${u.role}</span></td>
-        <td>${esc(u.artistProfile?.artistName || '—')}</td>
+        <td>${esc((u.artistProfile && u.artistProfile.artistName) || '—')}</td>
         <td>${fmt(u.walletBalance)} FCFA</td>
         <td>${new Date(u.createdAt).toLocaleDateString('es')}</td>
         <td>
@@ -494,7 +494,7 @@ async function loadUsers(page = 1) {
           ` : ''}
         </td>
       </tr>`).join('');
-    el.querySelector('.loading, .empty')?.remove();
+    var _toRemove = el.querySelector('.loading, .empty'); if (_toRemove) _toRemove.remove();
     el.innerHTML = `
       <div class="section-header">
         <h2>Usuarios <small style="color:var(--muted)">(${d.total})</small></h2>
@@ -550,7 +550,7 @@ async function viewUser(id) {
       artistSec.style.display = 'none';
     }
     document.getElementById('mu-stats').textContent =
-      `Rol: ${u.role} · Plays: ${u._count?.plays || 0} · Descargas: ${u._count?.downloads || 0} · Registro: ${new Date(u.createdAt).toLocaleDateString('es')}`;
+      `Rol: ${u.role} · Plays: ${(u._count && u._count.plays) || 0} · Descargas: ${(u._count && u._count.downloads) || 0} · Registro: ${new Date(u.createdAt).toLocaleDateString('es')}`;
     const txns = u.payments || [];
     if (!txns.length) {
       document.getElementById('mu-txns').innerHTML = '<div style="color:var(--muted);font-size:13px;">Sin transacciones</div>';
@@ -649,7 +649,7 @@ async function loadPayments(page = 1) {
     let rows = d.payments.map(p => `
       <tr>
         <td>${new Date(p.createdAt).toLocaleString('es')}</td>
-        <td>${esc(p.user?.username || '—')}</td>
+        <td>${esc((p.user && p.user.username) || '—')}</td>
         <td>${fmt(p.amount)} FCFA</td>
         <td>${p.method}</td>
         <td>${p.purpose}</td>
@@ -728,13 +728,13 @@ async function loadTracks() {
     const rows = td.tracks.map(t => `
       <tr>
         <td>
-          <button class="btn-sm btn-success" onclick="playTrack('${esc(t.audioUrl)}','${esc(t.title)}','${esc(t.artist?.artistName||'')}')">▶</button>
+          <button class="btn-sm btn-success" onclick="playTrack('${esc(t.audioUrl)}','${esc(t.title)}','${esc((t.artist && t.artist.artistName)||'')}')">▶</button>
         </td>
         <td>${esc(t.title)}</td>
-        <td>${esc(t.artist?.artistName || '—')}</td>
+        <td>${esc((t.artist && t.artist.artistName) || '—')}</td>
         <td>${esc(t.genre)}</td>
-        <td>${t._count?.plays || 0}</td>
-        <td>${t._count?.downloads || 0}</td>
+        <td>${(t._count && t._count.plays) || 0}</td>
+        <td>${(t._count && t._count.downloads) || 0}</td>
         <td>
           <span class="badge ${t.isPublished ? 'badge-done' : 'badge-failed'}">
             ${t.isPublished ? 'Publicada' : 'Oculta'}
@@ -973,7 +973,7 @@ async function loadChat() {
       div.className = 'chat-list-item';
       div.dataset.uid = c.user.id;
       const badge = c.unreadFromUser > 0 ? `<span class="cli-badge">${c.unreadFromUser}</span>` : '';
-      const preview = esc(c.lastMessage?.body || '');
+      const preview = esc((c.lastMessage && c.lastMessage.body) || '');
       div.innerHTML = `
         <div class="cli-name">${esc(c.user.username)} ${badge}</div>
         <div class="cli-preview">${preview}</div>`;
@@ -1096,7 +1096,7 @@ async function triggerSubDistribution() {
     const msg = [
       `✅ Reparto ${r.month} completado.`,
       `Suscriptores válidos: ${r.total}`,
-      `Procesados: ${r.processed} · Omitidos: ${r.skipped} · Errores: ${r.errors?.length || 0}`,
+      `Procesados: ${r.processed} · Omitidos: ${r.skipped} · Errores: ${(r.errors && r.errors.length) || 0}`,
       `Fondo total: ${fmt(r.totalFund)} FCFA`,
       `Admin (30%): ${fmt(r.adminEarnings)} FCFA`,
       `Artistas distribuido: ${fmt(r.artistDistributed)} FCFA`,
