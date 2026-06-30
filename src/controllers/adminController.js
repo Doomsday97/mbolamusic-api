@@ -363,11 +363,70 @@ async function platformWithdraw(req, res) {
   return ok(res, { payment, remaining: available - amount });
 }
 
+// POST /api/admin/fix-media-urls
+// Migra URLs antiguas (endpoint privado S3 o /uploads/) al CDN público actual.
+// Extrae el nombre de archivo de cualquier URL y lo reconstruye con CDN_BASE_URL.
+async function fixMediaUrls(req, res) {
+  const cdn = process.env.CDN_BASE_URL;
+  if (!cdn) return fail(res, 'CDN_BASE_URL no está configurado en las variables de entorno');
+
+  const base = cdn.replace(/\/$/, '');
+  const path = require('path');
+
+  // Extrae solo el filename de cualquier URL
+  function toNewUrl(url) {
+    if (!url) return url;
+    const filename = path.basename(url);
+    if (!filename || filename === url) return url; // URL relativa rara
+    return `${base}/${filename}`;
+  }
+
+  let trackAudio = 0, trackCover = 0, avatars = 0;
+
+  // Tracks
+  const tracks = await prisma.track.findMany({
+    select: { id: true, audioUrl: true, coverUrl: true },
+  });
+
+  for (const t of tracks) {
+    const newAudio = toNewUrl(t.audioUrl);
+    const newCover = toNewUrl(t.coverUrl);
+    const changed  = newAudio !== t.audioUrl || newCover !== t.coverUrl;
+    if (changed) {
+      await prisma.track.update({
+        where: { id: t.id },
+        data: { audioUrl: newAudio, coverUrl: newCover },
+      });
+      if (newAudio !== t.audioUrl) trackAudio++;
+      if (newCover !== t.coverUrl) trackCover++;
+    }
+  }
+
+  // Usuarios (avatarUrl)
+  const users = await prisma.user.findMany({
+    where: { avatarUrl: { not: null } },
+    select: { id: true, avatarUrl: true },
+  });
+
+  for (const u of users) {
+    const newAvatar = toNewUrl(u.avatarUrl);
+    if (newAvatar !== u.avatarUrl) {
+      await prisma.user.update({ where: { id: u.id }, data: { avatarUrl: newAvatar } });
+      avatars++;
+    }
+  }
+
+  return ok(res, {
+    fixed: { trackAudioUrls: trackAudio, trackCoverUrls: trackCover, avatarUrls: avatars },
+    cdnBase: base,
+  });
+}
+
 module.exports = {
   stats, listUsers, getUser, updateUser, resetPassword,
   blockArtist, unblockArtist, listPayments,
   listAllTracks, listArtists, adminUploadTrack, adminDeleteTrack, togglePublish,
   onlineUsers, platformEarnings, platformWithdraw,
   subscriptionDistributions, runSubscriptionDistribution,
-  subscriptionConfig, monthlyReport,
+  subscriptionConfig, monthlyReport, fixMediaUrls,
 };

@@ -27,6 +27,9 @@ router.post('/tracks',
 router.delete('/tracks/:id',               admin.adminDeleteTrack);
 router.patch('/tracks/:id/toggle',         admin.togglePublish);
 
+// Migración de URLs de medios al CDN público
+router.post('/fix-media-urls',             admin.fixMediaUrls);
+
 // Usuarios conectados
 router.get('/online',                      admin.onlineUsers);
 

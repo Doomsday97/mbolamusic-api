@@ -4,7 +4,7 @@ const { z } = require('zod');
 const prisma = require('../config/prisma');
 const { signToken } = require('../utils/jwt');
 const { ok, fail } = require('../utils/response');
-const { upload: uploadFile } = require('../services/storage');
+const { upload: uploadFile, rewriteUrl } = require('../services/storage');
 const fs = require('fs');
 const subscriptionService = require('../services/subscriptionService');
 
@@ -256,6 +256,8 @@ async function listArtists(req, res) {
 
 function sanitize(user) {
   const { passwordHash, ...rest } = user;
+  // Reescribir avatarUrl al CDN actual (corrige URLs privadas S3 antiguas)
+  if (rest.avatarUrl) rest.avatarUrl = rewriteUrl(rest.avatarUrl);
   return rest;
 }
 

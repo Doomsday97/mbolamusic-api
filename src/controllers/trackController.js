@@ -8,6 +8,17 @@ const paymentController = require('./paymentController');
 const AUDIO_EXTS = new Set(['.mp3', '.wav', '.ogg', '.flac', '.aac', '.m4a', '.opus', '.wma', '.mp4', '.webm']);
 const notif = require('./notificationController');
 
+// Reescribe audioUrl y coverUrl de cualquier track al CDN actual
+function rw(track) {
+  if (!track) return track;
+  return {
+    ...track,
+    audioUrl: storage.rewriteUrl(track.audioUrl),
+    coverUrl: storage.rewriteUrl(track.coverUrl),
+  };
+}
+function rwAll(tracks) { return tracks.map(rw); }
+
 // POST /api/tracks  (ARTIST con suscripción activa o ADMIN)  multipart: audio, cover
 async function uploadTrack(req, res) {
   const isAdmin = req.user.role === 'ADMIN';
@@ -81,7 +92,7 @@ async function uploadTrack(req, res) {
     }
   }
 
-  return ok(res, { track }, 201);
+  return ok(res, { track: rw(track) }, 201);
 }
 
 // GET /api/tracks?genre=...&search=...  -> catálogo público (solo publicadas)
@@ -97,7 +108,7 @@ async function listTracks(req, res) {
     orderBy: { releaseDate: 'desc' },
     take: 100,
   });
-  return ok(res, { tracks });
+  return ok(res, { tracks: rwAll(tracks) });
 }
 
 // GET /api/tracks/charts  -> top por reproducciones
@@ -108,7 +119,7 @@ async function charts(req, res) {
     orderBy: { playCount: 'desc' },
     take: 50,
   });
-  return ok(res, { tracks });
+  return ok(res, { tracks: rwAll(tracks) });
 }
 
 // GET /api/tracks/mine  -> catálogo del artista (incluye ocultas)
@@ -118,7 +129,7 @@ async function myTracks(req, res) {
     where: { artistId: req.user.artistProfile.id },
     orderBy: { createdAt: 'desc' },
   });
-  return ok(res, { tracks });
+  return ok(res, { tracks: rwAll(tracks) });
 }
 
 // POST /api/tracks/:id/play
@@ -138,7 +149,8 @@ async function playTrack(req, res) {
   }
 
   await paymentController.registerPlay(req.user.id, track, true);
-  return ok(res, { audioUrl: track.audioUrl, track });
+  const t = rw(track);
+  return ok(res, { audioUrl: t.audioUrl, track: t });
 }
 
 // GET /api/tracks/feed  -> últimas canciones de artistas que sigo
@@ -163,7 +175,7 @@ async function feed(req, res) {
     orderBy: { releaseDate: 'desc' },
     take: 50,
   });
-  return ok(res, { tracks });
+  return ok(res, { tracks: rwAll(tracks) });
 }
 
 // POST /api/tracks/follow/:userId  -> seguir a un artista
@@ -256,7 +268,7 @@ async function updateTrack(req, res) {
   if (Object.keys(data).length === 0) return fail(res, 'Sin cambios que guardar');
 
   const updated = await prisma.track.update({ where: { id: track.id }, data });
-  return ok(res, { track: updated });
+  return ok(res, { track: rw(updated) });
 }
 
 // GET /api/tracks/:id  -> info pública de una canción (player page)
@@ -269,7 +281,7 @@ async function getTrack(req, res) {
     },
   });
   if (!track) return fail(res, 'Canción no encontrada', 404);
-  return ok(res, { track });
+  return ok(res, { track: rw(track) });
 }
 
 module.exports = {

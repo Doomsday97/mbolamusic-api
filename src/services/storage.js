@@ -61,6 +61,23 @@ function s3PublicUrl(key) {
   return `${process.env.S3_ENDPOINT}/${process.env.S3_BUCKET}/${key}`;
 }
 
+/**
+ * Reescribe una URL almacenada al CDN público actual.
+ * Útil para corregir URLs antiguas (endpoint privado S3 o /uploads/) sin migración de BD.
+ * Solo actúa si CDN_BASE_URL está definido y la URL no lo usa ya.
+ */
+function rewriteUrl(url) {
+  if (!url) return url;
+  const cdn = process.env.CDN_BASE_URL;
+  if (!cdn) return url;
+  const base = cdn.replace(/\/$/, '');
+  if (url.startsWith(base)) return url; // ya es CDN
+  const path = require('path');
+  const filename = path.basename(url);
+  if (!filename) return url;
+  return `${base}/${filename}`;
+}
+
 // ── API pública ─────────────────────────────────────────────────────────────
 
 /**
@@ -118,4 +135,4 @@ async function deleteFile(url) {
   if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 }
 
-module.exports = { ensureDir, publicUrl, upload, deleteFile, UPLOAD_DIR };
+module.exports = { ensureDir, publicUrl, upload, deleteFile, rewriteUrl, UPLOAD_DIR };
