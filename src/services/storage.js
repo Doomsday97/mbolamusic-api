@@ -75,16 +75,18 @@ async function upload(file) {
     const key = file.filename;
     const fileStream = fs.createReadStream(file.path);
 
+    const uploadParams = {
+      Bucket: process.env.S3_BUCKET,
+      Key: key,
+      Body: fileStream,
+      ContentType: file.mimetype,
+    };
+    // ACL solo si está definido — Cloudflare R2 no admite ACL por objeto
+    if (process.env.S3_ACL) uploadParams.ACL = process.env.S3_ACL;
+
     const managed = new Upload({
       client: getS3Client(),
-      params: {
-        Bucket: process.env.S3_BUCKET,
-        Key: key,
-        Body: fileStream,
-        ContentType: file.mimetype,
-        // "public-read" permite acceso directo sin firma; usa "private" + CDN si prefieres
-        ACL: process.env.S3_ACL || 'public-read',
-      },
+      params: uploadParams,
     });
 
     await managed.done();

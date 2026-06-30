@@ -118,7 +118,12 @@ jobs:
             echo "APK sin cambios, nada que publicar."
           else
             git commit -m "chore: actualizar APK desde build automatico [skip ci]"
-            git pull --rebase origin main
+            # Si dos builds concurrentes colisionan en el APK binario, tomar nuestra version (recien compilada)
+            git pull --rebase origin main || {
+              git checkout --theirs website/mbolamusic.apk
+              git add website/mbolamusic.apk
+              GIT_EDITOR=true git rebase --continue
+            }
             git push origin main
           fi
           echo "Listo. APK disponible en website/mbolamusic.apk"
