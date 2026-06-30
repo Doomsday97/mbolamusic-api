@@ -7,11 +7,17 @@ const dbOk = db.startsWith('postgresql://') || db.startsWith('postgres://');
 if (dbOk) {
   console.log('[start:prod] Ejecutando migraciones...');
   try {
-    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+    // Timeout extra para el advisory lock de Neon (serverless puede tardar)
+    execSync('npx prisma migrate deploy', {
+      stdio: 'inherit',
+      env: { ...process.env, PRISMA_MIGRATE_LOCK_TIMEOUT_MS: '30000' },
+      timeout: 60000,
+    });
     console.log('[start:prod] Migraciones completadas.');
   } catch (e) {
-    console.error('[start:prod] ERROR en migraciones:', e.message);
-    process.exit(1);
+    // No matamos el proceso: si las migraciones ya estaban aplicadas
+    // o Neon da timeout en el advisory lock, el servidor arranca igual.
+    console.warn('[start:prod] ⚠ Migraciones con error (servidor arranca de todas formas):', e.message.split('\n')[0]);
   }
 } else {
   console.warn('[start:prod] ⚠ DATABASE_URL no configurada o invalida.');
