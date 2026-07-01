@@ -36,4 +36,7 @@ module.exports = {
 
   // Umbral mínimo de ganancias acumuladas para efectuar el pago al artista
   payoutThreshold: 5000, // FCFA
+
+  // Monto mínimo permitido para recargar o retirar el monedero
+  minTransferAmount: 50, // FCFA
 };

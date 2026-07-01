@@ -164,6 +164,7 @@ async function getMonthlyWalletTotal(userId) {
 async function walletTopup(req, res) {
   const { amount, method } = req.body;
   if (!amount || amount <= 0) return fail(res, 'Monto inválido');
+  if (amount < business.minTransferAmount) return fail(res, `El monto mínimo es ${business.minTransferAmount} FCFA`);
   if (amount > MONTHLY_WALLET_LIMIT) return fail(res, `El monto máximo por operación es ${MONTHLY_WALLET_LIMIT} FCFA`);
 
   // Comprobar límite mensual
@@ -196,6 +197,7 @@ async function artistEarningsWithdraw(req, res) {
   if (req.user.role !== 'ARTIST') return fail(res, 'Solo artistas pueden retirar ganancias', 403);
   const { amount } = req.body;
   if (!amount || amount <= 0) return fail(res, 'Monto inválido');
+  if (amount < business.minTransferAmount) return fail(res, `El monto mínimo para retirar es ${business.minTransferAmount} FCFA`);
 
   const profile = await prisma.artistProfile.findUnique({ where: { userId: req.user.id } });
   if (!profile) return fail(res, 'Perfil de artista no encontrado', 404);
@@ -229,6 +231,7 @@ async function artistEarningsWithdraw(req, res) {
 async function walletWithdraw(req, res) {
   const { amount } = req.body;
   if (!amount || amount <= 0) return fail(res, 'Monto inválido');
+  if (amount < business.minTransferAmount) return fail(res, `El monto mínimo para retirar es ${business.minTransferAmount} FCFA`);
   if (amount > MONTHLY_WALLET_LIMIT) return fail(res, `El monto máximo por operación es ${MONTHLY_WALLET_LIMIT} FCFA`);
 
   const user = await prisma.user.findUnique({ where: { id: req.user.id } });
