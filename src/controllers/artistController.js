@@ -6,27 +6,46 @@ const subscriptionService = require('../services/subscriptionService');
 async function dashboard(req, res) {
   if (!req.user.artistProfile) return fail(res, 'No eres artista', 403);
   const artistId = req.user.artistProfile.id;
+  const userId   = req.user.id;
 
-  const [trackCount, agg, sub] = await Promise.all([
-    prisma.track.count({ where: { artistId } }),
-    prisma.track.aggregate({
-      where: { artistId },
-      _sum: { playCount: true, downloadCount: true },
-    }),
-    subscriptionService.getActiveSubscription(req.user.id),
-  ]);
+  const now          = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfYear  = new Date(now.getFullYear(), 0, 1);
 
-  // Oyentes por ciudad (top 5)
-  const tracks = await prisma.track.findMany({
-    where: { artistId },
-    select: { id: true },
-  });
-  const trackIds = tracks.map((t) => t.id);
+  const [trackCount, agg, sub, followerCount, monthlyListenerRows, yearlyListenerRows, trackLikesData] =
+    await Promise.all([
+      prisma.track.count({ where: { artistId } }),
+      prisma.track.aggregate({
+        where: { artistId },
+        _sum: { playCount: true, downloadCount: true, likeCount: true },
+      }),
+      subscriptionService.getActiveSubscription(userId),
+      prisma.follow.count({ where: { followingId: userId } }),
+      // Oyentes únicos este mes
+      prisma.play.findMany({
+        where: { artistId, createdAt: { gte: startOfMonth } },
+        select: { userId: true },
+        distinct: ['userId'],
+      }),
+      // Oyentes únicos este año
+      prisma.play.findMany({
+        where: { artistId, createdAt: { gte: startOfYear } },
+        select: { userId: true },
+        distinct: ['userId'],
+      }),
+      // Likes por canción
+      prisma.track.findMany({
+        where: { artistId },
+        select: { id: true, title: true, likeCount: true, playCount: true },
+        orderBy: { likeCount: 'desc' },
+      }),
+    ]);
 
+  // Oyentes por ciudad (top 5) — usar artistId directamente
   const playsByCity = await prisma.play.findMany({
-    where: { trackId: { in: trackIds } },
+    where: { artistId },
     include: { user: { select: { city: true } } },
-    take: 1000,
+    take: 2000,
   });
   const cityCount = {};
   for (const p of playsByCity) {
@@ -41,12 +60,23 @@ async function dashboard(req, res) {
   return ok(res, {
     subscriptionActive: !!sub,
     subscriptionEndsAt: sub?.endDate || null,
-    totalTracks: trackCount,
-    totalPlays: agg._sum.playCount || 0,
+    subscriptionType: sub?.type || null,
+    followerCount,
+    monthlyListeners: monthlyListenerRows.length,
+    yearlyListeners:  yearlyListenerRows.length,
+    totalTracks:    trackCount,
+    totalPlays:     agg._sum.playCount     || 0,
     totalDownloads: agg._sum.downloadCount || 0,
-    totalEarnings: req.user.artistProfile.totalEarnings,
+    totalLikes:     agg._sum.likeCount     || 0,
+    totalEarnings:  req.user.artistProfile.totalEarnings,
     currency: 'FCFA',
     topCities,
+    trackLikes: trackLikesData.map((t) => ({
+      id: t.id,
+      title: t.title,
+      likeCount: t.likeCount,
+      playCount: t.playCount,
+    })),
   });
 }
 

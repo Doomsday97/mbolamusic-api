@@ -284,7 +284,56 @@ async function getTrack(req, res) {
   return ok(res, { track: rw(track) });
 }
 
+// POST /api/tracks/:id/like  -> da o quita "me gusta" (toggle)
+async function toggleLike(req, res) {
+  const userId  = req.user.id;
+  const trackId = req.params.id;
+
+  const existing = await prisma.trackLike.findUnique({
+    where: { userId_trackId: { userId, trackId } },
+  });
+
+  if (existing) {
+    await prisma.$transaction([
+      prisma.trackLike.delete({ where: { userId_trackId: { userId, trackId } } }),
+      prisma.track.update({ where: { id: trackId }, data: { likeCount: { decrement: 1 } } }),
+    ]);
+    return ok(res, { liked: false });
+  } else {
+    await prisma.$transaction([
+      prisma.trackLike.create({ data: { userId, trackId } }),
+      prisma.track.update({ where: { id: trackId }, data: { likeCount: { increment: 1 } } }),
+    ]);
+    return ok(res, { liked: true });
+  }
+}
+
+// GET /api/tracks/:id/liked  -> ¿el usuario actual ha dado like?
+async function isLiked(req, res) {
+  const existing = await prisma.trackLike.findUnique({
+    where: { userId_trackId: { userId: req.user.id, trackId: req.params.id } },
+  });
+  return ok(res, { liked: !!existing });
+}
+
+// GET /api/tracks/liked  -> canciones con like del usuario
+async function likedTracks(req, res) {
+  const likes = await prisma.trackLike.findMany({
+    where: { userId: req.user.id },
+    include: {
+      track: {
+        include: { artist: { select: { artistName: true, userId: true } } },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 100,
+  });
+  const tracks = likes.filter((l) => l.track.isPublished).map((l) => rw(l.track));
+  return ok(res, { tracks });
+}
+
 module.exports = {
   uploadTrack, updateTrack, listTracks, charts, myTracks, playTrack, deleteTrack,
   feed, followArtist, unfollowArtist, myFollowing, getTrack,
+  toggleLike, isLiked, likedTracks,
 };

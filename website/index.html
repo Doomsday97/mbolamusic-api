@@ -69,6 +69,9 @@
   }
   #mobile-menu a:last-child { border-bottom: none; }
   #mobile-menu a:active, #mobile-menu a:hover { color: var(--amber); background: rgba(245,158,11,0.06); }
+  #mobile-menu-auth { border-top: 2px solid rgba(245,158,11,0.25) !important; margin-top: 4px; }
+  #mobile-menu-auth.login-btn { color: var(--amber) !important; font-weight: 700 !important; }
+  #mobile-menu-auth.account-btn { color: var(--text) !important; }
 
   /* HERO */
   .hero { min-height: 100vh; display: flex; align-items: center; padding: 80px 1.5rem 4rem; position: relative; overflow: hidden; }
@@ -287,6 +290,8 @@
   <a href="#artistas"        onclick="closeMobileMenu()">Artistas</a>
   <a href="#descargar"       onclick="closeMobileMenu()">⬇ Descargar APK</a>
   <a href="#admin"           onclick="closeMobileMenu()">Admin</a>
+  <!-- Auth dinámica — se actualiza desde updateNavAuth() -->
+  <a id="mobile-menu-auth" href="#" class="login-btn" onclick="mobilMenuAuthClick();return false;">🔑 Iniciar sesión</a>
 </div>
 
 <!-- MODAL LOGIN / REGISTRO -->
@@ -547,6 +552,8 @@ function updateNavAuth() {
   const navUser = document.getElementById('nav-user');
   const navLogin = document.getElementById('nav-login-btn');
   const navDownload = document.getElementById('nav-download-btn');
+  const mobileAuthLink = document.getElementById('mobile-menu-auth');
+
   if (token && user.username) {
     navUser.style.display = 'flex';
     navLogin.style.display = 'none';
@@ -566,10 +573,31 @@ function updateNavAuth() {
     } else {
       navAv.textContent = (user.username || '?')[0].toUpperCase();
     }
+    // Menú móvil: mostrar cuenta del usuario
+    if (mobileAuthLink) {
+      mobileAuthLink.textContent = '👤 ' + user.username + ' — Mi cuenta';
+      mobileAuthLink.className = 'account-btn';
+    }
   } else {
     navUser.style.display = 'none';
     navLogin.style.display = '';
     navDownload.style.display = '';
+    // Menú móvil: mostrar botón de login
+    if (mobileAuthLink) {
+      mobileAuthLink.textContent = '🔑 Iniciar sesión';
+      mobileAuthLink.className = 'login-btn';
+    }
+  }
+}
+
+function mobilMenuAuthClick() {
+  closeMobileMenu();
+  const token = localStorage.getItem('mbola_token');
+  const user  = JSON.parse(localStorage.getItem('mbola_user') || '{}');
+  if (token && user.username) {
+    openMiCuenta();
+  } else {
+    openModal('login');
   }
 }
 
@@ -1783,6 +1811,27 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
       <button id="mc-subscribe-btn" onclick="closeMiCuenta();openSubscribeModal();" style="display:none;width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.9rem;cursor:pointer;">Suscribirme — 2.000 FCFA/mes</button>
     </div>
 
+    <!-- Artista: plan de suscripción -->
+    <div id="mc-artist-sub-section" style="display:none;margin-bottom:1.25rem;">
+      <div style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.6rem;">Plan de artista</div>
+      <div style="background:linear-gradient(135deg,#1a3a2a,#0f2018);border:1px solid rgba(74,222,128,0.2);border-radius:14px;padding:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:1.2rem;">🎤</span>
+            <span style="font-weight:700;color:var(--text);font-size:0.95rem;">Plan Artista</span>
+          </div>
+          <span id="mc-artist-sub-badge" style="font-size:0.7rem;padding:3px 10px;border-radius:20px;font-weight:700;"></span>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:6px;">
+          <span style="font-size:1.8rem;font-weight:800;color:var(--amber);">10.000</span>
+          <span style="font-size:0.82rem;color:var(--text2);padding-bottom:4px;">FCFA / mes</span>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text2);margin-bottom:10px;">31 días · Subida de música ilimitada · 70% de ganancias</div>
+        <div id="mc-artist-sub-expiry" style="font-size:0.8rem;color:#4ade80;margin-bottom:14px;display:none;"></div>
+        <button onclick="closeMiCuenta();openArtistSubscribeModal();" style="width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.88rem;cursor:pointer;" id="mc-artist-pay-btn">Pagar suscripción — 10.000 FCFA →</button>
+      </div>
+    </div>
+
     <!-- Artista: subir música -->
     <div id="mc-upload-section" style="display:none;margin-bottom:1.25rem;">
       <button onclick="closeMiCuenta();openUploadModal();" style="width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;">🎵 Subir nueva canción</button>
@@ -1795,6 +1844,12 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
         <span id="mc-tracks-count" style="font-size:0.75rem;color:var(--text2);"></span>
       </div>
       <div id="mc-tracks-list" style="display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;padding-right:2px;"></div>
+    </div>
+
+    <!-- Artista: estadísticas (seguidores, oyentes, likes) -->
+    <div id="mc-artist-stats-section" style="display:none;margin-bottom:1.25rem;">
+      <div style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.6rem;">Estadísticas</div>
+      <div id="mc-artist-stats"></div>
     </div>
 
     <!-- Artista: ganancias -->
@@ -1983,6 +2038,39 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
 </div>
 
 <!-- ════════════════════════════════════════════════════════════
+     SUSCRIPCIÓN ARTISTA MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="artist-subscribe-overlay" onclick="if(event.target===this)closeArtistSubscribeModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:11500;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:420px;position:relative;">
+    <button onclick="closeArtistSubscribeModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;line-height:1;">✕</button>
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.4rem;color:var(--amber);">🎤 Suscripción Artista</h3>
+    <p style="font-size:0.85rem;color:var(--text2);margin-bottom:1.5rem;">10.000 FCFA / 31 días · Sube música ilimitada · Gana el 70%</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Método de pago</label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;">
+        <input type="radio" name="artist-sub-method" value="BANK_TRANSFER" checked style="accent-color:var(--amber);">
+        <span style="color:var(--text);font-size:0.9rem;">🏦 Transferencia bancaria</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;">
+        <input type="radio" name="artist-sub-method" value="SIM_BALANCE" style="accent-color:var(--amber);">
+        <span style="color:var(--text);font-size:0.9rem;">📱 Saldo SIM / Mobile Money</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;">
+        <input type="radio" name="artist-sub-method" value="WALLET" style="accent-color:var(--amber);">
+        <span style="color:var(--text);font-size:0.9rem;">💰 Monedero interno</span>
+      </label>
+    </div>
+    <div style="padding:12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:10px;font-size:0.82rem;color:var(--text2);margin-bottom:1rem;line-height:1.6;">
+      Banco: <strong style="color:var(--text)">BGFI Bank Guinea Ecuatorial</strong><br>
+      Titular: <strong style="color:var(--text)">MbôláMusic SARL</strong><br>
+      Concepto: <strong style="color:var(--text)">ARTISTA + tu usuario</strong>
+    </div>
+    <div id="asm-result" style="display:none;padding:12px;border-radius:10px;font-size:0.85rem;margin-bottom:1rem;"></div>
+    <button id="asm-btn" onclick="doArtistSubscribeWeb()" style="width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:0.95rem;cursor:pointer;">Pagar 10.000 FCFA →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
      RECARGAR / RETIRAR MODAL
 ════════════════════════════════════════════════════════════ -->
 <div id="wallet-overlay" onclick="if(event.target===this)closeWalletModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:11500;align-items:center;justify-content:center;padding:1rem;">
@@ -2033,47 +2121,138 @@ async function openMiCuenta() {
   document.getElementById('mc-balance-val').textContent = (user.walletBalance != null ? user.walletBalance : 0) + ' FCFA';
 
   // Suscripción
+  const artistSubSec = document.getElementById('mc-artist-sub-section');
+  const listenerSubBtn = document.getElementById('mc-subscribe-btn');
   try {
     const sr = await fetch(API_BASE + '/payments/subscription/current', { headers: { Authorization: 'Bearer ' + token } });
     const sj = await sr.json();
     const sub = sj && sj.data && sj.data.subscription;
     const badge = document.getElementById('mc-sub-badge');
     const info  = document.getElementById('mc-sub-info');
-    const btn   = document.getElementById('mc-subscribe-btn');
-    if (sub && sub.status === 'ACTIVE') {
-      badge.textContent = '✅ Activa';
-      badge.style.background = 'rgba(74,222,128,0.15)';
-      badge.style.color = '#4ade80';
-      const end = new Date(sub.endDate).toLocaleDateString();
-      const typeLabel = sub.type === 'LISTENER_FREE' ? 'Prueba gratis' : sub.type === 'LISTENER_MONTHLY' ? 'Mensual' : 'Artista mensual';
-      info.textContent = typeLabel + ' · Vence el ' + end;
-      btn.style.display = 'none';
+
+    if (user.role === 'ARTIST') {
+      // Artista: ocultar sección oyente, mostrar sección artista
+      listenerSubBtn.style.display = 'none';
+      artistSubSec.style.display = '';
+      const artistBadge  = document.getElementById('mc-artist-sub-badge');
+      const artistExpiry = document.getElementById('mc-artist-sub-expiry');
+      const artistPayBtn = document.getElementById('mc-artist-pay-btn');
+      if (sub && sub.status === 'ACTIVE') {
+        badge.textContent = '✅ Activa'; badge.style.background = 'rgba(74,222,128,0.15)'; badge.style.color = '#4ade80';
+        artistBadge.textContent = 'ACTIVO'; artistBadge.style.background = 'rgba(74,222,128,0.15)'; artistBadge.style.color = '#4ade80';
+        const endsAt = new Date(sub.endDate);
+        const diff = Math.ceil((endsAt - new Date()) / 86400000);
+        artistExpiry.style.display = '';
+        artistExpiry.textContent = diff > 0 ? '⏰ Vence en ' + diff + ' días (' + endsAt.toLocaleDateString() + ')' : '⚠ Vence hoy';
+        artistExpiry.style.color = diff <= 7 ? 'var(--amber)' : '#4ade80';
+        info.textContent = 'Plan artista activo · Vence el ' + endsAt.toLocaleDateString();
+        artistPayBtn.textContent = '🔄 Renovar plan — 10.000 FCFA →';
+        artistPayBtn.style.background = 'rgba(245,158,11,0.7)';
+      } else {
+        badge.textContent = '⚠ Sin plan'; badge.style.background = 'rgba(251,191,36,0.12)'; badge.style.color = 'var(--amber)';
+        artistBadge.textContent = 'INACTIVO'; artistBadge.style.background = 'rgba(248,113,113,0.15)'; artistBadge.style.color = '#f87171';
+        artistExpiry.style.display = 'none';
+        info.textContent = 'Necesitas suscripción de artista para publicar música.';
+        artistPayBtn.textContent = '✅ Activar plan — 10.000 FCFA →';
+        artistPayBtn.style.background = 'var(--amber)';
+      }
     } else {
-      badge.textContent = user.role === 'ARTIST' ? '—' : '⚠ Sin plan';
-      badge.style.background = 'rgba(251,191,36,0.12)';
-      badge.style.color = 'var(--amber)';
-      info.textContent = user.role === 'LISTENER' ? 'No tienes una suscripción activa.' : 'Necesitas suscripción de artista para publicar música.';
-      if (user.role === 'LISTENER') btn.style.display = '';
+      // Oyente: ocultar sección artista
+      artistSubSec.style.display = 'none';
+      if (sub && sub.status === 'ACTIVE') {
+        const endDate = new Date(sub.endDate);
+        const diffDays = Math.ceil((endDate - new Date()) / 86400000);
+        const isFreeTrial = sub.type === 'LISTENER_FREE';
+        const isMonthly   = sub.type === 'LISTENER_MONTHLY';
+        const typeLabel = isFreeTrial ? '🎁 Prueba gratuita' : isMonthly ? '⭐ Suscripción mensual' : '✅ Plan activo';
+        const daysText = diffDays > 0 ? diffDays + ' días restantes' : 'Vence hoy';
+        const daysColor = diffDays <= 5 ? '#f87171' : '#4ade80';
+        badge.textContent = '✅ Activa'; badge.style.background = 'rgba(74,222,128,0.15)'; badge.style.color = '#4ade80';
+        info.innerHTML =
+          `<div style="font-weight:600;color:var(--text);margin-bottom:4px;">${typeLabel}</div>` +
+          (isFreeTrial ? `<div style="font-size:0.78rem;color:var(--text2);margin-bottom:6px;">30 días gratis — <strong>válido una sola vez al registrarte</strong></div>` : isMonthly ? `<div style="font-size:0.78rem;color:var(--text2);margin-bottom:6px;">Escucha ilimitada · Sin anuncios · 2.000 FCFA/mes</div>` : '') +
+          `<div style="display:flex;align-items:center;gap:6px;font-size:0.82rem;"><span style="color:${daysColor};font-weight:700;">⏰ ${daysText}</span><span style="color:var(--text2);">· Hasta el ${endDate.toLocaleDateString()}</span></div>` +
+          (isFreeTrial ? `<div style="margin-top:10px;padding:8px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;font-size:0.78rem;color:var(--amber);">💡 Al terminar la prueba, elige entre suscripción mensual (2.000 FCFA) o pago por uso (50 FCFA/reproducción).</div>` : '');
+        listenerSubBtn.style.display = isFreeTrial ? '' : 'none';
+        if (isFreeTrial) listenerSubBtn.textContent = '⭐ Activar suscripción mensual — 2.000 FCFA/mes';
+      } else {
+        badge.textContent = '⚠ Sin plan'; badge.style.background = 'rgba(251,191,36,0.12)'; badge.style.color = 'var(--amber)';
+        info.innerHTML =
+          `<div style="font-weight:600;color:var(--text);margin-bottom:4px;">Sin suscripción activa</div>` +
+          `<div style="font-size:0.78rem;color:var(--text2);margin-bottom:6px;">Modo pago por uso: 50 FCFA/reproducción · 200 FCFA/descarga</div>` +
+          `<div style="font-size:0.78rem;color:var(--text2);">Suscríbete para escuchar ilimitado sin interrupciones.</div>`;
+        listenerSubBtn.style.display = '';
+        listenerSubBtn.textContent = 'Suscribirme — 2.000 FCFA/mes';
+      }
     }
   } catch(_) {
     document.getElementById('mc-sub-info').textContent = 'No se pudo cargar la suscripción.';
+    artistSubSec.style.display = user.role === 'ARTIST' ? '' : 'none';
+    listenerSubBtn.style.display = user.role === 'LISTENER' ? '' : 'none';
   }
 
   // Artista: botón subir + ganancias
-  const uploadSec = document.getElementById('mc-upload-section');
-  const artistSec = document.getElementById('mc-artist-section');
+  const uploadSec     = document.getElementById('mc-upload-section');
+  const artistSec     = document.getElementById('mc-artist-section');
+  const artistStatsSec = document.getElementById('mc-artist-stats-section');
   if (user.role === 'ARTIST') {
     uploadSec.style.display = '';
     artistSec.style.display = '';
+    if (artistStatsSec) artistStatsSec.style.display = '';
     try {
       const pr = await fetch(API_BASE + '/artist/dashboard', { headers: { Authorization: 'Bearer ' + token } });
       const pj = await pr.json();
-      const earnings = (pj && pj.data && pj.data.totalEarnings != null ? pj.data.totalEarnings : (pj && pj.data && pj.data.availableEarnings != null ? pj.data.availableEarnings : 0));
+      const d = pj && pj.data ? pj.data : {};
+      const earnings = d.totalEarnings != null ? d.totalEarnings : (d.availableEarnings != null ? d.availableEarnings : 0);
       document.getElementById('mc-earnings-val').textContent = earnings + ' FCFA';
+      // Estadísticas del artista
+      const statsEl = document.getElementById('mc-artist-stats');
+      if (statsEl) {
+        const fmtNum = n => n >= 1000000 ? (n/1000000).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(1)+'k' : n;
+        statsEl.innerHTML =
+          `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">` +
+          `<div style="text-align:center;padding:10px 4px;background:rgba(255,255,255,0.04);border-radius:10px;"><div style="font-size:1.1rem;font-weight:800;color:var(--amber);">${fmtNum(d.followerCount||0)}</div><div style="font-size:0.7rem;color:var(--text2);margin-top:2px;">Seguidores</div></div>` +
+          `<div style="text-align:center;padding:10px 4px;background:rgba(255,255,255,0.04);border-radius:10px;"><div style="font-size:1.1rem;font-weight:800;color:var(--amber);">${fmtNum(d.monthlyListeners||0)}</div><div style="font-size:0.7rem;color:var(--text2);margin-top:2px;">Oyentes/mes</div></div>` +
+          `<div style="text-align:center;padding:10px 4px;background:rgba(255,255,255,0.04);border-radius:10px;"><div style="font-size:1.1rem;font-weight:800;color:var(--amber);">${fmtNum(d.yearlyListeners||0)}</div><div style="font-size:0.7rem;color:var(--text2);margin-top:2px;">Oyentes/año</div></div>` +
+          `<div style="text-align:center;padding:10px 4px;background:rgba(255,255,255,0.04);border-radius:10px;"><div style="font-size:1.1rem;font-weight:800;color:var(--amber);">${fmtNum(d.totalTracks||0)}</div><div style="font-size:0.7rem;color:var(--text2);margin-top:2px;">Canciones</div></div>` +
+          `<div style="text-align:center;padding:10px 4px;background:rgba(255,255,255,0.04);border-radius:10px;"><div style="font-size:1.1rem;font-weight:800;color:#f87171;">${fmtNum(d.totalLikes||0)}</div><div style="font-size:0.7rem;color:var(--text2);margin-top:2px;">Me gustas</div></div>` +
+          `<div style="text-align:center;padding:10px 4px;background:rgba(255,255,255,0.04);border-radius:10px;"><div style="font-size:1.1rem;font-weight:800;color:var(--amber);">${fmtNum(d.totalDownloads||0)}</div><div style="font-size:0.7rem;color:var(--text2);margin-top:2px;">Descargas</div></div>` +
+          `</div>`;
+        // Top canciones por me gustas
+        if (d.trackLikes && d.trackLikes.length > 0) {
+          const topLiked = d.trackLikes.slice(0,5);
+          const maxL = topLiked[0].likeCount || 1;
+          statsEl.innerHTML += `<div style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:8px;">❤ Me gustas por canción</div>` +
+            topLiked.map(t => {
+              const pct = (t.likeCount / maxL * 100).toFixed(0);
+              return `<div style="margin-bottom:8px;">` +
+                `<div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-size:0.82rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%;">${t.title}</span><span style="font-size:0.78rem;color:#f87171;font-weight:700;">❤ ${t.likeCount}</span></div>` +
+                `<div style="height:3px;background:rgba(255,255,255,0.08);border-radius:2px;"><div style="height:3px;width:${pct}%;background:#f87171;border-radius:2px;"></div></div>` +
+                `</div>`;
+            }).join('');
+        }
+      }
+      // Mostrar "Período de prueba" si es ARTIST_FREE
+      const subType = d.subscriptionType;
+      const artistPayBtn = document.getElementById('mc-artist-pay-btn');
+      if (subType === 'ARTIST_FREE' && artistPayBtn) {
+        artistPayBtn.textContent = '✅ Activar plan de pago — 10.000 FCFA →';
+        const trialBadge = document.getElementById('mc-artist-sub-badge');
+        if (trialBadge) { trialBadge.textContent = 'PRUEBA GRATIS'; trialBadge.style.background = 'rgba(245,158,11,0.15)'; trialBadge.style.color = 'var(--amber)'; }
+        const expiry = document.getElementById('mc-artist-sub-expiry');
+        if (expiry && pj.data.subscriptionEndsAt) {
+          const d = new Date(pj.data.subscriptionEndsAt);
+          const diff = Math.ceil((d - new Date()) / 86400000);
+          expiry.textContent = '🎁 Prueba gratuita: ' + (diff > 0 ? diff + ' días restantes' : 'vence hoy');
+          expiry.style.color = diff <= 7 ? 'var(--amber)' : '#4ade80';
+          expiry.style.display = '';
+        }
+      }
     } catch(_) { document.getElementById('mc-earnings-val').textContent = '— FCFA'; }
   } else {
     uploadSec.style.display = 'none';
     artistSec.style.display = 'none';
+    if (artistStatsSec) artistStatsSec.style.display = 'none';
   }
 
   // Artista: cargar canciones
@@ -2232,6 +2411,58 @@ function openSubscribeModal() {
   document.getElementById('subscribe-overlay').style.display = 'flex';
 }
 function closeSubscribeModal() { document.getElementById('subscribe-overlay').style.display = 'none'; }
+
+function openArtistSubscribeModal() {
+  const token = localStorage.getItem('mbola_token');
+  if (!token) { openModal('login'); return; }
+  document.getElementById('asm-result').style.display = 'none';
+  document.getElementById('asm-btn').disabled = false;
+  document.getElementById('asm-btn').textContent = 'Pagar 10.000 FCFA →';
+  document.querySelector('input[name="artist-sub-method"][value="BANK_TRANSFER"]').checked = true;
+  document.getElementById('artist-subscribe-overlay').style.display = 'flex';
+}
+function closeArtistSubscribeModal() { document.getElementById('artist-subscribe-overlay').style.display = 'none'; }
+
+async function doArtistSubscribeWeb() {
+  const token  = localStorage.getItem('mbola_token');
+  const _checked = document.querySelector('input[name="artist-sub-method"]:checked');
+  const method = _checked ? _checked.value : 'BANK_TRANSFER';
+  const res    = document.getElementById('asm-result');
+  const btn    = document.getElementById('asm-btn');
+  btn.disabled = true; btn.textContent = 'Procesando…';
+  res.style.display = 'none';
+  try {
+    const r = await fetch(API_BASE + '/payments/artist-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ method }),
+    });
+    const j = await r.json();
+    if (!j.success) throw new Error(j.error || 'Error');
+    const status = j.data && j.data.result && j.data.result.status;
+    res.style.display = '';
+    if (status === 'COMPLETED') {
+      res.style.background = 'rgba(74,222,128,0.1)'; res.style.color = '#4ade80';
+      res.textContent = '✅ ¡Suscripción de artista activada! Ya puedes subir música.';
+    } else {
+      res.style.background = 'rgba(245,158,11,0.08)'; res.style.color = 'var(--amber)';
+      const bankInfo = j.data && j.data.result && j.data.result.bankDetails;
+      if (bankInfo) {
+        res.innerHTML = '⏳ Pago en verificación. Realiza la transferencia:<br>'
+          + `<strong>Banco:</strong> ${bankInfo.bankName}<br>`
+          + `<strong>Titular:</strong> ${bankInfo.accountName}<br>`
+          + `<strong>Número:</strong> ${bankInfo.accountNumber}<br>`
+          + `<strong>Importe:</strong> 10.000 FCFA<br>`
+          + `<em>El admin confirmará en 24h y tu plan se activará.</em>`;
+      } else {
+        res.textContent = '⏳ Solicitud enviada. Un administrador confirmará tu pago pronto.';
+      }
+    }
+  } catch(e) {
+    res.style.display = ''; res.style.background = 'rgba(248,113,113,0.1)'; res.style.color = '#f87171';
+    res.textContent = '❌ ' + e.message;
+  } finally { btn.disabled = false; btn.textContent = 'Pagar 10.000 FCFA →'; }
+}
 
 async function doSubscribeWeb() {
   const token  = localStorage.getItem('mbola_token');
