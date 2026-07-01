@@ -464,9 +464,11 @@ async function registerPlay(userId, track, bySubscription) {
     subType === 'LISTENER_MONTHLY' ||
     subType === 'ARTIST_MONTHLY';
 
-  // Artistas ARTIST_MONTHLY: auto-reproducciones capped en 2.000 FCFA de ganancia
+  // Auto-reproducciones del propio artista sobre su propia canción: capped en
+  // 2.000 FCFA de ganancia, sin importar si su suscripción activa es de tipo
+  // ARTIST_MONTHLY o LISTENER_MONTHLY (un artista puede pagar ambas).
   let selfPlayCapExceeded = false;
-  if (shouldCount && bySubscription && subType === 'ARTIST_MONTHLY' && track.artistId) {
+  if (shouldCount && bySubscription && track.artistId) {
     const artistProfile = await prisma.artistProfile.findUnique({
       where: { userId },
       select: { id: true },
