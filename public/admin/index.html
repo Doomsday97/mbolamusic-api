@@ -342,7 +342,7 @@ async function apiFetch(path, method = 'GET', body = null, auth = true) {
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 function showTab(name, btn) {
-  ['stats','users','payments','tracks','online','chat','ads'].forEach(t => {
+  ['stats','users','payments','tracks','online','chat','ads','tools'].forEach(t => {
     document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
   });
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
