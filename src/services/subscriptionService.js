@@ -99,8 +99,9 @@ async function createSubscription(userId, type) {
   return sub;
 }
 
-// Efecto clave: si el artista NO tiene suscripción activa, su música se oculta.
-// Si la recupera, vuelve a publicarse.
+// Efecto clave: si el artista NO tiene suscripción de ARTISTA activa, su música
+// se oculta (una suscripción de oyente en paralelo no cuenta). Si la recupera,
+// vuelve a publicarse.
 async function applySubscriptionEffects(userId) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -108,11 +109,7 @@ async function applySubscriptionEffects(userId) {
   });
   if (!user || user.role !== 'ARTIST' || !user.artistProfile) return;
 
-  const active = await prisma.subscription.findFirst({
-    where: { userId, status: 'ACTIVE' },
-    orderBy: { endDate: 'desc' },
-  });
-  const hasActive = active && !isExpired(active.endDate);
+  const hasActive = await hasActiveArtistSubscription(userId);
 
   await prisma.track.updateMany({
     where: { artistId: user.artistProfile.id },
@@ -126,10 +123,22 @@ async function listenerHasAccess(userId) {
   return !!sub;
 }
 
+// ¿Tiene el usuario una suscripción de ARTISTA activa y vigente?
+// (Un artista puede tener también una suscripción de oyente activa en paralelo;
+// getActiveSubscription() solo devuelve UNA, la de vencimiento más lejano, así
+// que no sirve para esta comprobación específica.)
+async function hasActiveArtistSubscription(userId) {
+  const subs = await prisma.subscription.findMany({
+    where: { userId, status: 'ACTIVE', type: { in: ['ARTIST_MONTHLY', 'ARTIST_FREE'] } },
+  });
+  return subs.some((s) => !isExpired(s.endDate));
+}
+
 module.exports = {
   getActiveSubscription,
   createSubscription,
   applySubscriptionEffects,
   listenerHasAccess,
+  hasActiveArtistSubscription,
   tryAutoRenew,
 };

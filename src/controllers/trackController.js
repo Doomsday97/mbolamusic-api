@@ -28,10 +28,10 @@ async function uploadTrack(req, res) {
     return fail(res, 'Solo artistas pueden subir música', 403);
   }
 
-  // Artistas deben tener suscripción activa; admins no
+  // Artistas deben tener suscripción de ARTISTA activa (no basta con una de oyente); admins no
   if (isArtist) {
-    const sub = await subscriptionService.getActiveSubscription(req.user.id);
-    if (!sub) {
+    const hasArtistSub = await subscriptionService.hasActiveArtistSubscription(req.user.id);
+    if (!hasArtistSub) {
       return fail(res, 'Necesitas una suscripción de artista activa (10.000 FCFA/mes) para publicar', 402);
     }
   }
