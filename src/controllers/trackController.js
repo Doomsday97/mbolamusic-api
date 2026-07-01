@@ -133,15 +133,18 @@ async function myTracks(req, res) {
 }
 
 // POST /api/tracks/:id/play
-// Si el oyente tiene suscripción activa -> reproduce gratis.
-// Si no -> responde 402 indicando que debe pagar 50 FCFA (per-play).
+// Oyente con suscripción activa (incluye prueba gratis) -> reproduce.
+// Admin / Artista -> bypass directo (admin no cuenta; artista cuenta con reglas normales).
+// Sin suscripción -> 402.
 async function playTrack(req, res) {
   const track = await prisma.track.findUnique({ where: { id: req.params.id } });
   if (!track || !track.isPublished) return fail(res, 'Canción no disponible', 404);
 
-  // Admins y artistas pueden escuchar sin restricción de suscripción
-  const isPrivileged = req.user.role === 'ADMIN' || req.user.role === 'ARTIST';
-  if (!isPrivileged) {
+  const role = req.user.role;
+  const isAdmin  = role === 'ADMIN';
+  const isArtist = role === 'ARTIST';
+
+  if (!isAdmin && !isArtist) {
     const hasAccess = await subscriptionService.listenerHasAccess(req.user.id);
     if (!hasAccess) {
       return res.status(402).json({
@@ -152,7 +155,10 @@ async function playTrack(req, res) {
     }
   }
 
-  await paymentController.registerPlay(req.user.id, track, isPrivileged);
+  if (!isAdmin) {
+    await paymentController.registerPlay(req.user.id, track, true);
+  }
+
   const t = rw(track);
   return ok(res, { audioUrl: t.audioUrl, track: t });
 }

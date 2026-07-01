@@ -2,7 +2,7 @@ const router = require('express').Router();
 const admin = require('../controllers/adminController');
 const pay = require('../controllers/paymentController');
 const { authenticate, requireRole } = require('../middleware/auth');
-const { upload } = require('../config/upload');
+const { upload, uploadMemory } = require('../config/upload');
 
 router.use(authenticate, requireRole('ADMIN'));
 
@@ -39,6 +39,8 @@ router.post('/ads',                        admin.createAd);
 router.patch('/ads/:id',                   admin.updateAd);
 router.delete('/ads/:id',                  admin.deleteAd);
 router.post('/ads/:id/toggle',             admin.toggleAd);
+router.post('/ads/:id/media',              uploadMemory.single('media'), admin.uploadAdMedia);
+router.delete('/ads/:id/media',            admin.removeAdMedia);
 
 // Usuarios conectados
 router.get('/online',                      admin.onlineUsers);

@@ -412,6 +412,8 @@ model Ad {
   description String?
   linkUrl     String?
   imageUrl    String?
+  mediaUrl    String?  // base64 data URL (imagen ≤2 MB) o URL directa (video)
+  mediaType   String?  // "image" | "video"
   // Posición: "web-top" | "web-mid" | "web-bottom" | "app-discover" | "app-library" | "app-all"
   slot        String
   bgColor     String   @default("#1A1200")

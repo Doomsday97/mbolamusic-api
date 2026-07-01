@@ -513,26 +513,14 @@ async function loadUsers(page = 1) {
   try {
     const qs = `?page=${page}&limit=20${_uRole ? '&role=' + _uRole : ''}`;
     const d = await apiFetch('/admin/users' + qs);
-
-    function subBadge(u) {
-      const sub = u.subscriptions && u.subscriptions[0];
-      if (!sub) return `<span style="font-size:11px;color:var(--error);background:rgba(229,72,77,.12);padding:2px 8px;border-radius:99px;">Sin suscripción</span>`;
-      const exp = new Date(sub.endDate);
-      const isExp = exp < new Date();
-      const label = { LISTENER_MONTHLY:'Oyente mensual', ARTIST_MONTHLY:'Artista mensual', LISTENER_FREE:'Prueba oyente', ARTIST_FREE:'Prueba artista' }[sub.type] || sub.type;
-      if (isExp) return `<span style="font-size:11px;color:var(--muted);background:rgba(255,255,255,.06);padding:2px 8px;border-radius:99px;">⏰ Expirada</span>`;
-      return `<span style="font-size:11px;color:var(--success);background:rgba(48,164,108,.12);padding:2px 8px;border-radius:99px;" title="Vence ${exp.toLocaleDateString('es')}">✓ ${label}</span>`;
-    }
-
     let rows = d.users.map(u => `
       <tr>
         <td>${esc(u.username)}</td>
-        <td style="font-size:12px;">${esc(u.email || u.phone || '—')}</td>
+        <td>${esc(u.email || u.phone || '—')}</td>
         <td><span class="badge badge-${u.role.toLowerCase()}">${u.role}</span></td>
-        <td style="font-size:12px;">${esc((u.artistProfile && u.artistProfile.artistName) || '—')}</td>
-        <td>${subBadge(u)}</td>
-        <td style="font-size:12px;">${fmt(u.walletBalance)} FCFA</td>
-        <td style="font-size:12px;">${new Date(u.createdAt).toLocaleDateString('es')}</td>
+        <td>${esc((u.artistProfile && u.artistProfile.artistName) || '—')}</td>
+        <td>${fmt(u.walletBalance)} FCFA</td>
+        <td>${new Date(u.createdAt).toLocaleDateString('es')}</td>
         <td>
           <button class="btn-sm btn-success" onclick="viewUser('${u.id}')">Detalles</button>
           ${u.role === 'ARTIST' ? `
@@ -542,18 +530,12 @@ async function loadUsers(page = 1) {
         </td>
       </tr>`).join('');
     var _toRemove = el.querySelector('.loading, .empty'); if (_toRemove) _toRemove.remove();
-
-    const subTotal = d.users.filter(u => u.subscriptions && u.subscriptions[0] && new Date(u.subscriptions[0].endDate) > new Date()).length;
-    const noSubTotal = d.users.length - subTotal;
-
     el.innerHTML = `
       <div class="section-header">
         <h2>Usuarios <small style="color:var(--muted)">(${d.total})</small></h2>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-          <span style="font-size:12px;color:var(--success);">✓ Suscritos: ${subTotal}</span>
-          <span style="font-size:12px;color:var(--error);">✗ Sin suscripción: ${noSubTotal}</span>
-          <select onchange="filterUsers(this.value)" style="font-size:13px;padding:5px 10px;background:var(--surface2);border:1px solid var(--surface2);color:var(--text);border-radius:6px;">
-            <option value="">Todos los roles</option>
+        <div class="filters">
+          <select onchange="filterUsers(this.value)">
+            <option value="">Todos</option>
             <option value="ARTIST" ${_uRole==='ARTIST'?'selected':''}>Artistas</option>
             <option value="LISTENER" ${_uRole==='LISTENER'?'selected':''}>Oyentes</option>
             <option value="ADMIN" ${_uRole==='ADMIN'?'selected':''}>Admin</option>
@@ -561,8 +543,8 @@ async function loadUsers(page = 1) {
         </div>
       </div>
       <table>
-        <thead><tr><th>Usuario</th><th>Contacto</th><th>Rol</th><th>Artista</th><th>Suscripción</th><th>Monedero</th><th>Registro</th><th>Acciones</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="8" class="empty">Sin resultados</td></tr>'}</tbody>
+        <thead><tr><th>Usuario</th><th>Contacto</th><th>Rol</th><th>Nombre artístico</th><th>Monedero</th><th>Registro</th><th>Acciones</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="7" class="empty">Sin resultados</td></tr>'}</tbody>
       </table>
       <div class="pager">
         <button onclick="loadUsers(${page-1})" ${page<=1?'disabled':''}>← Anterior</button>
@@ -1387,6 +1369,14 @@ function renderAdsTab(el) {
           </div>
         </div>
       </td>
+      <td style="text-align:center;">
+        ${ad.mediaType === 'image' && ad.mediaUrl
+          ? `<img src="${esc(ad.mediaUrl)}" style="width:44px;height:32px;object-fit:cover;border-radius:4px;border:1px solid var(--border);" title="Imagen">`
+          : ad.mediaType === 'video' && ad.mediaUrl
+            ? `<span title="${esc(ad.mediaUrl)}" style="background:rgba(99,102,241,0.15);color:#818cf8;padding:2px 7px;border-radius:6px;font-size:11px;">▶ Video</span>`
+            : `<span style="color:var(--muted);font-size:11px;">—</span>`
+        }
+      </td>
       <td><span style="background:rgba(245,158,11,0.12);color:var(--accent);padding:2px 8px;border-radius:99px;font-size:11px;">${esc(AD_SLOTS.find(s=>s.value===ad.slot)?.label || ad.slot)}</span></td>
       <td style="text-align:center;">${ad.priority}</td>
       <td style="text-align:center;">
@@ -1417,6 +1407,7 @@ function renderAdsTab(el) {
         <thead>
           <tr style="border-bottom:1px solid var(--border);text-align:left;">
             <th style="padding:10px 8px;font-size:12px;color:var(--muted);">Anuncio</th>
+            <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:center;">Media</th>
             <th style="padding:10px 8px;font-size:12px;color:var(--muted);">Posición</th>
             <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:center;">Prioridad</th>
             <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:center;">Estado</th>
@@ -1502,6 +1493,37 @@ function renderAdsTab(el) {
           </div>
         </div>
 
+          <!-- ── Media upload ── -->
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:8px;">Contenido visual (imagen o video)</label>
+            <!-- Tabs -->
+            <div style="display:flex;gap:4px;margin-bottom:10px;">
+              <button id="ad-media-tab-none"  onclick="setAdMediaTab('none')"  style="flex:1;padding:6px;background:var(--surface2);border-radius:6px;font-size:12px;border:2px solid transparent;" class="ad-media-tab">Sin media</button>
+              <button id="ad-media-tab-image" onclick="setAdMediaTab('image')" style="flex:1;padding:6px;background:var(--surface2);border-radius:6px;font-size:12px;border:2px solid transparent;" class="ad-media-tab">📷 Imagen</button>
+              <button id="ad-media-tab-video" onclick="setAdMediaTab('video')" style="flex:1;padding:6px;background:var(--surface2);border-radius:6px;font-size:12px;border:2px solid transparent;" class="ad-media-tab">🎬 Video</button>
+            </div>
+            <!-- Panel: sin media -->
+            <div id="ad-media-panel-none" style="display:block;padding:10px;background:var(--bg);border-radius:8px;border:1px dashed var(--border);text-align:center;color:var(--muted);font-size:12px;">
+              No se mostrará ninguna imagen ni video en este anuncio.
+            </div>
+            <!-- Panel: imagen -->
+            <div id="ad-media-panel-image" style="display:none;">
+              <div id="ad-image-drop" onclick="document.getElementById('ad-media-file').click()" style="border:2px dashed var(--border);border-radius:8px;padding:14px;text-align:center;cursor:pointer;background:var(--bg);transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+                <div id="ad-image-preview-wrap" style="display:none;margin-bottom:8px;">
+                  <img id="ad-image-preview" src="" style="max-width:100%;max-height:100px;border-radius:6px;object-fit:contain;">
+                </div>
+                <div style="font-size:12px;color:var(--muted);">Haz clic para subir imagen<br><span style="font-size:10px;">JPG, PNG, WebP — máx. 2 MB</span></div>
+                <input type="file" id="ad-media-file" accept="image/*" style="display:none;" onchange="onAdImageSelected(this)">
+              </div>
+            </div>
+            <!-- Panel: video -->
+            <div id="ad-media-panel-video" style="display:none;">
+              <input id="ad-video-url" type="text" placeholder="URL directa de video .mp4 o YouTube (15 s máx.)" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;" oninput="updateAdVideoPreview()">
+              <div id="ad-video-preview" style="display:none;margin-top:8px;border-radius:8px;overflow:hidden;"></div>
+              <div style="font-size:11px;color:var(--muted);margin-top:6px;">Ejemplo: https://… /spot.mp4 · Solo videos cortos (máx. 15 s)</div>
+            </div>
+          </div>
+
         <div id="ad-modal-err" style="display:none;color:#f87171;font-size:12px;margin-top:10px;"></div>
         <div style="display:flex;gap:10px;margin-top:20px;">
           <button onclick="closeAdModal()" style="flex:1;padding:10px;background:var(--surface2);border-radius:8px;color:var(--muted);">Cancelar</button>
@@ -1554,6 +1576,73 @@ function updateAdPreview() {
   if (descEl) descEl.textContent = desc;
 }
 
+let _adMediaFile = null;
+let _adMediaTab  = 'none';
+
+function setAdMediaTab(tab) {
+  _adMediaTab = tab;
+  ['none', 'image', 'video'].forEach(t => {
+    const btn = document.getElementById('ad-media-tab-' + t);
+    const pan = document.getElementById('ad-media-panel-' + t);
+    if (btn) btn.style.borderColor = t === tab ? 'var(--accent)' : 'transparent';
+    if (pan) pan.style.display     = t === tab ? 'block' : 'none';
+  });
+}
+
+function onAdImageSelected(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    alert('La imagen no puede superar 2 MB. Comprime el archivo antes de subirlo.');
+    input.value = ''; return;
+  }
+  _adMediaFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('ad-image-preview');
+    const wrap = document.getElementById('ad-image-preview-wrap');
+    img.src = e.target.result;
+    wrap.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateAdVideoPreview() {
+  const url     = (document.getElementById('ad-video-url').value || '').trim();
+  const preview = document.getElementById('ad-video-preview');
+  if (!url) { preview.style.display = 'none'; return; }
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (ytMatch) {
+    preview.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}?mute=1" style="width:100%;height:110px;border:none;border-radius:6px;" allowfullscreen></iframe>`;
+  } else {
+    preview.innerHTML = `<video src="${url}" controls muted style="width:100%;max-height:110px;border-radius:6px;"></video>`;
+  }
+  preview.style.display = 'block';
+}
+
+function _resetAdMediaUI(ad) {
+  _adMediaFile = null;
+  const fileInput = document.getElementById('ad-media-file');
+  if (fileInput) fileInput.value = '';
+  const wrap = document.getElementById('ad-image-preview-wrap');
+  if (wrap) wrap.style.display = 'none';
+  const vp = document.getElementById('ad-video-preview');
+  if (vp) { vp.innerHTML = ''; vp.style.display = 'none'; }
+  const vu = document.getElementById('ad-video-url');
+  if (vu) vu.value = '';
+
+  if (ad && ad.mediaType === 'image' && ad.mediaUrl) {
+    setAdMediaTab('image');
+    const img = document.getElementById('ad-image-preview');
+    if (img) { img.src = ad.mediaUrl; wrap.style.display = 'block'; }
+  } else if (ad && ad.mediaType === 'video' && ad.mediaUrl) {
+    setAdMediaTab('video');
+    if (vu) { vu.value = ad.mediaUrl; updateAdVideoPreview(); }
+  } else {
+    setAdMediaTab('none');
+  }
+}
+
 function newAdModal() {
   document.getElementById('ad-modal-title').textContent = 'Nuevo anuncio';
   document.getElementById('ad-id').value = '';
@@ -1569,6 +1658,7 @@ function newAdModal() {
   document.getElementById('ad-accent-hex').value = '#F59E0B';
   document.getElementById('ad-priority').value = '0';
   document.getElementById('ad-modal-err').style.display = 'none';
+  _resetAdMediaUI(null);
   updateAdPreview();
   document.getElementById('ad-modal').style.display = 'flex';
 }
@@ -1590,6 +1680,7 @@ function editAdModal(id) {
   document.getElementById('ad-accent-hex').value = ad.accentColor || '#F59E0B';
   document.getElementById('ad-priority').value = String(ad.priority ?? 0);
   document.getElementById('ad-modal-err').style.display = 'none';
+  _resetAdMediaUI(ad);
   updateAdPreview();
   document.getElementById('ad-modal').style.display = 'flex';
 }
@@ -1622,11 +1713,33 @@ async function saveAd() {
   errEl.style.display = 'none';
 
   try {
+    let adId = id;
     if (id) {
       await apiFetch('/admin/ads/' + id, 'PATCH', body);
     } else {
-      await apiFetch('/admin/ads', 'POST', body);
+      const r = await apiFetch('/admin/ads', 'POST', body);
+      adId = r.data.ad.id;
     }
+
+    // ── Subir / actualizar media ──
+    if (_adMediaTab === 'image' && _adMediaFile && adId) {
+      btn.textContent = 'Subiendo imagen…';
+      const fd = new FormData();
+      fd.append('media', _adMediaFile);
+      await fetch(API + '/admin/ads/' + adId + '/media', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token },
+        body: fd,
+      });
+    } else if (_adMediaTab === 'video' && adId) {
+      const videoUrl = (document.getElementById('ad-video-url').value || '').trim();
+      if (videoUrl) {
+        await apiFetch('/admin/ads/' + adId, 'PATCH', { mediaUrl: videoUrl, mediaType: 'video' });
+      }
+    } else if (_adMediaTab === 'none' && adId) {
+      await apiFetch('/admin/ads/' + adId, 'PATCH', { mediaUrl: null, mediaType: null });
+    }
+
     closeAdModal();
     loadAds();
   } catch(e) {

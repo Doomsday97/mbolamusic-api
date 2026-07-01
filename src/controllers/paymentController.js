@@ -454,22 +454,43 @@ async function _finalizePayment(payment, status) {
 }
 
 async function registerPlay(userId, track, bySubscription) {
-  // Obtener la suscripción activa para saber si debe contar la reproducción
   const sub = await subscriptionService.getActiveSubscription(userId);
   const subType = sub ? sub.type : null;
 
-  // Solo cuentan las reproducciones de suscriptores de pago o pagos por reproducción.
-  // Usuarios en período de prueba gratuita (LISTENER_FREE / ARTIST_FREE) NO cuentan.
+  // Prueba gratuita (LISTENER_FREE / ARTIST_FREE) o sin suscripción → no cuenta.
+  // Pago directo por reproducción (bySubscription=false) → siempre cuenta.
   const shouldCount =
-    !bySubscription ||                          // pago directo por reproducción → siempre cuenta
+    !bySubscription ||
     subType === 'LISTENER_MONTHLY' ||
     subType === 'ARTIST_MONTHLY';
+
+  // Artistas ARTIST_MONTHLY: auto-reproducciones capped en 2.000 FCFA de ganancia
+  let selfPlayCapExceeded = false;
+  if (shouldCount && bySubscription && subType === 'ARTIST_MONTHLY' && track.artistId) {
+    const artistProfile = await prisma.artistProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+    if (artistProfile && artistProfile.id === track.artistId) {
+      const artistPerPlay = Math.round(business.prices.perPlay * business.revenueSplit.artist);
+      const maxSelfPlays  = Math.floor(2000 / (artistPerPlay || 1));
+      const prevSelfPlays = await prisma.play.count({
+        where: {
+          userId,
+          artistId: artistProfile.id,
+          bySubscription: true,
+          createdAt: { gte: sub.startDate },
+        },
+      });
+      selfPlayCapExceeded = prevSelfPlays >= maxSelfPlays;
+    }
+  }
 
   await prisma.play.create({
     data: { userId, trackId: track.id, artistId: track.artistId ?? null, bySubscription },
   });
 
-  if (shouldCount) {
+  if (shouldCount && !selfPlayCapExceeded) {
     await prisma.track.update({
       where: { id: track.id },
       data: { playCount: { increment: 1 } },

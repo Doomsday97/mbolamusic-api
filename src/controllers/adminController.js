@@ -487,7 +487,7 @@ async function updateAd(req, res) {
   if (!ad) return fail(res, 'Anuncio no encontrado', 404);
 
   const { title, description, linkUrl, imageUrl, slot, bgColor, accentColor,
-          icon, isActive, priority } = req.body;
+          icon, isActive, priority, mediaUrl, mediaType } = req.body;
   const data = {};
   if (title       !== undefined) data.title       = title;
   if (description !== undefined) data.description = description || null;
@@ -499,6 +499,8 @@ async function updateAd(req, res) {
   if (icon        !== undefined) data.icon        = icon;
   if (isActive    !== undefined) data.isActive    = Boolean(isActive);
   if (priority    !== undefined) data.priority    = parseInt(priority) || 0;
+  if (mediaUrl    !== undefined) data.mediaUrl    = mediaUrl || null;
+  if (mediaType   !== undefined) data.mediaType   = mediaType || null;
 
   const updated = await prisma.ad.update({ where: { id: req.params.id }, data });
   return ok(res, { ad: updated });
@@ -523,6 +525,49 @@ async function toggleAd(req, res) {
   return ok(res, { ad: updated });
 }
 
+// POST /api/admin/ads/:id/media  — subir imagen o indicar URL de video
+// Para imagen: multipart field "media" (≤2 MB) → base64 en mediaUrl
+// Para video:  JSON field "videoUrl" → guardado en mediaUrl
+async function uploadAdMedia(req, res) {
+  const ad = await prisma.ad.findUnique({ where: { id: req.params.id } });
+  if (!ad) return fail(res, 'Anuncio no encontrado', 404);
+
+  // Video por URL
+  if (req.body.videoUrl) {
+    const updated = await prisma.ad.update({
+      where: { id: req.params.id },
+      data: { mediaUrl: req.body.videoUrl, mediaType: 'video' },
+    });
+    return ok(res, { ad: updated });
+  }
+
+  // Imagen subida como archivo
+  if (!req.file) return fail(res, 'Se requiere un archivo de imagen o una URL de video');
+  if (!req.file.mimetype.startsWith('image/') && !req.file.mimetype.startsWith('video/')) {
+    return fail(res, 'Solo se permiten imágenes o videos cortos');
+  }
+
+  const mediaType = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+  const mediaUrl  = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+
+  const updated = await prisma.ad.update({
+    where: { id: req.params.id },
+    data: { mediaUrl, mediaType },
+  });
+  return ok(res, { ad: updated });
+}
+
+// DELETE /api/admin/ads/:id/media  — quitar media del anuncio
+async function removeAdMedia(req, res) {
+  const ad = await prisma.ad.findUnique({ where: { id: req.params.id } });
+  if (!ad) return fail(res, 'Anuncio no encontrado', 404);
+  const updated = await prisma.ad.update({
+    where: { id: req.params.id },
+    data: { mediaUrl: null, mediaType: null },
+  });
+  return ok(res, { ad: updated });
+}
+
 // GET /api/ads?slot=web-mid  — endpoint PÚBLICO que devuelve anuncios activos por posición
 async function publicAds(req, res) {
   const { slot } = req.query;
@@ -543,5 +588,5 @@ module.exports = {
   onlineUsers, platformEarnings, platformWithdraw,
   subscriptionDistributions, runSubscriptionDistribution,
   subscriptionConfig, monthlyReport, fixMediaUrls, fixArtistTrials,
-  listAds, createAd, updateAd, deleteAd, toggleAd, publicAds,
+  listAds, createAd, updateAd, deleteAd, toggleAd, uploadAdMedia, removeAdMedia, publicAds,
 };
