@@ -33,6 +33,9 @@ router.post('/fix-media-urls',             admin.fixMediaUrls);
 // Repara canciones de prueba cuyo audio quedó apuntando a un archivo inexistente en el CDN
 router.post('/fix-seed-audio',             admin.fixSeedAudio);
 
+// Diagnóstico: sube un archivo de prueba y comprueba si es accesible desde CDN_BASE_URL
+router.post('/storage-diagnostics',        admin.storageDiagnostics);
+
 // Dar prueba gratuita de 30 días a todos los artistas sin suscripción activa
 router.post('/fix-artist-trials',          admin.fixArtistTrials);
 

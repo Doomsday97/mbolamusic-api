@@ -241,6 +241,9 @@
     .admin-card { grid-template-columns: 1fr; }
     .footer-top { grid-template-columns: 1fr 1fr; gap: 2rem; }
     .nav-links, .nav-cta { display: none; }
+    /* Con sesión iniciada: todas las acciones (editar perfil, mi panel, salir)
+       viven en el menú hamburguesa, no sueltas en la barra superior. */
+    #nav-user { display: none !important; }
     .hamburger { display: flex; }
   }
   @media (max-width: 480px) {
@@ -608,7 +611,7 @@ function mobilMenuAuthClick() {
   const token = localStorage.getItem('mbola_token');
   const user  = JSON.parse(localStorage.getItem('mbola_user') || '{}');
   if (token && user.username) {
-    openMiCuenta();
+    goToMyPage();
   } else {
     openModal('login');
   }

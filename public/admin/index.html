@@ -187,15 +187,22 @@
       <h2 style="margin-bottom:24px;font-size:18px;">🛠️ Herramientas de mantenimiento</h2>
 
       <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
+        <h3 style="margin-bottom:8px;">🔍 Diagnóstico de almacenamiento (R2/S3)</h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Sube un archivo de prueba diminuto al bucket configurado y comprueba de inmediato si es accesible desde el CDN público. Úsalo para saber si el audio/carátulas que se suben realmente se pueden reproducir.</p>
+        <button onclick="runAdminTool('storage-diagnostics','Probando almacenamiento...')" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;">Probar almacenamiento</button>
+        <div id="tool-storage-diagnostics-result" style="margin-top:12px;font-size:13px;white-space:pre-wrap;"></div>
+      </div>
+
+      <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
         <h3 style="margin-bottom:8px;">📸 Corregir URLs de medios (CDN)</h3>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Actualiza las URLs de audio, carátulas y avatares en la base de datos para que usen el CDN público configurado en CDN_BASE_URL. Necesario cuando se cambia el proveedor de almacenamiento.</p>
-        <button onclick="runAdminTool('fix-media-urls','Corregiendo URLs...')" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;">Corregir URLs de medios</button>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Actualiza las URLs de audio y carátulas de canciones para que usen el CDN público configurado en CDN_BASE_URL, solo si el archivo nuevo realmente existe ahí (nunca borra ni deja vacío lo existente). No toca avatares de perfil.</p>
+        <button onclick="runAdminTool('fix-media-urls','Corrigiendo URLs...')" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;">Corregir URLs de medios</button>
         <div id="tool-fix-media-urls-result" style="margin-top:12px;font-size:13px;"></div>
       </div>
 
       <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
         <h3 style="margin-bottom:8px;">🎵 Reparar audio de canciones de prueba</h3>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Restaura el audio de las canciones de prueba (SoundHelix) cuyo archivo quedó apuntando a una URL rota en el CDN. Úsalo si "Corregir URLs de medios" dejó canciones sin sonido.</p>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Restaura el audio de las canciones de prueba (SoundHelix) cuyo archivo quedó apuntando a una URL rota en el CDN, y les asigna una carátula de muestra si nunca tuvieron una.</p>
         <button onclick="runAdminTool('fix-seed-audio','Reparando audio...')" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;">Reparar audio de prueba</button>
         <div id="tool-fix-seed-audio-result" style="margin-top:12px;font-size:13px;"></div>
       </div>

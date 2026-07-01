@@ -382,6 +382,87 @@ async function _urlExists(url) {
   }
 }
 
+// GET /api/admin/storage-diagnostics
+// Sube un archivo diminuto de prueba al proveedor de almacenamiento activo y
+// verifica de inmediato si es públicamente accesible en CDN_BASE_URL. Así se
+// detecta si S3_BUCKET / S3_ENDPOINT / CDN_BASE_URL apuntan a lugares distintos
+// (causa típica de "el audio se sube pero no se puede reproducir").
+async function storageDiagnostics(req, res) {
+  const provider = process.env.STORAGE_PROVIDER || 'local';
+  const diag = {
+    provider,
+    s3Bucket: process.env.S3_BUCKET || null,
+    s3Endpoint: process.env.S3_ENDPOINT || null,
+    s3Region: process.env.S3_REGION || null,
+    cdnBaseUrl: process.env.CDN_BASE_URL || null,
+  };
+
+  if (provider !== 's3') {
+    return ok(res, { ...diag, roundTrip: 'omitido (STORAGE_PROVIDER no es s3)' });
+  }
+
+  const uuid = require('uuid').v4();
+  const testKey = `diagnostics-${uuid}.txt`;
+  const testContent = `MbôláMusic storage diagnostics ${new Date().toISOString()}`;
+
+  try {
+    const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+    const client = new S3Client({
+      region: process.env.S3_REGION || 'auto',
+      endpoint: process.env.S3_ENDPOINT || undefined,
+      credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY,
+        secretAccessKey: process.env.S3_SECRET_KEY,
+      },
+      forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+    });
+
+    await client.send(new PutObjectCommand({
+      Bucket: process.env.S3_BUCKET,
+      Key: testKey,
+      Body: testContent,
+      ContentType: 'text/plain',
+    }));
+
+    const cdn = (process.env.CDN_BASE_URL || '').replace(/\/$/, '');
+    const publicUrl = cdn ? `${cdn}/${testKey}` : null;
+
+    let reachable = false;
+    let fetchStatus = null;
+    if (publicUrl) {
+      try {
+        const r = await fetch(publicUrl, { signal: AbortSignal.timeout(8000) });
+        fetchStatus = r.status;
+        reachable = r.ok;
+      } catch (e) {
+        fetchStatus = 'error: ' + e.message;
+      }
+    }
+
+    // Limpieza: borrar el archivo de prueba tanto si se pudo verificar como si no
+    await client.send(new DeleteObjectCommand({ Bucket: process.env.S3_BUCKET, Key: testKey })).catch(() => {});
+
+    return ok(res, {
+      ...diag,
+      uploadedTo: `s3://${process.env.S3_BUCKET}/${testKey}`,
+      publicUrl,
+      publicUrlReachable: reachable,
+      publicUrlStatus: fetchStatus,
+      diagnosis: reachable
+        ? '✅ El bucket S3/R2 y el CDN público coinciden. Los archivos subidos deberían reproducirse.'
+        : '❌ El archivo se subió correctamente al bucket S3/R2, pero NO es accesible desde CDN_BASE_URL. '
+          + 'Revisa que S3_BUCKET sea el mismo bucket cuyo acceso público está habilitado en CDN_BASE_URL, '
+          + 'y que "Allow public access" esté activado para ese bucket en Cloudflare R2.',
+    });
+  } catch (e) {
+    return ok(res, {
+      ...diag,
+      error: e.message,
+      diagnosis: '❌ Falló la subida de prueba al bucket S3/R2. Revisa S3_ACCESS_KEY, S3_SECRET_KEY, S3_ENDPOINT y S3_BUCKET.',
+    });
+  }
+}
+
 async function fixMediaUrls(req, res) {
   const cdn = process.env.CDN_BASE_URL;
   if (!cdn) return fail(res, 'CDN_BASE_URL no está configurado en las variables de entorno');
@@ -430,21 +511,12 @@ async function fixMediaUrls(req, res) {
     }
   }
 
-  // Usuarios (avatarUrl)
-  const users = await prisma.user.findMany({
-    where: { avatarUrl: { not: null } },
-    select: { id: true, avatarUrl: true },
-  });
-
-  for (const u of users) {
-    if (u.avatarUrl.startsWith('data:')) continue; // base64, no aplica reescritura de CDN
-    const newAvatar = toNewUrl(u.avatarUrl);
-    if (newAvatar !== u.avatarUrl) {
-      if (!(await _urlExists(newAvatar))) { skippedMissing++; continue; }
-      await prisma.user.update({ where: { id: u.id }, data: { avatarUrl: newAvatar } });
-      avatars++;
-    }
-  }
+  // Avatares: NO se tocan aquí. Desde que se guardan como base64 (data: URL) en la
+  // propia base de datos, esta herramienta no tiene nada que migrar, y forzar una
+  // reescritura sobre un avatar antiguo (antes de ese cambio) arriesgaba borrar
+  // fotos de perfil de usuarios reales. Si algún día hay avatares reales en el CDN
+  // que migrar, hacerlo con una herramienta dedicada y con este mismo resguardo de
+  // "solo si el destino existe".
 
   return ok(res, {
     fixed: { trackAudioUrls: trackAudio, trackCoverUrls: trackCover, avatarUrls: avatars, skippedMissing },
@@ -455,26 +527,35 @@ async function fixMediaUrls(req, res) {
 // POST /api/admin/fix-seed-audio
 // Repara las canciones de prueba (seed) cuyo audioUrl fue reescrito por error hacia
 // el CDN sin que el archivo existiera realmente ahí, restaurando la fuente original
-// pública de SoundHelix (siempre disponible).
+// pública de SoundHelix (siempre disponible). De paso, les asigna una carátula de
+// muestra (Lorem Picsum) si nunca tuvieron una, ya que el seed original no la incluía.
 async function fixSeedAudio(req, res) {
   const path = require('path');
-  const tracks = await prisma.track.findMany({ select: { id: true, audioUrl: true, title: true } });
+  const tracks = await prisma.track.findMany({ select: { id: true, audioUrl: true, coverUrl: true, title: true } });
 
   let fixed = 0;
+  let coversAdded = 0;
   for (const t of tracks) {
     const filename = path.basename(t.audioUrl || '');
     const match = filename.match(/^(SoundHelix-Song-\d+\.mp3)$/i);
     if (!match) continue;
 
     const originalUrl = `https://www.soundhelix.com/examples/mp3/${match[1]}`;
-    if (t.audioUrl === originalUrl) continue;
-    if (!(await _urlExists(t.audioUrl))) {
-      await prisma.track.update({ where: { id: t.id }, data: { audioUrl: originalUrl } });
-      fixed++;
+    const data = {};
+    if (t.audioUrl !== originalUrl && !(await _urlExists(t.audioUrl))) {
+      data.audioUrl = originalUrl;
+    }
+    if (!t.coverUrl) {
+      data.coverUrl = `https://picsum.photos/seed/${t.id}/400`;
+    }
+    if (Object.keys(data).length > 0) {
+      await prisma.track.update({ where: { id: t.id }, data });
+      if (data.audioUrl) fixed++;
+      if (data.coverUrl) coversAdded++;
     }
   }
 
-  return ok(res, { fixed });
+  return ok(res, { fixed, coversAdded });
 }
 
 // POST /api/admin/fix-artist-trials
@@ -636,6 +717,6 @@ module.exports = {
   listAllTracks, listArtists, adminUploadTrack, adminDeleteTrack, togglePublish,
   onlineUsers, platformEarnings, platformWithdraw,
   subscriptionDistributions, runSubscriptionDistribution,
-  subscriptionConfig, monthlyReport, fixMediaUrls, fixSeedAudio, fixArtistTrials,
+  subscriptionConfig, monthlyReport, fixMediaUrls, fixSeedAudio, fixArtistTrials, storageDiagnostics,
   listAds, createAd, updateAd, deleteAd, toggleAd, uploadAdMedia, removeAdMedia, publicAds,
 };
