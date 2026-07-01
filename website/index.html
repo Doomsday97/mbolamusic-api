@@ -27,6 +27,18 @@
   html { scroll-behavior: smooth; }
   body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; overflow-x: hidden; }
 
+  /* AD BANNERS */
+  .ad-banner-wrap { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 0.75rem 1.5rem; }
+  .ad-banner-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+  .ad-label { position: absolute; top: -8px; left: 0; font-size: 0.62rem; color: var(--text2); opacity: 0.5; letter-spacing: 0.08em; text-transform: uppercase; background: var(--bg2); padding: 0 4px; }
+  .ad-slot { min-height: 80px; display: flex; align-items: center; }
+  .ad-placeholder { display: flex; align-items: center; gap: 1.25rem; padding: 0.75rem 0; width: 100%; }
+  .ad-placeholder > span { font-size: 2.2rem; flex-shrink: 0; }
+  .ad-placeholder > div { flex: 1; }
+  .ad-placeholder strong { color: var(--text); font-size: 0.95rem; }
+  .ad-placeholder p { color: var(--text2); font-size: 0.82rem; margin-top: 3px; }
+  @media (max-width: 600px) { .ad-placeholder > span { display: none; } }
+
   /* NAV */
   nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(8,8,8,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
   .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 64px; }
@@ -1219,6 +1231,27 @@ function setLang(code, save = true) {
   </div>
 </section>
 
+<!-- AD BANNER 1 -->
+<div class="ad-banner-wrap" id="ad-banner-1">
+  <div class="ad-banner-inner">
+    <span class="ad-label">Publicidad</span>
+    <div class="ad-slot" id="ad-slot-1">
+      <!-- Google AdSense: reemplaza con tu código de bloque de anuncios -->
+      <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+           <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+           <script>(adsbygoogle = window.adsbygoogle || []).push({});</script> -->
+      <div class="ad-placeholder">
+        <span>🎵</span>
+        <div>
+          <strong>¿Eres artista?</strong>
+          <p>Publica tu música en MbôláMusic y llega a miles de oyentes en Guinea Ecuatorial.</p>
+          <a href="#artistas" style="color:var(--amber);font-weight:600;text-decoration:none;">Saber más →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- PRICING -->
 <section id="precios">
   <div class="section-inner">
@@ -1454,20 +1487,81 @@ let _allTracks = [];
 
 function renderTrackCard(t, i) {
   const bgs = ['rgba(245,158,11,0.15)','rgba(63,81,181,0.2)','rgba(0,154,68,0.15)'];
-  return `<div onclick="window.location.href='/player.html?id=${t.id}'"
+  const artistName = (t.artist && t.artist.artistName) || t.artistName || '';
+  return `<div onclick="playWebTrack('${t.id}',${JSON.stringify(t.title)},${JSON.stringify(artistName)},${JSON.stringify(t.coverUrl||'')})"
        style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s;"
        onmouseover="this.style.borderColor='rgba(245,158,11,0.5)';this.style.transform='translateY(-3px)'"
        onmouseout="this.style.borderColor='rgba(255,255,255,0.06)';this.style.transform='translateY(0)'">
     <div style="height:130px;background:${bgs[i%3]};display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;">
       ${t.coverUrl ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'">` : '🎵'}
+      <div id="play-spin-${t.id}" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;font-size:1.5rem;">⏳</div>
       <div style="position:absolute;bottom:8px;right:8px;background:var(--amber);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;">▶</div>
     </div>
     <div style="padding:14px;">
       <div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div>
-      <div style="font-size:0.78rem;color:var(--text2);margin-top:4px;">${(t.artist && t.artist.artistName) || t.artistName || ''}</div>
+      <div style="font-size:0.78rem;color:var(--text2);margin-top:4px;">${artistName}</div>
       <div style="font-size:0.72rem;color:rgba(245,158,11,.7);margin-top:4px;text-transform:uppercase;letter-spacing:.04em;">${t.genre || ''}</div>
     </div>
   </div>`;
+}
+
+async function playWebTrack(trackId, title, artistName, coverUrl) {
+  const token = localStorage.getItem('mbola_token');
+  if (!token) {
+    openModal('login');
+    return;
+  }
+  // Spinner
+  const spin = document.getElementById('play-spin-' + trackId);
+  if (spin) { spin.style.display = 'flex'; }
+
+  // Mostrar barra de reproducción inmediatamente
+  document.getElementById('wp-title').textContent  = title;
+  document.getElementById('wp-artist').textContent = artistName;
+  const coverWrap = document.getElementById('wp-cover-wrap');
+  if (coverWrap) {
+    coverWrap.innerHTML = coverUrl
+      ? `<img src="${coverUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.textContent='🎵'">`
+      : '🎵';
+  }
+  document.getElementById('web-player').style.display = 'block';
+
+  try {
+    const r = await fetch(API_BASE + '/tracks/' + trackId + '/play', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({}),
+    });
+    const j = await r.json();
+
+    if (r.status === 402) {
+      document.getElementById('web-player').style.display = 'none';
+      _showWebPaymentOptions(trackId, title);
+      return;
+    }
+    if (!j.success) {
+      document.getElementById('web-player').style.display = 'none';
+      alert('⚠️ ' + (j.error || 'No se puede reproducir esta canción'));
+      return;
+    }
+
+    const audioUrl = (j.data && j.data.audioUrl) || '';
+    const audio = document.getElementById('web-audio');
+    audio.src = audioUrl;
+    audio.play().catch(() => alert('⚠️ Error al iniciar el audio. Revisa que el servidor tiene los archivos.'));
+
+  } catch(e) {
+    document.getElementById('web-player').style.display = 'none';
+    alert('⚠️ Error de conexión: ' + e.message);
+  } finally {
+    if (spin) spin.style.display = 'none';
+  }
+}
+
+function _showWebPaymentOptions(trackId, title) {
+  const token = localStorage.getItem('mbola_token');
+  if (!confirm('Tu periodo gratuito terminó.\n\n• Suscríbete por 2.000 FCFA/mes\n• O paga 50 FCFA por esta reproducción\n\n¿Ir a la sección de precios para suscribirte?')) return;
+  document.getElementById('precios').scrollIntoView({ behavior: 'smooth' });
 }
 
 function filterGenreWeb(genre) {
@@ -1574,7 +1668,7 @@ function loadTrending() {
       const tracks = ((j && j.data && j.data.tracks) || (j && j.data) || []).slice(0, 12);
       if (!tracks.length) { el.innerHTML = '<p style="color:var(--text2);opacity:.6;padding:1rem;">Sin datos disponibles.</p>'; return; }
       el.innerHTML = tracks.map(t => `
-        <div onclick="window.location.href='/player.html?id=${t.id}'"
+        <div onclick="playWebTrack('${t.id}',${JSON.stringify(t.title)},${JSON.stringify((t.artist&&t.artist.artistName)||t.artistName||'')},${JSON.stringify(t.coverUrl||'')})"
              style="flex:0 0 160px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;cursor:pointer;scroll-snap-align:start;transition:border-color .2s,transform .15s;"
              onmouseover="this.style.borderColor='rgba(245,158,11,0.5)';this.style.transform='translateY(-3px)'"
              onmouseout="this.style.borderColor='rgba(255,255,255,0.07)';this.style.transform='translateY(0)'">
@@ -1598,22 +1692,6 @@ function loadTrending() {
 }
 loadTrending();
 
-function playTrack(urlEnc, titleEnc, artistEnc) {
-  var url, title, artist;
-  try {
-    url    = decodeURIComponent(urlEnc);
-    title  = decodeURIComponent(titleEnc);
-    artist = decodeURIComponent(artistEnc);
-  } catch(_) {
-    url = urlEnc; title = titleEnc; artist = artistEnc;
-  }
-  document.getElementById('wp-title').textContent  = title;
-  document.getElementById('wp-artist').textContent = artist;
-  const audio = document.getElementById('web-audio');
-  audio.src = url;
-  audio.play().catch(()=>{});
-  document.getElementById('web-player').style.display = 'block';
-}
 </script>
 
 <!-- DOWNLOAD -->
@@ -1679,6 +1757,24 @@ function playTrack(urlEnc, titleEnc, artistEnc) {
     </div>
   </div>
 </section>
+
+<!-- AD BANNER 2 -->
+<div class="ad-banner-wrap" id="ad-banner-2">
+  <div class="ad-banner-inner">
+    <span class="ad-label">Publicidad</span>
+    <div class="ad-slot" id="ad-slot-2">
+      <!-- Google AdSense slot 2: reemplaza con tu código -->
+      <div class="ad-placeholder">
+        <span>📱</span>
+        <div>
+          <strong>Descarga la app MbôláMusic</strong>
+          <p>Escucha tu música favorita en cualquier lugar, también sin internet con las descargas offline.</p>
+          <a href="#descargar" style="color:var(--amber);font-weight:600;text-decoration:none;">Descargar APK →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- FOOTER -->
 <footer>

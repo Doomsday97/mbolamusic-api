@@ -454,13 +454,27 @@ async function _finalizePayment(payment, status) {
 }
 
 async function registerPlay(userId, track, bySubscription) {
+  // Obtener la suscripción activa para saber si debe contar la reproducción
+  const sub = await subscriptionService.getActiveSubscription(userId);
+  const subType = sub ? sub.type : null;
+
+  // Solo cuentan las reproducciones de suscriptores de pago o pagos por reproducción.
+  // Usuarios en período de prueba gratuita (LISTENER_FREE / ARTIST_FREE) NO cuentan.
+  const shouldCount =
+    !bySubscription ||                          // pago directo por reproducción → siempre cuenta
+    subType === 'LISTENER_MONTHLY' ||
+    subType === 'ARTIST_MONTHLY';
+
   await prisma.play.create({
     data: { userId, trackId: track.id, artistId: track.artistId ?? null, bySubscription },
   });
-  await prisma.track.update({
-    where: { id: track.id },
-    data: { playCount: { increment: 1 } },
-  });
+
+  if (shouldCount) {
+    await prisma.track.update({
+      where: { id: track.id },
+      data: { playCount: { increment: 1 } },
+    });
+  }
 }
 
 async function creditArtist(artistId, amount) {
