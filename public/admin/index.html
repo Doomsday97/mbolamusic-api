@@ -171,6 +171,7 @@
     <button onclick="showTab('tracks', this)">🎵 Canciones</button>
     <button onclick="showTab('online', this)" id="online-tab-btn">🟢 En línea <span id="online-badge" style="background:var(--success);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
     <button onclick="showTab('chat', this)" id="chat-tab-btn">💬 Soporte <span id="chat-badge" style="display:none;background:var(--error);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
+    <button onclick="showTab('ads', this)">📢 Publicidad</button>
     <button onclick="showTab('tools', this)">🛠️ Herramientas</button>
   </nav>
   <main>
@@ -180,6 +181,7 @@
     <div id="tab-tracks" style="display:none"></div>
     <div id="tab-online" style="display:none"></div>
     <div id="tab-chat" style="display:none"></div>
+    <div id="tab-ads" style="display:none"></div>
     <div id="tab-tools" style="display:none">
       <h2 style="margin-bottom:24px;font-size:18px;">🛠️ Herramientas de mantenimiento</h2>
 
@@ -340,7 +342,7 @@ async function apiFetch(path, method = 'GET', body = null, auth = true) {
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 function showTab(name, btn) {
-  ['stats','users','payments','tracks','online','chat'].forEach(t => {
+  ['stats','users','payments','tracks','online','chat','ads'].forEach(t => {
     document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
   });
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -351,6 +353,7 @@ function showTab(name, btn) {
   if (name === 'tracks')   loadTracks();
   if (name === 'online')   loadOnlineUsers();
   if (name === 'chat')     loadChat();
+  if (name === 'ads')      loadAds();
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
@@ -1324,6 +1327,312 @@ function toggleLang() {
   _lang = _langs[(idx + 1) % _langs.length];
   localStorage.setItem('adminLang', _lang);
   applyLang();
+}
+
+// ── Publicidad ────────────────────────────────────────────────────────────────
+const AD_SLOTS = [
+  { value: 'web-top',      label: 'Web — Banner superior' },
+  { value: 'web-mid',      label: 'Web — Banner intermedio' },
+  { value: 'web-bottom',   label: 'Web — Banner inferior' },
+  { value: 'app-discover', label: 'APK — Pantalla Discover' },
+  { value: 'app-library',  label: 'APK — Pantalla Library' },
+  { value: 'app-all',      label: 'APK — Todas las pantallas' },
+];
+const AD_ICONS = ['star','mic','download_done','people','music_note','headphones','trending_up','campaign'];
+
+let _ads = [];
+
+async function loadAds() {
+  const el = document.getElementById('tab-ads');
+  el.innerHTML = '<div class="loading">Cargando anuncios…</div>';
+  try {
+    const d = await apiFetch('/admin/ads');
+    _ads = d.ads || [];
+    renderAdsTab(el);
+  } catch(e) {
+    el.innerHTML = `<div class="error">Error: ${esc(e.message)}</div>`;
+  }
+}
+
+function renderAdsTab(el) {
+  const slotOptions = AD_SLOTS.map(s => `<option value="${s.value}">${s.label}</option>`).join('');
+  const iconOptions = AD_ICONS.map(i => `<option value="${i}">${i}</option>`).join('');
+
+  const rows = _ads.map(ad => `
+    <tr id="ad-row-${ad.id}">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:32px;height:32px;border-radius:6px;background:${esc(ad.bgColor)};border:2px solid ${esc(ad.accentColor)};flex-shrink:0;"></div>
+          <div>
+            <div style="font-weight:600;font-size:13px;">${esc(ad.title)}</div>
+            <div style="color:var(--muted);font-size:11px;">${esc(ad.description || '—')}</div>
+          </div>
+        </div>
+      </td>
+      <td><span style="background:rgba(245,158,11,0.12);color:var(--accent);padding:2px 8px;border-radius:99px;font-size:11px;">${esc(AD_SLOTS.find(s=>s.value===ad.slot)?.label || ad.slot)}</span></td>
+      <td style="text-align:center;">${ad.priority}</td>
+      <td style="text-align:center;">
+        <span style="background:${ad.isActive ? 'rgba(74,222,128,0.15)' : 'rgba(248,113,113,0.15)'};color:${ad.isActive ? '#4ade80' : '#f87171'};padding:2px 10px;border-radius:99px;font-size:11px;">
+          ${ad.isActive ? 'Activo' : 'Pausado'}
+        </span>
+      </td>
+      <td style="text-align:center;font-size:12px;color:var(--muted);">${fmt(ad.clicks)} clics / ${fmt(ad.impressions)} imp.</td>
+      <td>
+        <div style="display:flex;gap:6px;justify-content:flex-end;">
+          <button onclick="editAdModal('${ad.id}')" style="padding:4px 10px;background:var(--surface2);border-radius:6px;font-size:12px;">✏️ Editar</button>
+          <button onclick="toggleAdStatus('${ad.id}')" style="padding:4px 10px;background:var(--surface2);border-radius:6px;font-size:12px;">${ad.isActive ? '⏸ Pausar' : '▶ Activar'}</button>
+          <button onclick="deleteAd('${ad.id}')" style="padding:4px 10px;background:rgba(248,113,113,0.15);color:#f87171;border-radius:6px;font-size:12px;">🗑 Eliminar</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h2 style="font-size:18px;">📢 Gestión de publicidad <small style="color:var(--muted);font-size:13px;">(${_ads.length} anuncios)</small></h2>
+      <button onclick="newAdModal()" style="padding:8px 18px;background:var(--accent);color:#000;border-radius:8px;font-weight:700;">+ Nuevo anuncio</button>
+    </div>
+
+    ${_ads.length === 0 ? `<div style="text-align:center;padding:40px;color:var(--muted);">No hay anuncios. Crea el primero con "Nuevo anuncio".</div>` : `
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border);text-align:left;">
+            <th style="padding:10px 8px;font-size:12px;color:var(--muted);">Anuncio</th>
+            <th style="padding:10px 8px;font-size:12px;color:var(--muted);">Posición</th>
+            <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:center;">Prioridad</th>
+            <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:center;">Estado</th>
+            <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:center;">Estadísticas</th>
+            <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:right;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    `}
+
+    <!-- Modal crear/editar anuncio -->
+    <div id="ad-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;">
+      <div style="background:var(--surface);border-radius:14px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;position:relative;">
+        <button onclick="closeAdModal()" style="position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
+        <h3 id="ad-modal-title" style="font-size:16px;font-weight:700;margin-bottom:20px;color:var(--accent);">Nuevo anuncio</h3>
+
+        <input type="hidden" id="ad-id">
+
+        <div style="display:grid;gap:14px;">
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Título *</label>
+            <input id="ad-title" type="text" placeholder="Ej: Suscríbete por 2.000 FCFA" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Descripción</label>
+            <input id="ad-description" type="text" placeholder="Subtítulo del anuncio" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Posición *</label>
+              <select id="ad-slot" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;">
+                ${slotOptions}
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Icono</label>
+              <select id="ad-icon" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;">
+                ${iconOptions}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">URL de destino (enlace al hacer clic)</label>
+            <input id="ad-link" type="text" placeholder="https://… o #seccion" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">URL de imagen (opcional)</label>
+            <input id="ad-image" type="text" placeholder="https://… (logo o banner)" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Color fondo</label>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <input type="color" id="ad-bgcolor" value="#1A1200" style="width:38px;height:36px;padding:2px;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;">
+                <input id="ad-bgcolor-hex" type="text" value="#1A1200" maxlength="7" style="flex:1;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:12px;" oninput="document.getElementById('ad-bgcolor').value=this.value">
+              </div>
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Color acento</label>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <input type="color" id="ad-accent" value="#F59E0B" style="width:38px;height:36px;padding:2px;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;">
+                <input id="ad-accent-hex" type="text" value="#F59E0B" maxlength="7" style="flex:1;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:12px;" oninput="document.getElementById('ad-accent').value=this.value">
+              </div>
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Prioridad</label>
+              <input id="ad-priority" type="number" value="0" min="0" max="100" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;">
+            </div>
+          </div>
+          <!-- Vista previa -->
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Vista previa</label>
+            <div id="ad-preview" style="border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;background:#1A1200;border:1px solid rgba(245,158,11,0.3);">
+              <div id="ad-preview-icon" style="width:36px;height:36px;border-radius:50%;background:rgba(245,158,11,0.15);display:flex;align-items:center;justify-content:center;font-size:18px;">⭐</div>
+              <div style="flex:1;">
+                <div id="ad-preview-title" style="font-weight:700;font-size:12px;color:#fff;">Título del anuncio</div>
+                <div id="ad-preview-desc" style="font-size:10px;color:rgba(255,255,255,0.5);">Descripción</div>
+              </div>
+              <span style="font-size:9px;color:rgba(255,255,255,0.25);">Ad</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="ad-modal-err" style="display:none;color:#f87171;font-size:12px;margin-top:10px;"></div>
+        <div style="display:flex;gap:10px;margin-top:20px;">
+          <button onclick="closeAdModal()" style="flex:1;padding:10px;background:var(--surface2);border-radius:8px;color:var(--muted);">Cancelar</button>
+          <button id="ad-save-btn" onclick="saveAd()" style="flex:2;padding:10px;background:var(--accent);color:#000;border-radius:8px;font-weight:700;">Guardar anuncio</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Sincronizar color pickers con inputs de texto
+  ['ad-bgcolor','ad-accent'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', e => {
+      const hexId = id + '-hex';
+      const hexEl = document.getElementById(hexId);
+      if (hexEl) hexEl.value = e.target.value;
+      updateAdPreview();
+    });
+  });
+  ['ad-bgcolor-hex','ad-accent-hex'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', updateAdPreview);
+  });
+  ['ad-title','ad-description','ad-icon'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', updateAdPreview);
+  });
+}
+
+const ICON_EMOJI = { star:'⭐', mic:'🎤', download_done:'✅', people:'👥',
+  music_note:'🎵', headphones:'🎧', trending_up:'📈', campaign:'📢' };
+
+function updateAdPreview() {
+  const title = document.getElementById('ad-title')?.value || 'Título del anuncio';
+  const desc  = document.getElementById('ad-description')?.value || 'Descripción';
+  const icon  = document.getElementById('ad-icon')?.value || 'star';
+  const bg    = document.getElementById('ad-bgcolor-hex')?.value || '#1A1200';
+  const accent= document.getElementById('ad-accent-hex')?.value || '#F59E0B';
+
+  const preview = document.getElementById('ad-preview');
+  if (preview) {
+    preview.style.background = bg;
+    preview.style.borderColor = accent + '4D';
+  }
+  const iconEl = document.getElementById('ad-preview-icon');
+  if (iconEl) {
+    iconEl.style.background = accent + '26';
+    iconEl.textContent = ICON_EMOJI[icon] || '⭐';
+  }
+  const titleEl = document.getElementById('ad-preview-title');
+  if (titleEl) titleEl.textContent = title;
+  const descEl = document.getElementById('ad-preview-desc');
+  if (descEl) descEl.textContent = desc;
+}
+
+function newAdModal() {
+  document.getElementById('ad-modal-title').textContent = 'Nuevo anuncio';
+  document.getElementById('ad-id').value = '';
+  document.getElementById('ad-title').value = '';
+  document.getElementById('ad-description').value = '';
+  document.getElementById('ad-slot').value = 'web-mid';
+  document.getElementById('ad-icon').value = 'star';
+  document.getElementById('ad-link').value = '';
+  document.getElementById('ad-image').value = '';
+  document.getElementById('ad-bgcolor').value = '#1A1200';
+  document.getElementById('ad-bgcolor-hex').value = '#1A1200';
+  document.getElementById('ad-accent').value = '#F59E0B';
+  document.getElementById('ad-accent-hex').value = '#F59E0B';
+  document.getElementById('ad-priority').value = '0';
+  document.getElementById('ad-modal-err').style.display = 'none';
+  updateAdPreview();
+  document.getElementById('ad-modal').style.display = 'flex';
+}
+
+function editAdModal(id) {
+  const ad = _ads.find(a => a.id === id);
+  if (!ad) return;
+  document.getElementById('ad-modal-title').textContent = 'Editar anuncio';
+  document.getElementById('ad-id').value = ad.id;
+  document.getElementById('ad-title').value = ad.title;
+  document.getElementById('ad-description').value = ad.description || '';
+  document.getElementById('ad-slot').value = ad.slot;
+  document.getElementById('ad-icon').value = ad.icon || 'star';
+  document.getElementById('ad-link').value = ad.linkUrl || '';
+  document.getElementById('ad-image').value = ad.imageUrl || '';
+  document.getElementById('ad-bgcolor').value = ad.bgColor || '#1A1200';
+  document.getElementById('ad-bgcolor-hex').value = ad.bgColor || '#1A1200';
+  document.getElementById('ad-accent').value = ad.accentColor || '#F59E0B';
+  document.getElementById('ad-accent-hex').value = ad.accentColor || '#F59E0B';
+  document.getElementById('ad-priority').value = String(ad.priority ?? 0);
+  document.getElementById('ad-modal-err').style.display = 'none';
+  updateAdPreview();
+  document.getElementById('ad-modal').style.display = 'flex';
+}
+
+function closeAdModal() {
+  document.getElementById('ad-modal').style.display = 'none';
+}
+
+async function saveAd() {
+  const id    = document.getElementById('ad-id').value;
+  const title = document.getElementById('ad-title').value.trim();
+  const slot  = document.getElementById('ad-slot').value;
+  const errEl = document.getElementById('ad-modal-err');
+  if (!title) { errEl.textContent = 'El título es obligatorio.'; errEl.style.display=''; return; }
+
+  const body = {
+    title,
+    description:  document.getElementById('ad-description').value.trim() || null,
+    linkUrl:      document.getElementById('ad-link').value.trim() || null,
+    imageUrl:     document.getElementById('ad-image').value.trim() || null,
+    slot,
+    bgColor:      document.getElementById('ad-bgcolor-hex').value || '#1A1200',
+    accentColor:  document.getElementById('ad-accent-hex').value || '#F59E0B',
+    icon:         document.getElementById('ad-icon').value || 'star',
+    priority:     parseInt(document.getElementById('ad-priority').value) || 0,
+  };
+
+  const btn = document.getElementById('ad-save-btn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  errEl.style.display = 'none';
+
+  try {
+    if (id) {
+      await apiFetch('/admin/ads/' + id, 'PATCH', body);
+    } else {
+      await apiFetch('/admin/ads', 'POST', body);
+    }
+    closeAdModal();
+    loadAds();
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.style.display = '';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Guardar anuncio';
+  }
+}
+
+async function toggleAdStatus(id) {
+  try {
+    await apiFetch('/admin/ads/' + id + '/toggle', 'POST');
+    loadAds();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function deleteAd(id) {
+  const ad = _ads.find(a => a.id === id);
+  if (!confirm(`¿Eliminar el anuncio "${ad?.title}"? Esta acción no se puede deshacer.`)) return;
+  try {
+    await apiFetch('/admin/ads/' + id, 'DELETE');
+    loadAds();
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 // ── Utils ─────────────────────────────────────────────────────────────────────

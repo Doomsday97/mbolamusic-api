@@ -443,6 +443,93 @@ async function fixArtistTrials(req, res) {
   return ok(res, { fixed, total: artists.length });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// GESTIÓN DE PUBLICIDAD
+// ─────────────────────────────────────────────────────────────────────────────
+
+// GET /api/admin/ads
+async function listAds(req, res) {
+  const ads = await prisma.ad.findMany({
+    orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
+  });
+  return ok(res, { ads });
+}
+
+// POST /api/admin/ads
+async function createAd(req, res) {
+  const { title, description, linkUrl, imageUrl, slot, bgColor, accentColor, icon, priority } = req.body;
+  if (!title || !slot) return fail(res, 'title y slot son obligatorios');
+  const ad = await prisma.ad.create({
+    data: {
+      title,
+      description: description || null,
+      linkUrl: linkUrl || null,
+      imageUrl: imageUrl || null,
+      slot,
+      bgColor: bgColor || '#1A1200',
+      accentColor: accentColor || '#F59E0B',
+      icon: icon || 'star',
+      priority: parseInt(priority) || 0,
+    },
+  });
+  return ok(res, { ad }, 201);
+}
+
+// PATCH /api/admin/ads/:id
+async function updateAd(req, res) {
+  const ad = await prisma.ad.findUnique({ where: { id: req.params.id } });
+  if (!ad) return fail(res, 'Anuncio no encontrado', 404);
+
+  const { title, description, linkUrl, imageUrl, slot, bgColor, accentColor,
+          icon, isActive, priority } = req.body;
+  const data = {};
+  if (title       !== undefined) data.title       = title;
+  if (description !== undefined) data.description = description || null;
+  if (linkUrl     !== undefined) data.linkUrl     = linkUrl || null;
+  if (imageUrl    !== undefined) data.imageUrl    = imageUrl || null;
+  if (slot        !== undefined) data.slot        = slot;
+  if (bgColor     !== undefined) data.bgColor     = bgColor;
+  if (accentColor !== undefined) data.accentColor = accentColor;
+  if (icon        !== undefined) data.icon        = icon;
+  if (isActive    !== undefined) data.isActive    = Boolean(isActive);
+  if (priority    !== undefined) data.priority    = parseInt(priority) || 0;
+
+  const updated = await prisma.ad.update({ where: { id: req.params.id }, data });
+  return ok(res, { ad: updated });
+}
+
+// DELETE /api/admin/ads/:id
+async function deleteAd(req, res) {
+  const ad = await prisma.ad.findUnique({ where: { id: req.params.id } });
+  if (!ad) return fail(res, 'Anuncio no encontrado', 404);
+  await prisma.ad.delete({ where: { id: req.params.id } });
+  return ok(res, { deleted: true });
+}
+
+// POST /api/admin/ads/:id/toggle  — activar / desactivar
+async function toggleAd(req, res) {
+  const ad = await prisma.ad.findUnique({ where: { id: req.params.id } });
+  if (!ad) return fail(res, 'Anuncio no encontrado', 404);
+  const updated = await prisma.ad.update({
+    where: { id: req.params.id },
+    data: { isActive: !ad.isActive },
+  });
+  return ok(res, { ad: updated });
+}
+
+// GET /api/ads?slot=web-mid  — endpoint PÚBLICO que devuelve anuncios activos por posición
+async function publicAds(req, res) {
+  const { slot } = req.query;
+  const where = { isActive: true };
+  if (slot) where.slot = slot;
+  const ads = await prisma.ad.findMany({
+    where,
+    orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
+    take: 10,
+  });
+  return ok(res, { ads });
+}
+
 module.exports = {
   stats, listUsers, getUser, updateUser, resetPassword,
   blockArtist, unblockArtist, listPayments,
@@ -450,4 +537,5 @@ module.exports = {
   onlineUsers, platformEarnings, platformWithdraw,
   subscriptionDistributions, runSubscriptionDistribution,
   subscriptionConfig, monthlyReport, fixMediaUrls, fixArtistTrials,
+  listAds, createAd, updateAd, deleteAd, toggleAd, publicAds,
 };

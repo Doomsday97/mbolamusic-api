@@ -9,6 +9,9 @@ router.use('/playlists',      require('./playlistRoutes'));
 router.use('/notifications',  require('./notificationRoutes'));
 router.use('/chat',           require('./chatRoutes'));
 
+// Endpoint público: anuncios activos por slot
+router.get('/ads', require('../controllers/adminController').publicAds);
+
 router.get('/', (req, res) => {
   res.json({
     success: true,

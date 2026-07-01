@@ -401,3 +401,28 @@ model ArtistMonthlyEarning {
   @@index([artistId, month])
   @@index([month])
 }
+
+// ------------------------------------------------------------------
+// PUBLICIDAD
+// ------------------------------------------------------------------
+
+model Ad {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  linkUrl     String?
+  imageUrl    String?
+  // Posición: "web-top" | "web-mid" | "web-bottom" | "app-discover" | "app-library" | "app-all"
+  slot        String
+  bgColor     String   @default("#1A1200")
+  accentColor String   @default("#F59E0B")
+  icon        String   @default("star")   // nombre simbólico para el frontend
+  isActive    Boolean  @default(true)
+  priority    Int      @default(0)        // mayor = se muestra primero
+  clicks      Int      @default(0)
+  impressions Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slot, isActive])
+}
