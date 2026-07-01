@@ -194,6 +194,13 @@
       </div>
 
       <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
+        <h3 style="margin-bottom:8px;">🎵 Reparar audio de canciones de prueba</h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Restaura el audio de las canciones de prueba (SoundHelix) cuyo archivo quedó apuntando a una URL rota en el CDN. Úsalo si "Corregir URLs de medios" dejó canciones sin sonido.</p>
+        <button onclick="runAdminTool('fix-seed-audio','Reparando audio...')" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;">Reparar audio de prueba</button>
+        <div id="tool-fix-seed-audio-result" style="margin-top:12px;font-size:13px;"></div>
+      </div>
+
+      <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
         <h3 style="margin-bottom:8px;">🎤 Activar prueba gratuita a artistas existentes</h3>
         <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Da 30 días de suscripción gratuita a todos los artistas que aún no tienen una suscripción activa, para que puedan subir y publicar música de inmediato.</p>
         <button onclick="runAdminTool('fix-artist-trials','Activando pruebas...')" style="width:auto;padding:10px 24px;background:var(--success);color:#fff;border-radius:8px;font-weight:bold;">Activar prueba artistas</button>

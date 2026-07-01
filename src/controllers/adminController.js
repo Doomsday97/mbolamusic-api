@@ -372,6 +372,16 @@ async function platformWithdraw(req, res) {
 // POST /api/admin/fix-media-urls
 // Migra URLs antiguas (endpoint privado S3 o /uploads/) al CDN público actual.
 // Extrae el nombre de archivo de cualquier URL y lo reconstruye con CDN_BASE_URL.
+// Comprueba con una petición HEAD que la URL responda 200 antes de darla por válida.
+async function _urlExists(url) {
+  try {
+    const res = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(6000) });
+    return res.ok;
+  } catch (_) {
+    return false;
+  }
+}
+
 async function fixMediaUrls(req, res) {
   const cdn = process.env.CDN_BASE_URL;
   if (!cdn) return fail(res, 'CDN_BASE_URL no está configurado en las variables de entorno');
@@ -387,7 +397,7 @@ async function fixMediaUrls(req, res) {
     return `${base}/${filename}`;
   }
 
-  let trackAudio = 0, trackCover = 0, avatars = 0;
+  let trackAudio = 0, trackCover = 0, avatars = 0, skippedMissing = 0;
 
   // Tracks
   const tracks = await prisma.track.findMany({
@@ -395,9 +405,21 @@ async function fixMediaUrls(req, res) {
   });
 
   for (const t of tracks) {
-    const newAudio = toNewUrl(t.audioUrl);
-    const newCover = toNewUrl(t.coverUrl);
-    const changed  = newAudio !== t.audioUrl || newCover !== t.coverUrl;
+    let newAudio = toNewUrl(t.audioUrl);
+    let newCover = toNewUrl(t.coverUrl);
+
+    // No reescribir si el archivo no existe realmente en el CDN destino
+    // (evita dejar canciones con audioUrl roto, como pasó con las de prueba).
+    if (newAudio !== t.audioUrl && !(await _urlExists(newAudio))) {
+      newAudio = t.audioUrl;
+      skippedMissing++;
+    }
+    if (newCover !== t.coverUrl && !(await _urlExists(newCover))) {
+      newCover = t.coverUrl;
+      skippedMissing++;
+    }
+
+    const changed = newAudio !== t.audioUrl || newCover !== t.coverUrl;
     if (changed) {
       await prisma.track.update({
         where: { id: t.id },
@@ -415,17 +437,44 @@ async function fixMediaUrls(req, res) {
   });
 
   for (const u of users) {
+    if (u.avatarUrl.startsWith('data:')) continue; // base64, no aplica reescritura de CDN
     const newAvatar = toNewUrl(u.avatarUrl);
     if (newAvatar !== u.avatarUrl) {
+      if (!(await _urlExists(newAvatar))) { skippedMissing++; continue; }
       await prisma.user.update({ where: { id: u.id }, data: { avatarUrl: newAvatar } });
       avatars++;
     }
   }
 
   return ok(res, {
-    fixed: { trackAudioUrls: trackAudio, trackCoverUrls: trackCover, avatarUrls: avatars },
+    fixed: { trackAudioUrls: trackAudio, trackCoverUrls: trackCover, avatarUrls: avatars, skippedMissing },
     cdnBase: base,
   });
+}
+
+// POST /api/admin/fix-seed-audio
+// Repara las canciones de prueba (seed) cuyo audioUrl fue reescrito por error hacia
+// el CDN sin que el archivo existiera realmente ahí, restaurando la fuente original
+// pública de SoundHelix (siempre disponible).
+async function fixSeedAudio(req, res) {
+  const path = require('path');
+  const tracks = await prisma.track.findMany({ select: { id: true, audioUrl: true, title: true } });
+
+  let fixed = 0;
+  for (const t of tracks) {
+    const filename = path.basename(t.audioUrl || '');
+    const match = filename.match(/^(SoundHelix-Song-\d+\.mp3)$/i);
+    if (!match) continue;
+
+    const originalUrl = `https://www.soundhelix.com/examples/mp3/${match[1]}`;
+    if (t.audioUrl === originalUrl) continue;
+    if (!(await _urlExists(t.audioUrl))) {
+      await prisma.track.update({ where: { id: t.id }, data: { audioUrl: originalUrl } });
+      fixed++;
+    }
+  }
+
+  return ok(res, { fixed });
 }
 
 // POST /api/admin/fix-artist-trials
@@ -587,6 +636,6 @@ module.exports = {
   listAllTracks, listArtists, adminUploadTrack, adminDeleteTrack, togglePublish,
   onlineUsers, platformEarnings, platformWithdraw,
   subscriptionDistributions, runSubscriptionDistribution,
-  subscriptionConfig, monthlyReport, fixMediaUrls, fixArtistTrials,
+  subscriptionConfig, monthlyReport, fixMediaUrls, fixSeedAudio, fixArtistTrials,
   listAds, createAd, updateAd, deleteAd, toggleAd, uploadAdMedia, removeAdMedia, publicAds,
 };
