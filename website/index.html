@@ -300,10 +300,10 @@
   <a href="#precios"         onclick="closeMobileMenu()">Precios</a>
   <a href="#escuchar"        onclick="closeMobileMenu()">Escuchar</a>
   <a href="#artistas"        onclick="closeMobileMenu()">Artistas</a>
-  <a href="#descargar"       onclick="closeMobileMenu()">Descargar APK</a>
+  <a href="#descargar"       onclick="closeMobileMenu()">⬇ Descargar APK</a>
   <a href="#admin"           onclick="closeMobileMenu()">Admin</a>
   <!-- Auth dinámica — se actualiza desde updateNavAuth() -->
-  <a id="mobile-menu-auth" href="#" class="login-btn" onclick="mobilMenuAuthClick();return false;">Iniciar sesión</a>
+  <a id="mobile-menu-auth" href="#" class="login-btn" onclick="mobilMenuAuthClick();return false;">🔑 Iniciar sesión</a>
 </div>
 
 <!-- MODAL LOGIN / REGISTRO -->
@@ -587,7 +587,7 @@ function updateNavAuth() {
     }
     // Menú móvil: mostrar cuenta del usuario
     if (mobileAuthLink) {
-      mobileAuthLink.textContent = user.username + ' — Mi cuenta';
+      mobileAuthLink.textContent = '👤 ' + user.username + ' — Mi cuenta';
       mobileAuthLink.className = 'account-btn';
     }
   } else {
@@ -596,7 +596,7 @@ function updateNavAuth() {
     navDownload.style.display = '';
     // Menú móvil: mostrar botón de login
     if (mobileAuthLink) {
-      mobileAuthLink.textContent = 'Iniciar sesión';
+      mobileAuthLink.textContent = '🔑 Iniciar sesión';
       mobileAuthLink.className = 'login-btn';
     }
   }
@@ -748,7 +748,7 @@ const T = {
     stat1: '<strong>Gratuit</strong><span>1 mois à l\'inscription</span>',
     stat2: '<strong>70%</strong><span>revenus pour l\'artiste</span>',
     stat3: '<strong>Hors ligne</strong><span>téléchargement chiffré</span>',
-    navFeatures:'Fonctionnalités', navTrend:'Tendances', navGenres:'Genres', navPrices:'Tarifs', navListen:'🎵 Écouter',
+    navFeatures:'Fonctionnalités', navTrend:'Tendances', navGenres:'Genres', navPrices:'Tarifs', navListen:'Écouter',
     navArtists:'Artistes', navDownload:'Télécharger', navAdmin:'Admin',
     navCta:'Télécharger APK',
     tabLogin:'Se connecter', tabRegister:"S'inscrire",
@@ -831,7 +831,7 @@ const T = {
     stat1: '<strong>Grátis</strong><span>1 mês ao registar</span>',
     stat2: '<strong>70%</strong><span>ganhos para o artista</span>',
     stat3: '<strong>Offline</strong><span>download cifrado</span>',
-    navFeatures:'Funcionalidades', navTrend:'Tendências', navGenres:'Géneros', navPrices:'Preços', navListen:'🎵 Ouvir',
+    navFeatures:'Funcionalidades', navTrend:'Tendências', navGenres:'Géneros', navPrices:'Preços', navListen:'Ouvir',
     navArtists:'Artistas', navDownload:'Descarregar', navAdmin:'Admin',
     navCta:'Descarregar APK',
     tabLogin:'Iniciar sessão', tabRegister:'Registar',
@@ -914,7 +914,7 @@ const T = {
     stat1: '<strong>Free</strong><span>1 month on sign up</span>',
     stat2: '<strong>70%</strong><span>earnings for artists</span>',
     stat3: '<strong>Offline</strong><span>encrypted download</span>',
-    navFeatures:'Features', navTrend:'Trending', navGenres:'Genres', navPrices:'Pricing', navListen:'🎵 Listen',
+    navFeatures:'Features', navTrend:'Trending', navGenres:'Genres', navPrices:'Pricing', navListen:'Listen',
     navArtists:'Artists', navDownload:'Download', navAdmin:'Admin',
     navCta:'Download APK',
     tabLogin:'Log in', tabRegister:'Sign up',
@@ -2092,7 +2092,33 @@ loadTrending();
     </div>
 
     <button onclick="closeMiCuenta();openEditProfileWeb();" style="width:100%;background:rgba(255,255,255,0.04);color:var(--text2);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:11px;font-weight:600;font-size:0.85rem;cursor:pointer;margin-bottom:8px;">✏ Editar perfil</button>
+    <button onclick="closeMiCuenta();openChangePasswordModal();" style="width:100%;background:rgba(255,255,255,0.04);color:var(--text2);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:11px;font-weight:600;font-size:0.85rem;cursor:pointer;margin-bottom:8px;">🔒 Cambiar contraseña</button>
     <button onclick="logoutWeb();closeMiCuenta();" style="width:100%;background:rgba(248,113,113,0.08);color:#f87171;border:1px solid rgba(248,113,113,0.2);border-radius:10px;padding:10px;font-weight:600;font-size:0.82rem;cursor:pointer;">Cerrar sesión</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     CAMBIAR CONTRASEÑA MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="change-password-overlay" onclick="if(event.target===this)closeChangePasswordModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:11600;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:400px;position:relative;">
+    <button onclick="closeChangePasswordModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;line-height:1;">✕</button>
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;color:var(--amber);">🔒 Cambiar contraseña</h3>
+
+    <div style="margin-bottom:0.9rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px;">Contraseña actual</label>
+      <input type="password" id="cp-current" style="width:100%;padding:11px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:0.9rem;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:0.9rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px;">Nueva contraseña</label>
+      <input type="password" id="cp-new" style="width:100%;padding:11px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:0.9rem;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px;">Confirmar nueva contraseña</label>
+      <input type="password" id="cp-confirm" style="width:100%;padding:11px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:0.9rem;box-sizing:border-box;">
+    </div>
+    <div id="cp-err" style="display:none;color:#f87171;font-size:0.82rem;margin-bottom:10px;"></div>
+    <button id="cp-save-btn" onclick="submitChangePassword()" style="width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.9rem;cursor:pointer;">Guardar contraseña</button>
   </div>
 </div>
 
@@ -2490,6 +2516,56 @@ async function openMiCuenta() {
   document.getElementById('mi-cuenta-overlay').style.display = 'flex';
 }
 function closeMiCuenta() { document.getElementById('mi-cuenta-overlay').style.display = 'none'; }
+
+// ── Cambiar contraseña (web) ──────────────────────────────────────────────────
+function openChangePasswordModal() {
+  document.getElementById('cp-current').value = '';
+  document.getElementById('cp-new').value = '';
+  document.getElementById('cp-confirm').value = '';
+  document.getElementById('cp-err').style.display = 'none';
+  document.getElementById('change-password-overlay').style.display = 'flex';
+}
+function closeChangePasswordModal() {
+  document.getElementById('change-password-overlay').style.display = 'none';
+}
+async function submitChangePassword() {
+  const token = localStorage.getItem('mbola_token');
+  const current = document.getElementById('cp-current').value;
+  const newPass = document.getElementById('cp-new').value;
+  const confirm = document.getElementById('cp-confirm').value;
+  const errEl = document.getElementById('cp-err');
+  const btn = document.getElementById('cp-save-btn');
+
+  if (newPass.length < 6) {
+    errEl.textContent = 'La nueva contraseña debe tener al menos 6 caracteres.';
+    errEl.style.display = '';
+    return;
+  }
+  if (newPass !== confirm) {
+    errEl.textContent = 'Las contraseñas no coinciden.';
+    errEl.style.display = '';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  errEl.style.display = 'none';
+  try {
+    const r = await fetch(API_BASE + '/auth/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ currentPassword: current, newPassword: newPass }),
+    });
+    const j = await r.json();
+    if (!j.success) throw new Error(j.error || 'Error al cambiar la contraseña');
+    closeChangePasswordModal();
+    alert('✅ Contraseña actualizada correctamente.');
+  } catch (e) {
+    errEl.textContent = e.message;
+    errEl.style.display = '';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Guardar contraseña';
+  }
+}
 
 // ── Gestión de canciones del artista (web) ────────────────────────────────────
 async function loadArtistTracksWeb(token) {

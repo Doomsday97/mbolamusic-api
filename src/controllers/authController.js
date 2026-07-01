@@ -183,6 +183,21 @@ async function updateProfile(req, res) {
   return ok(res, { user: sanitize(fresh) });
 }
 
+// POST /api/auth/change-password  — el usuario logueado cambia su propia contraseña
+async function changePassword(req, res) {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) return fail(res, 'Faltan campos');
+  if (newPassword.length < 6) return fail(res, 'La nueva contraseña debe tener al menos 6 caracteres');
+
+  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!valid) return fail(res, 'La contraseña actual es incorrecta', 401);
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  await prisma.user.update({ where: { id: req.user.id }, data: { passwordHash } });
+  return ok(res, { changed: true });
+}
+
 // POST /api/auth/security-questions  — guarda/actualiza las 4 preguntas de seguridad
 async function setSecurityQuestions(req, res) {
   try {
@@ -289,4 +304,4 @@ async function updateAvatar(req, res) {
   return ok(res, { user: sanitize(fresh), avatarUrl });
 }
 
-module.exports = { register, login, me, myReferral, updateProfile, updateAvatar, listArtists, setSecurityQuestions, recoverChallenge, recoverVerify };
+module.exports = { register, login, me, myReferral, updateProfile, updateAvatar, listArtists, changePassword, setSecurityQuestions, recoverChallenge, recoverVerify };

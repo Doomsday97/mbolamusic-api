@@ -8,6 +8,7 @@ router.post('/login',                            auth.login);
 router.get('/me',                                authenticate, auth.me);
 router.get('/my-referral',                       authenticate, auth.myReferral);
 router.put('/profile',                           authenticate, auth.updateProfile);
+router.post('/change-password',                  authenticate, auth.changePassword);
 router.post('/avatar',                           authenticate, uploadMemory.single('avatar'), auth.updateAvatar);
 router.get('/artists',                           authenticate, requireRole('ADMIN'), auth.listArtists);
 

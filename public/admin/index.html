@@ -162,6 +162,7 @@
     <h1>🎵 MbôláMusic Admin</h1>
     <span id="admin-name"></span>
     <button class="lang-btn" onclick="toggleLang()" id="lang-toggle-btn">🇫🇷 FR</button>
+    <button onclick="openChangePasswordModal()" style="width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;">🔒 Contraseña</button>
     <button onclick="logout()" style="width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;" data-i18n="logout">Salir</button>
   </header>
   <nav>
@@ -200,6 +201,21 @@
       </div>
     </div>
   </main>
+</div>
+
+<!-- Change my password modal -->
+<div id="change-password-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h3>🔒 Cambiar mi contraseña</h3>
+    <div class="mfield"><label>Contraseña actual</label><input id="cp-current" type="password" /></div>
+    <div class="mfield"><label>Nueva contraseña</label><input id="cp-new" type="password" /></div>
+    <div class="mfield"><label>Confirmar nueva contraseña</label><input id="cp-confirm" type="password" /></div>
+    <div id="cp-err" style="display:none;color:var(--error);font-size:13px;margin-bottom:8px;"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="cp-save-btn" onclick="submitChangePassword()">Guardar</button>
+      <button class="btn-secondary" onclick="closeChangePasswordModal()">Cancelar</button>
+    </div>
+  </div>
 </div>
 
 <!-- User detail modal -->
@@ -643,6 +659,52 @@ async function promptResetPw() {
 function closeUserModal() {
   document.getElementById('user-modal').classList.add('hidden');
   _currentUserId = null;
+}
+
+// ── Cambiar mi propia contraseña (admin) ──────────────────────────────────────
+function openChangePasswordModal() {
+  document.getElementById('cp-current').value = '';
+  document.getElementById('cp-new').value = '';
+  document.getElementById('cp-confirm').value = '';
+  document.getElementById('cp-err').style.display = 'none';
+  document.getElementById('change-password-modal').classList.remove('hidden');
+}
+function closeChangePasswordModal() {
+  document.getElementById('change-password-modal').classList.add('hidden');
+}
+async function submitChangePassword() {
+  const current = document.getElementById('cp-current').value;
+  const newPass = document.getElementById('cp-new').value;
+  const confirm = document.getElementById('cp-confirm').value;
+  const errEl = document.getElementById('cp-err');
+  const btn = document.getElementById('cp-save-btn');
+
+  if (newPass.length < 6) {
+    errEl.textContent = 'La nueva contraseña debe tener al menos 6 caracteres.';
+    errEl.style.display = '';
+    return;
+  }
+  if (newPass !== confirm) {
+    errEl.textContent = 'Las contraseñas no coinciden.';
+    errEl.style.display = '';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  errEl.style.display = 'none';
+  try {
+    await apiFetch('/auth/change-password', 'POST', {
+      currentPassword: current,
+      newPassword: newPass,
+    });
+    closeChangePasswordModal();
+    alert('✅ Contraseña actualizada correctamente.');
+  } catch (e) {
+    errEl.textContent = e.message;
+    errEl.style.display = '';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Guardar';
+  }
 }
 
 async function blockUser(id, name) {
