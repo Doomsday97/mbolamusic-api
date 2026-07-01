@@ -300,10 +300,10 @@
   <a href="#precios"         onclick="closeMobileMenu()">Precios</a>
   <a href="#escuchar"        onclick="closeMobileMenu()">Escuchar</a>
   <a href="#artistas"        onclick="closeMobileMenu()">Artistas</a>
-  <a href="#descargar"       onclick="closeMobileMenu()">⬇ Descargar APK</a>
+  <a href="#descargar"       onclick="closeMobileMenu()">Descargar APK</a>
   <a href="#admin"           onclick="closeMobileMenu()">Admin</a>
   <!-- Auth dinámica — se actualiza desde updateNavAuth() -->
-  <a id="mobile-menu-auth" href="#" class="login-btn" onclick="mobilMenuAuthClick();return false;">🔑 Iniciar sesión</a>
+  <a id="mobile-menu-auth" href="#" class="login-btn" onclick="mobilMenuAuthClick();return false;">Iniciar sesión</a>
 </div>
 
 <!-- MODAL LOGIN / REGISTRO -->
@@ -587,7 +587,7 @@ function updateNavAuth() {
     }
     // Menú móvil: mostrar cuenta del usuario
     if (mobileAuthLink) {
-      mobileAuthLink.textContent = '👤 ' + user.username + ' — Mi cuenta';
+      mobileAuthLink.textContent = user.username + ' — Mi cuenta';
       mobileAuthLink.className = 'account-btn';
     }
   } else {
@@ -596,7 +596,7 @@ function updateNavAuth() {
     navDownload.style.display = '';
     // Menú móvil: mostrar botón de login
     if (mobileAuthLink) {
-      mobileAuthLink.textContent = '🔑 Iniciar sesión';
+      mobileAuthLink.textContent = 'Iniciar sesión';
       mobileAuthLink.className = 'login-btn';
     }
   }
