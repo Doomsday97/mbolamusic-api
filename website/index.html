@@ -1470,7 +1470,9 @@ function setLang(code, save = true) {
 <!-- Mini player web (fijo abajo) -->
 <div id="web-player" style="display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,10,0.97);border-top:1px solid rgba(245,158,11,0.3);padding:12px 1.5rem;z-index:9999;backdrop-filter:blur(12px);">
   <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-    <div id="wp-cover-wrap" style="width:44px;height:44px;border-radius:8px;background:var(--amber);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">🎵</div>
+    <div id="wp-cover-wrap" style="width:44px;height:44px;border-radius:8px;background:rgba(245,158,11,0.2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(245,158,11,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    </div>
     <div style="flex:1;min-width:120px;overflow:hidden;">
       <div id="wp-title" style="font-weight:700;font-size:0.9rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
       <div id="wp-artist" style="font-size:0.75rem;color:var(--text2);">—</div>
@@ -1492,10 +1494,16 @@ function renderTrackCard(t, i) {
        style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s;"
        onmouseover="this.style.borderColor='rgba(245,158,11,0.5)';this.style.transform='translateY(-3px)'"
        onmouseout="this.style.borderColor='rgba(255,255,255,0.06)';this.style.transform='translateY(0)'">
-    <div style="height:130px;background:${bgs[i%3]};display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;">
-      ${t.coverUrl ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'">` : '🎵'}
-      <div id="play-spin-${t.id}" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;font-size:1.5rem;">⏳</div>
-      <div style="position:absolute;bottom:8px;right:8px;background:var(--amber);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;">▶</div>
+    <div style="height:130px;background:${bgs[i%3]};display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+      ${t.coverUrl
+        ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'">`
+        : `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(245,158,11,0.35)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`}
+      <div id="play-spin-${t.id}" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div style="position:absolute;bottom:8px;right:8px;background:var(--amber);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </div>
     </div>
     <div style="padding:14px;">
       <div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div>
@@ -1521,8 +1529,8 @@ async function playWebTrack(trackId, title, artistName, coverUrl) {
   const coverWrap = document.getElementById('wp-cover-wrap');
   if (coverWrap) {
     coverWrap.innerHTML = coverUrl
-      ? `<img src="${coverUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.textContent='🎵'">`
-      : '🎵';
+      ? `<img src="${coverUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'22\' height=\'22\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'rgba(245,158,11,0.5)\' stroke-width=\'1.5\'><path d=\'M9 18V5l12-2v13\'/><circle cx=\'6\' cy=\'18\' r=\'3\'/><circle cx=\'18\' cy=\'16\' r=\'3\'/></svg>'">`
+      : `<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='rgba(245,158,11,0.5)' stroke-width='1.5'><path d='M9 18V5l12-2v13'/><circle cx='6' cy='18' r='3'/><circle cx='18' cy='16' r='3'/></svg>`;
   }
   document.getElementById('web-player').style.display = 'block';
 
@@ -1672,9 +1680,9 @@ function loadTrending() {
              style="flex:0 0 160px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;cursor:pointer;scroll-snap-align:start;transition:border-color .2s,transform .15s;"
              onmouseover="this.style.borderColor='rgba(245,158,11,0.5)';this.style.transform='translateY(-3px)'"
              onmouseout="this.style.borderColor='rgba(255,255,255,0.07)';this.style.transform='translateY(0)'">
-          <div style="height:160px;background:rgba(245,158,11,0.12);display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;">
-            ${t.coverUrl ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'">` : '🎵'}
-            <div style="position:absolute;bottom:8px;right:8px;background:var(--amber);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:.9rem;box-shadow:0 2px 8px rgba(245,158,11,.4);">▶</div>
+          <div style="height:160px;background:rgba(245,158,11,0.12);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+            ${t.coverUrl ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'">` : `<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="rgba(245,158,11,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`}
+            <div style="position:absolute;bottom:8px;right:8px;background:var(--amber);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(245,158,11,.4);"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
           </div>
           <div style="padding:10px 12px;">
             <div style="font-weight:700;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div>
@@ -2380,8 +2388,10 @@ async function loadArtistTracksWeb(token) {
     }
     list.innerHTML = tracks.map(t => `
       <div style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,0.04);border-radius:10px;">
-        <div style="width:44px;height:44px;border-radius:8px;flex-shrink:0;overflow:hidden;background:#222;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">
-          ${t.coverUrl ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='🎵'">` : '🎵'}
+        <div style="width:44px;height:44px;border-radius:8px;flex-shrink:0;overflow:hidden;background:#222;display:flex;align-items:center;justify-content:center;">
+          ${t.coverUrl
+            ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`
+            : `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(245,158,11,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`}
         </div>
         <div style="flex:1;min-width:0;">
           <div style="font-weight:600;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(t.title)}</div>
