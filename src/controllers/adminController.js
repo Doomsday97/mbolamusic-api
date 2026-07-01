@@ -393,6 +393,7 @@ async function storageDiagnostics(req, res) {
     provider,
     s3Bucket: process.env.S3_BUCKET || null,
     s3Endpoint: process.env.S3_ENDPOINT || null,
+    s3EndpointEffective: require('../services/storage').cleanEndpoint(process.env.S3_ENDPOINT) || null,
     s3Region: process.env.S3_REGION || null,
     cdnBaseUrl: process.env.CDN_BASE_URL || null,
   };
@@ -406,16 +407,9 @@ async function storageDiagnostics(req, res) {
   const testContent = `MbôláMusic storage diagnostics ${new Date().toISOString()}`;
 
   try {
-    const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
-    const client = new S3Client({
-      region: process.env.S3_REGION || 'auto',
-      endpoint: process.env.S3_ENDPOINT || undefined,
-      credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY,
-        secretAccessKey: process.env.S3_SECRET_KEY,
-      },
-      forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-    });
+    const { PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+    const storageService = require('../services/storage');
+    const client = storageService.getS3Client(); // mismo cliente que usan las subidas reales
 
     await client.send(new PutObjectCommand({
       Bucket: process.env.S3_BUCKET,

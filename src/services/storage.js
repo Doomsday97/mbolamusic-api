@@ -30,6 +30,22 @@ function keyFromUrl(url) {
 // ── S3 ─────────────────────────────────────────────────────────────────────
 let _s3 = null;
 
+// Algunas configuraciones de S3_ENDPOINT incluyen por error el nombre del bucket
+// en la ruta (p.ej. "https://xxx.r2.cloudflarestorage.com/mi-bucket"). El SDK ya
+// recibe el bucket por separado en cada operación (Bucket: ...), así que si el
+// endpoint también trae una ruta, el objeto termina subiéndose a una ruta
+// duplicada dentro del bucket y nunca coincide con la URL pública del CDN.
+// Nos quedamos solo con el origen (protocolo + host) para evitar ese desajuste.
+function _cleanEndpoint(raw) {
+  if (!raw) return raw;
+  try {
+    const u = new URL(raw);
+    return `${u.protocol}//${u.host}`;
+  } catch {
+    return raw;
+  }
+}
+
 function getS3Client() {
   if (_s3) return _s3;
   let S3Client;
@@ -42,7 +58,7 @@ function getS3Client() {
   }
   _s3 = new S3Client({
     region: process.env.S3_REGION || 'auto',
-    endpoint: process.env.S3_ENDPOINT || undefined,
+    endpoint: _cleanEndpoint(process.env.S3_ENDPOINT) || undefined,
     credentials: {
       accessKeyId: process.env.S3_ACCESS_KEY,
       secretAccessKey: process.env.S3_SECRET_KEY,
@@ -135,4 +151,4 @@ async function deleteFile(url) {
   if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 }
 
-module.exports = { ensureDir, publicUrl, upload, deleteFile, rewriteUrl, UPLOAD_DIR };
+module.exports = { ensureDir, publicUrl, upload, deleteFile, rewriteUrl, UPLOAD_DIR, getS3Client, cleanEndpoint: _cleanEndpoint };
