@@ -1467,40 +1467,173 @@ function setLang(code, save = true) {
   </div>
 </section>
 
-<!-- Mini player web (fijo abajo) -->
-<div id="web-player" style="display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,10,0.97);border-top:1px solid rgba(245,158,11,0.3);padding:12px 1.5rem;z-index:9999;backdrop-filter:blur(12px);">
-  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-    <div id="wp-cover-wrap" style="width:44px;height:44px;border-radius:8px;background:rgba(245,158,11,0.2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(245,158,11,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+<!-- Reproductor web (barra fija inferior) -->
+<style>
+  #web-player { display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(8,8,8,0.97);border-top:2px solid rgba(245,158,11,0.35);padding:10px 1.5rem;z-index:9999;backdrop-filter:blur(16px); }
+  .wp-wrap { max-width:1100px;margin:0 auto;display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:1rem; }
+  @media(max-width:640px){ .wp-wrap{ grid-template-columns:auto 1fr auto; } .wp-vol-wrap{ display:none!important; } }
+  .wp-info { overflow:hidden;min-width:0; }
+  .wp-controls { display:flex;align-items:center;gap:6px; }
+  .wp-btn { background:none;border:none;color:#fff;cursor:pointer;padding:6px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:background .15s; }
+  .wp-btn:hover { background:rgba(255,255,255,.1); }
+  .wp-btn-play { background:var(--amber);color:#000;border-radius:50%;width:38px;height:38px;padding:0; }
+  .wp-btn-play:hover { background:#fcd34d; }
+  .wp-progress-wrap { display:flex;align-items:center;gap:6px;flex:1;min-width:0; }
+  .wp-time { font-size:11px;color:var(--text2);white-space:nowrap;font-variant-numeric:tabular-nums; }
+  #wp-seek { flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:rgba(255,255,255,.15);outline:none;cursor:pointer;accent-color:var(--amber); }
+  #wp-seek::-webkit-slider-thumb { -webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--amber);cursor:pointer; }
+  #wp-vol { width:72px;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:rgba(255,255,255,.15);outline:none;cursor:pointer;accent-color:var(--amber); }
+  #wp-vol::-webkit-slider-thumb { -webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--amber);cursor:pointer; }
+</style>
+<div id="web-player">
+  <div class="wp-wrap">
+    <!-- Carátula + info -->
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div id="wp-cover-wrap" style="width:44px;height:44px;border-radius:8px;background:rgba(245,158,11,0.2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(245,158,11,0.7)" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      </div>
+      <div class="wp-info">
+        <div id="wp-title" style="font-weight:700;font-size:0.88rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">—</div>
+        <div id="wp-artist" style="font-size:0.73rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">—</div>
+      </div>
     </div>
-    <div style="flex:1;min-width:120px;overflow:hidden;">
-      <div id="wp-title" style="font-weight:700;font-size:0.9rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
-      <div id="wp-artist" style="font-size:0.75rem;color:var(--text2);">—</div>
+    <!-- Controles + barra de progreso -->
+    <div style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+      <div class="wp-controls">
+        <button class="wp-btn" onclick="wpSkip(-1)" title="Anterior">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+        </button>
+        <button class="wp-btn" onclick="wpSeekRel(-10)" title="-10s" style="font-size:11px;font-weight:700;padding:4px 6px;">-10</button>
+        <button class="wp-btn wp-btn-play" id="wp-play-btn" onclick="wpTogglePlay()" title="Play/Pausa">
+          <svg id="wp-icon-play" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <svg id="wp-icon-pause" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+        <button class="wp-btn" onclick="wpSeekRel(10)" title="+10s" style="font-size:11px;font-weight:700;padding:4px 6px;">+10</button>
+        <button class="wp-btn" onclick="wpSkip(1)" title="Siguiente">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+      </div>
+      <div class="wp-progress-wrap">
+        <span class="wp-time" id="wp-current">0:00</span>
+        <input type="range" id="wp-seek" min="0" max="1000" value="0" oninput="wpSeekTo(this.value)">
+        <span class="wp-time" id="wp-duration">0:00</span>
+      </div>
     </div>
-    <audio id="web-audio" controls style="flex:2;min-width:200px;height:36px;"></audio>
-    <button onclick="document.getElementById('web-player').style.display='none';document.getElementById('web-audio').pause();"
-      style="background:rgba(255,255,255,0.1);border:none;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:0.85rem;flex-shrink:0;">✕</button>
+    <!-- Volumen -->
+    <div class="wp-vol-wrap" style="display:flex;align-items:center;gap:6px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      <input type="range" id="wp-vol" min="0" max="100" value="80" oninput="wpSetVol(this.value)">
+    </div>
+    <!-- Cerrar -->
+    <button class="wp-btn" onclick="wpClose()" title="Cerrar" style="flex-shrink:0;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
   </div>
+  <audio id="web-audio" preload="none"></audio>
 </div>
 
 <script>
 const API = 'https://mbolamusic-apionrender.com/api';
 let _allTracks = [];
+let _currentTrackIdx = -1;
+
+// ── Reproductor web ─────────────────────────────────────────────────────────
+(function initPlayer() {
+  const audio = document.getElementById('web-audio');
+  if (!audio) return;
+
+  audio.volume = 0.8;
+
+  function fmtTime(s) {
+    if (!isFinite(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    return m + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+  }
+
+  audio.addEventListener('timeupdate', function () {
+    if (!this.duration) return;
+    const pct = (this.currentTime / this.duration) * 1000;
+    const seek = document.getElementById('wp-seek');
+    if (seek && document.activeElement !== seek) seek.value = pct;
+    const cur = document.getElementById('wp-current');
+    if (cur) cur.textContent = fmtTime(this.currentTime);
+  });
+
+  audio.addEventListener('loadedmetadata', function () {
+    const dur = document.getElementById('wp-duration');
+    if (dur) dur.textContent = fmtTime(this.duration);
+  });
+
+  audio.addEventListener('play', function () {
+    document.getElementById('wp-icon-play').style.display = 'none';
+    document.getElementById('wp-icon-pause').style.display = '';
+  });
+
+  audio.addEventListener('pause', function () {
+    document.getElementById('wp-icon-play').style.display = '';
+    document.getElementById('wp-icon-pause').style.display = 'none';
+  });
+
+  audio.addEventListener('ended', function () {
+    wpSkip(1);
+  });
+
+  audio.addEventListener('error', function () {
+    console.warn('Error de audio:', this.error);
+  });
+})();
+
+function wpTogglePlay() {
+  const a = document.getElementById('web-audio');
+  if (!a.src) return;
+  a.paused ? a.play() : a.pause();
+}
+
+function wpSeekRel(secs) {
+  const a = document.getElementById('web-audio');
+  if (!a.duration) return;
+  a.currentTime = Math.max(0, Math.min(a.duration, a.currentTime + secs));
+}
+
+function wpSeekTo(val) {
+  const a = document.getElementById('web-audio');
+  if (!a.duration) return;
+  a.currentTime = (val / 1000) * a.duration;
+}
+
+function wpSetVol(val) {
+  document.getElementById('web-audio').volume = val / 100;
+}
+
+function wpClose() {
+  document.getElementById('web-player').style.display = 'none';
+  const a = document.getElementById('web-audio');
+  a.pause();
+  a.src = '';
+  _currentTrackIdx = -1;
+}
+
+function wpSkip(dir) {
+  if (!_allTracks.length) return;
+  const next = _currentTrackIdx + dir;
+  if (next < 0 || next >= _allTracks.length) return;
+  const t = _allTracks[next];
+  const artistName = (t.artist && t.artist.artistName) || t.artistName || '';
+  playWebTrack(t.id, t.title, artistName, t.coverUrl || '', t.audioUrl || '');
+}
 
 function renderTrackCard(t, i) {
   const bgs = ['rgba(245,158,11,0.15)','rgba(63,81,181,0.2)','rgba(0,154,68,0.15)'];
   const artistName = (t.artist && t.artist.artistName) || t.artistName || '';
-  return `<div onclick="playWebTrack('${t.id}',${JSON.stringify(t.title)},${JSON.stringify(artistName)},${JSON.stringify(t.coverUrl||'')})"
+  return `<div onclick="playWebTrack('${t.id}',${JSON.stringify(t.title)},${JSON.stringify(artistName)},${JSON.stringify(t.coverUrl||'')},${JSON.stringify(t.audioUrl||'')})"
        style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s;"
        onmouseover="this.style.borderColor='rgba(245,158,11,0.5)';this.style.transform='translateY(-3px)'"
        onmouseout="this.style.borderColor='rgba(255,255,255,0.06)';this.style.transform='translateY(0)'">
     <div style="height:130px;background:${bgs[i%3]};display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
       ${t.coverUrl
         ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'">`
-        : `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(245,158,11,0.35)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`}
-      <div id="play-spin-${t.id}" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      </div>
+        : `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(245,158,11,0.35)" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`}
+      <div id="wp-playing-${t.id}" style="display:none;position:absolute;top:8px;left:8px;background:var(--amber);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;color:#000;">▶ NOW</div>
       <div style="position:absolute;bottom:8px;right:8px;background:var(--amber);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       </div>
@@ -1513,63 +1646,57 @@ function renderTrackCard(t, i) {
   </div>`;
 }
 
-async function playWebTrack(trackId, title, artistName, coverUrl) {
-  const token = localStorage.getItem('mbola_token');
-  if (!token) {
-    openModal('login');
-    return;
+function playWebTrack(trackId, title, artistName, coverUrl, audioUrl) {
+  // Si no tenemos la URL directa, la buscamos en _allTracks
+  if (!audioUrl) {
+    const found = _allTracks.find(t => t.id === trackId);
+    audioUrl = found ? (found.audioUrl || '') : '';
   }
-  // Spinner
-  const spin = document.getElementById('play-spin-' + trackId);
-  if (spin) { spin.style.display = 'flex'; }
 
-  // Mostrar barra de reproducción inmediatamente
+  // Actualizar índice actual
+  _currentTrackIdx = _allTracks.findIndex(t => t.id === trackId);
+
+  // Quitar badge "NOW" anterior
+  document.querySelectorAll('[id^="wp-playing-"]').forEach(el => el.style.display = 'none');
+  const badge = document.getElementById('wp-playing-' + trackId);
+  if (badge) badge.style.display = '';
+
+  // Actualizar info del reproductor
   document.getElementById('wp-title').textContent  = title;
   document.getElementById('wp-artist').textContent = artistName;
+  document.getElementById('wp-current').textContent = '0:00';
+  document.getElementById('wp-duration').textContent = '0:00';
+  document.getElementById('wp-seek').value = 0;
+
   const coverWrap = document.getElementById('wp-cover-wrap');
-  if (coverWrap) {
-    coverWrap.innerHTML = coverUrl
-      ? `<img src="${coverUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'22\' height=\'22\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'rgba(245,158,11,0.5)\' stroke-width=\'1.5\'><path d=\'M9 18V5l12-2v13\'/><circle cx=\'6\' cy=\'18\' r=\'3\'/><circle cx=\'18\' cy=\'16\' r=\'3\'/></svg>'">`
-      : `<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='rgba(245,158,11,0.5)' stroke-width='1.5'><path d='M9 18V5l12-2v13'/><circle cx='6' cy='18' r='3'/><circle cx='18' cy='16' r='3'/></svg>`;
-  }
+  const svgPlaceholder = `<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='rgba(245,158,11,0.7)' stroke-width='1.5'><path d='M9 18V5l12-2v13'/><circle cx='6' cy='18' r='3'/><circle cx='18' cy='16' r='3'/></svg>`;
+  coverWrap.innerHTML = coverUrl
+    ? `<img src="${coverUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='${svgPlaceholder.replace(/'/g,"\\'")}'">`
+    : svgPlaceholder;
+
   document.getElementById('web-player').style.display = 'block';
 
-  try {
-    const r = await fetch(API_BASE + '/tracks/' + trackId + '/play', {
+  // Reproducir directamente con la URL del track
+  const audio = document.getElementById('web-audio');
+  if (!audioUrl) {
+    alert('⚠️ Esta canción no tiene un archivo de audio disponible.');
+    return;
+  }
+  audio.src = audioUrl;
+  audio.load();
+  audio.play().catch(err => {
+    console.warn('Autoplay bloqueado o error de audio:', err);
+  });
+
+  // Registrar reproducción en segundo plano (sin bloquear la UI)
+  const token = localStorage.getItem('mbola_token');
+  if (token) {
+    fetch(API + '/tracks/' + trackId + '/play', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({}),
-    });
-    const j = await r.json();
-
-    if (r.status === 402) {
-      document.getElementById('web-player').style.display = 'none';
-      _showWebPaymentOptions(trackId, title);
-      return;
-    }
-    if (!j.success) {
-      document.getElementById('web-player').style.display = 'none';
-      alert('⚠️ ' + (j.error || 'No se puede reproducir esta canción'));
-      return;
-    }
-
-    const audioUrl = (j.data && j.data.audioUrl) || '';
-    const audio = document.getElementById('web-audio');
-    audio.src = audioUrl;
-    audio.play().catch(() => alert('⚠️ Error al iniciar el audio. Revisa que el servidor tiene los archivos.'));
-
-  } catch(e) {
-    document.getElementById('web-player').style.display = 'none';
-    alert('⚠️ Error de conexión: ' + e.message);
-  } finally {
-    if (spin) spin.style.display = 'none';
+    }).catch(() => {});
   }
-}
-
-function _showWebPaymentOptions(trackId, title) {
-  const token = localStorage.getItem('mbola_token');
-  if (!confirm('Tu periodo gratuito terminó.\n\n• Suscríbete por 2.000 FCFA/mes\n• O paga 50 FCFA por esta reproducción\n\n¿Ir a la sección de precios para suscribirte?')) return;
-  document.getElementById('precios').scrollIntoView({ behavior: 'smooth' });
 }
 
 function filterGenreWeb(genre) {
@@ -1676,7 +1803,7 @@ function loadTrending() {
       const tracks = ((j && j.data && j.data.tracks) || (j && j.data) || []).slice(0, 12);
       if (!tracks.length) { el.innerHTML = '<p style="color:var(--text2);opacity:.6;padding:1rem;">Sin datos disponibles.</p>'; return; }
       el.innerHTML = tracks.map(t => `
-        <div onclick="playWebTrack('${t.id}',${JSON.stringify(t.title)},${JSON.stringify((t.artist&&t.artist.artistName)||t.artistName||'')},${JSON.stringify(t.coverUrl||'')})"
+        <div onclick="playWebTrack('${t.id}',${JSON.stringify(t.title)},${JSON.stringify((t.artist&&t.artist.artistName)||t.artistName||'')},${JSON.stringify(t.coverUrl||'')},${JSON.stringify(t.audioUrl||'')})"
              style="flex:0 0 160px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;cursor:pointer;scroll-snap-align:start;transition:border-color .2s,transform .15s;"
              onmouseover="this.style.borderColor='rgba(245,158,11,0.5)';this.style.transform='translateY(-3px)'"
              onmouseout="this.style.borderColor='rgba(255,255,255,0.07)';this.style.transform='translateY(0)'">

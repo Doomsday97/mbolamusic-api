@@ -139,16 +139,20 @@ async function playTrack(req, res) {
   const track = await prisma.track.findUnique({ where: { id: req.params.id } });
   if (!track || !track.isPublished) return fail(res, 'Canción no disponible', 404);
 
-  const hasAccess = await subscriptionService.listenerHasAccess(req.user.id);
-  if (!hasAccess) {
-    return res.status(402).json({
-      success: false,
-      data: { requiresPayment: true, options: ['LISTENER_MONTHLY', 'PER_PLAY'] },
-      error: 'Tu periodo gratuito terminó. Suscríbete o paga por reproducción.',
-    });
+  // Admins y artistas pueden escuchar sin restricción de suscripción
+  const isPrivileged = req.user.role === 'ADMIN' || req.user.role === 'ARTIST';
+  if (!isPrivileged) {
+    const hasAccess = await subscriptionService.listenerHasAccess(req.user.id);
+    if (!hasAccess) {
+      return res.status(402).json({
+        success: false,
+        data: { requiresPayment: true, options: ['LISTENER_MONTHLY', 'PER_PLAY'] },
+        error: 'Tu periodo gratuito terminó. Suscríbete o paga por reproducción.',
+      });
+    }
   }
 
-  await paymentController.registerPlay(req.user.id, track, true);
+  await paymentController.registerPlay(req.user.id, track, isPrivileged);
   const t = rw(track);
   return ok(res, { audioUrl: t.audioUrl, track: t });
 }

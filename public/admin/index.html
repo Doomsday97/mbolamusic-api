@@ -513,14 +513,26 @@ async function loadUsers(page = 1) {
   try {
     const qs = `?page=${page}&limit=20${_uRole ? '&role=' + _uRole : ''}`;
     const d = await apiFetch('/admin/users' + qs);
+
+    function subBadge(u) {
+      const sub = u.subscriptions && u.subscriptions[0];
+      if (!sub) return `<span style="font-size:11px;color:var(--error);background:rgba(229,72,77,.12);padding:2px 8px;border-radius:99px;">Sin suscripción</span>`;
+      const exp = new Date(sub.endDate);
+      const isExp = exp < new Date();
+      const label = { LISTENER_MONTHLY:'Oyente mensual', ARTIST_MONTHLY:'Artista mensual', LISTENER_FREE:'Prueba oyente', ARTIST_FREE:'Prueba artista' }[sub.type] || sub.type;
+      if (isExp) return `<span style="font-size:11px;color:var(--muted);background:rgba(255,255,255,.06);padding:2px 8px;border-radius:99px;">⏰ Expirada</span>`;
+      return `<span style="font-size:11px;color:var(--success);background:rgba(48,164,108,.12);padding:2px 8px;border-radius:99px;" title="Vence ${exp.toLocaleDateString('es')}">✓ ${label}</span>`;
+    }
+
     let rows = d.users.map(u => `
       <tr>
         <td>${esc(u.username)}</td>
-        <td>${esc(u.email || u.phone || '—')}</td>
+        <td style="font-size:12px;">${esc(u.email || u.phone || '—')}</td>
         <td><span class="badge badge-${u.role.toLowerCase()}">${u.role}</span></td>
-        <td>${esc((u.artistProfile && u.artistProfile.artistName) || '—')}</td>
-        <td>${fmt(u.walletBalance)} FCFA</td>
-        <td>${new Date(u.createdAt).toLocaleDateString('es')}</td>
+        <td style="font-size:12px;">${esc((u.artistProfile && u.artistProfile.artistName) || '—')}</td>
+        <td>${subBadge(u)}</td>
+        <td style="font-size:12px;">${fmt(u.walletBalance)} FCFA</td>
+        <td style="font-size:12px;">${new Date(u.createdAt).toLocaleDateString('es')}</td>
         <td>
           <button class="btn-sm btn-success" onclick="viewUser('${u.id}')">Detalles</button>
           ${u.role === 'ARTIST' ? `
@@ -530,12 +542,18 @@ async function loadUsers(page = 1) {
         </td>
       </tr>`).join('');
     var _toRemove = el.querySelector('.loading, .empty'); if (_toRemove) _toRemove.remove();
+
+    const subTotal = d.users.filter(u => u.subscriptions && u.subscriptions[0] && new Date(u.subscriptions[0].endDate) > new Date()).length;
+    const noSubTotal = d.users.length - subTotal;
+
     el.innerHTML = `
       <div class="section-header">
         <h2>Usuarios <small style="color:var(--muted)">(${d.total})</small></h2>
-        <div class="filters">
-          <select onchange="filterUsers(this.value)">
-            <option value="">Todos</option>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <span style="font-size:12px;color:var(--success);">✓ Suscritos: ${subTotal}</span>
+          <span style="font-size:12px;color:var(--error);">✗ Sin suscripción: ${noSubTotal}</span>
+          <select onchange="filterUsers(this.value)" style="font-size:13px;padding:5px 10px;background:var(--surface2);border:1px solid var(--surface2);color:var(--text);border-radius:6px;">
+            <option value="">Todos los roles</option>
             <option value="ARTIST" ${_uRole==='ARTIST'?'selected':''}>Artistas</option>
             <option value="LISTENER" ${_uRole==='LISTENER'?'selected':''}>Oyentes</option>
             <option value="ADMIN" ${_uRole==='ADMIN'?'selected':''}>Admin</option>
@@ -543,8 +561,8 @@ async function loadUsers(page = 1) {
         </div>
       </div>
       <table>
-        <thead><tr><th>Usuario</th><th>Contacto</th><th>Rol</th><th>Nombre artístico</th><th>Monedero</th><th>Registro</th><th>Acciones</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="7" class="empty">Sin resultados</td></tr>'}</tbody>
+        <thead><tr><th>Usuario</th><th>Contacto</th><th>Rol</th><th>Artista</th><th>Suscripción</th><th>Monedero</th><th>Registro</th><th>Acciones</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="8" class="empty">Sin resultados</td></tr>'}</tbody>
       </table>
       <div class="pager">
         <button onclick="loadUsers(${page-1})" ${page<=1?'disabled':''}>← Anterior</button>

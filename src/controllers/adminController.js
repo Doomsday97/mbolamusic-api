@@ -54,6 +54,12 @@ async function listUsers(req, res) {
         role: true, country: true, city: true,
         walletBalance: true, isVerified: true, createdAt: true,
         artistProfile: { select: { artistName: true, idVerified: true, totalEarnings: true } },
+        subscriptions: {
+          where: { status: 'ACTIVE' },
+          orderBy: { endDate: 'desc' },
+          take: 1,
+          select: { type: true, status: true, endDate: true },
+        },
       },
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
