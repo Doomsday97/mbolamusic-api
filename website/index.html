@@ -1468,18 +1468,57 @@ function setLang(code, save = true) {
 </section>
 
 <!-- Mini player web (fijo abajo) -->
-<div id="web-player" style="display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,10,0.97);border-top:1px solid rgba(245,158,11,0.3);padding:12px 1.5rem;z-index:9999;backdrop-filter:blur(12px);">
-  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-    <div id="wp-cover-wrap" style="width:44px;height:44px;border-radius:8px;background:rgba(245,158,11,0.2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+<style>
+  #web-player input[type=range] { -webkit-appearance:none; appearance:none; height:4px; border-radius:2px; background:rgba(255,255,255,0.15); outline:none; cursor:pointer; }
+  #web-player input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:var(--amber); cursor:pointer; }
+  #web-player input[type=range]::-moz-range-thumb { width:12px; height:12px; border-radius:50%; background:var(--amber); border:none; cursor:pointer; }
+  #web-player input[type=range]#wp-seek { flex:1; }
+  #web-player input[type=range]#wp-vol { width:70px; }
+  .wp-ctrl-btn { background:none; border:none; color:var(--text2); cursor:pointer; padding:4px; display:flex; align-items:center; justify-content:center; transition:color .15s; }
+  .wp-ctrl-btn:hover { color:#fff; }
+  .wp-ctrl-btn.wp-play { color:#fff; background:var(--amber); border-radius:50%; width:34px; height:34px; }
+  .wp-ctrl-btn.wp-play:hover { background:#ffb52e; }
+  @media (max-width:640px) { #web-player .wp-vol-wrap, #web-player .wp-time { display:none !important; } }
+</style>
+<div id="web-player" style="display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,10,0.97);border-top:1px solid rgba(245,158,11,0.3);padding:10px 1.5rem;z-index:9999;backdrop-filter:blur(12px);">
+  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:0.9rem;flex-wrap:nowrap;">
+    <div id="wp-cover-wrap" style="width:42px;height:42px;border-radius:8px;background:rgba(245,158,11,0.2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;">
       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(245,158,11,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
     </div>
-    <div style="flex:1;min-width:120px;overflow:hidden;">
-      <div id="wp-title" style="font-weight:700;font-size:0.9rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
-      <div id="wp-artist" style="font-size:0.75rem;color:var(--text2);">—</div>
+    <div style="width:130px;min-width:90px;overflow:hidden;flex-shrink:0;">
+      <div id="wp-title" style="font-weight:700;font-size:0.85rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
+      <div id="wp-artist" style="font-size:0.72rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
     </div>
-    <audio id="web-audio" controls style="flex:2;min-width:200px;height:36px;"></audio>
-    <button onclick="document.getElementById('web-player').style.display='none';document.getElementById('web-audio').pause();"
-      style="background:rgba(255,255,255,0.1);border:none;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:0.85rem;flex-shrink:0;">✕</button>
+
+    <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+      <button class="wp-ctrl-btn" onclick="wpPrev()" title="Anterior">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+      </button>
+      <button class="wp-ctrl-btn" onclick="wpSeekRel(-10)" title="-10s">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      </button>
+      <button class="wp-ctrl-btn wp-play" id="wp-play-btn" onclick="wpTogglePlay()" title="Play/Pausa">
+        <svg id="wp-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </button>
+      <button class="wp-ctrl-btn" onclick="wpSeekRel(10)" title="+10s">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+      </button>
+      <button class="wp-ctrl-btn" onclick="wpNext()" title="Siguiente">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+      </button>
+    </div>
+
+    <span class="wp-time" id="wp-time-cur" style="font-size:0.7rem;color:var(--text2);flex-shrink:0;width:34px;text-align:right;">0:00</span>
+    <input type="range" id="wp-seek" min="0" max="100" value="0" step="0.1" oninput="wpSeekTo(this.value)">
+    <span class="wp-time" id="wp-time-dur" style="font-size:0.7rem;color:var(--text2);flex-shrink:0;width:34px;">0:00</span>
+
+    <div class="wp-vol-wrap" style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+      <input type="range" id="wp-vol" min="0" max="1" value="1" step="0.01" oninput="wpSetVol(this.value)">
+    </div>
+
+    <audio id="web-audio" preload="none" style="display:none;"></audio>
+    <button onclick="wpClose()" style="background:rgba(255,255,255,0.1);border:none;color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem;flex-shrink:0;">✕</button>
   </div>
 </div>
 
@@ -1513,6 +1552,8 @@ function renderTrackCard(t, i) {
   </div>`;
 }
 
+let _currentTrackIdx = -1;
+
 async function playWebTrack(trackId, title, artistName, coverUrl) {
   const token = localStorage.getItem('mbola_token');
   if (!token) {
@@ -1522,6 +1563,10 @@ async function playWebTrack(trackId, title, artistName, coverUrl) {
   // Spinner
   const spin = document.getElementById('play-spin-' + trackId);
   if (spin) { spin.style.display = 'flex'; }
+
+  // Recordar posición en la lista para prev/next
+  const idx = _allTracks.findIndex(t => t.id === trackId);
+  if (idx !== -1) _currentTrackIdx = idx;
 
   // Mostrar barra de reproducción inmediatamente
   document.getElementById('wp-title').textContent  = title;
@@ -1565,6 +1610,80 @@ async function playWebTrack(trackId, title, artistName, coverUrl) {
     if (spin) spin.style.display = 'none';
   }
 }
+
+// ─────────────────────────────────────────────────────────────
+//  Controles del reproductor web (play/pause, ±10s, seek, volumen, prev/next)
+// ─────────────────────────────────────────────────────────────
+function _wpFormatTime(sec) {
+  if (!isFinite(sec) || sec < 0) sec = 0;
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+function wpTogglePlay() {
+  const audio = document.getElementById('web-audio');
+  if (!audio.src) return;
+  if (audio.paused) audio.play(); else audio.pause();
+}
+
+function wpSeekRel(deltaSec) {
+  const audio = document.getElementById('web-audio');
+  if (!audio.src) return;
+  audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + deltaSec));
+}
+
+function wpSeekTo(percent) {
+  const audio = document.getElementById('web-audio');
+  if (!audio.src || !audio.duration) return;
+  audio.currentTime = (percent / 100) * audio.duration;
+}
+
+function wpSetVol(val) {
+  document.getElementById('web-audio').volume = parseFloat(val);
+}
+
+function wpClose() {
+  const audio = document.getElementById('web-audio');
+  audio.pause();
+  document.getElementById('web-player').style.display = 'none';
+}
+
+function wpPrev() {
+  if (!_allTracks.length || _currentTrackIdx === -1) return;
+  const idx = (_currentTrackIdx - 1 + _allTracks.length) % _allTracks.length;
+  const t = _allTracks[idx];
+  playWebTrack(t.id, t.title, (t.artist && t.artist.artistName) || t.artistName || '', t.coverUrl || '');
+}
+
+function wpNext() {
+  if (!_allTracks.length || _currentTrackIdx === -1) return;
+  const idx = (_currentTrackIdx + 1) % _allTracks.length;
+  const t = _allTracks[idx];
+  playWebTrack(t.id, t.title, (t.artist && t.artist.artistName) || t.artistName || '', t.coverUrl || '');
+}
+
+(function initWebPlayerEvents() {
+  document.addEventListener('DOMContentLoaded', () => {
+    const audio = document.getElementById('web-audio');
+    if (!audio) return;
+    const playIcon = document.getElementById('wp-play-icon');
+    const seekBar  = document.getElementById('wp-seek');
+    const curEl    = document.getElementById('wp-time-cur');
+    const durEl    = document.getElementById('wp-time-dur');
+
+    audio.addEventListener('play',  () => { playIcon.innerHTML = '<rect x="5" y="4" width="4" height="16" rx="1"/><rect x="15" y="4" width="4" height="16" rx="1"/>'; });
+    audio.addEventListener('pause', () => { playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>'; });
+    audio.addEventListener('ended', () => { wpNext(); });
+    audio.addEventListener('loadedmetadata', () => {
+      durEl.textContent = _wpFormatTime(audio.duration);
+    });
+    audio.addEventListener('timeupdate', () => {
+      if (audio.duration) seekBar.value = (audio.currentTime / audio.duration) * 100;
+      curEl.textContent = _wpFormatTime(audio.currentTime);
+    });
+  });
+})();
 
 function _showWebPaymentOptions(trackId, title) {
   const token = localStorage.getItem('mbola_token');
