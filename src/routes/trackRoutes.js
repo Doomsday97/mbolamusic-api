@@ -31,6 +31,7 @@ router.patch(
   tracks.updateTrack,
 );
 router.delete('/:id', authenticate, tracks.deleteTrack);
+router.post('/:id/restore', authenticate, tracks.restoreTrack);
 
 // Reproducción (oyente)
 router.post('/:id/play', authenticate, tracks.playTrack);

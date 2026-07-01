@@ -2595,8 +2595,16 @@ async function loadArtistTracksWeb(token) {
       list.innerHTML = '<div style="color:var(--text2);font-size:0.85rem;padding:8px 0;">Aún no has subido canciones.</div>';
       return;
     }
-    list.innerHTML = tracks.map(t => `
-      <div style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,0.04);border-radius:10px;">
+    list.innerHTML = tracks.map(t => {
+      const isDeleted = !!t.deletedAt;
+      let deletedBadge = '';
+      if (isDeleted) {
+        const deletedAt = new Date(t.deletedAt);
+        const hoursLeft = Math.max(0, Math.ceil(48 - (Date.now() - deletedAt.getTime()) / 3600000));
+        deletedBadge = `<span style="font-size:0.68rem;padding:2px 8px;border-radius:20px;background:rgba(248,113,113,0.12);color:#f87171;">Eliminada · se borra en ${hoursLeft}h</span>`;
+      }
+      return `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,0.04);border-radius:10px;${isDeleted ? 'opacity:0.6;' : ''}">
         <div style="width:44px;height:44px;border-radius:8px;flex-shrink:0;overflow:hidden;background:#222;display:flex;align-items:center;justify-content:center;">
           ${t.coverUrl
             ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`
@@ -2607,11 +2615,15 @@ async function loadArtistTracksWeb(token) {
           <div style="font-size:0.75rem;color:var(--amber);">${escHtml(t.genre)}</div>
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
-          <span style="font-size:0.68rem;padding:2px 8px;border-radius:20px;background:${t.isPublished ? 'rgba(74,222,128,0.12)' : 'rgba(248,113,113,0.12)'};color:${t.isPublished ? '#4ade80' : '#f87171'};">${t.isPublished ? 'Publicada' : 'Oculta'}</span>
-          <button onclick='openEditTrackWeb(${_escSqAttr(JSON.stringify(t))})' title="Editar" style="background:rgba(245,158,11,0.12);border:none;border-radius:7px;padding:6px 8px;cursor:pointer;color:var(--amber);font-size:0.85rem;">✏️</button>
-          <button onclick="deleteTrackWeb('${t.id}','${escHtml(t.title).replace(/'/g,"\\'")}');" title="Eliminar" style="background:rgba(248,113,113,0.1);border:none;border-radius:7px;padding:6px 8px;cursor:pointer;color:#f87171;font-size:0.85rem;">🗑</button>
+          ${isDeleted
+            ? `${deletedBadge}<button onclick="restoreTrackWeb('${t.id}')" title="Restaurar" style="background:rgba(74,222,128,0.12);border:none;border-radius:7px;padding:6px 10px;cursor:pointer;color:#4ade80;font-size:0.78rem;font-weight:600;">↺ Restaurar</button>`
+            : `<span style="font-size:0.68rem;padding:2px 8px;border-radius:20px;background:${t.isPublished ? 'rgba(74,222,128,0.12)' : 'rgba(248,113,113,0.12)'};color:${t.isPublished ? '#4ade80' : '#f87171'};">${t.isPublished ? 'Publicada' : 'Oculta'}</span>
+               <button onclick='openEditTrackWeb(${_escSqAttr(JSON.stringify(t))})' title="Editar" style="background:rgba(245,158,11,0.12);border:none;border-radius:7px;padding:6px 8px;cursor:pointer;color:var(--amber);font-size:0.85rem;">✏️</button>
+               <button onclick="deleteTrackWeb('${t.id}','${escHtml(t.title).replace(/'/g,"\\'")}');" title="Eliminar" style="background:rgba(248,113,113,0.1);border:none;border-radius:7px;padding:6px 8px;cursor:pointer;color:#f87171;font-size:0.85rem;">🗑</button>`
+          }
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   } catch(e) {
     list.innerHTML = '<div style="color:#f87171;font-size:0.85rem;">Error al cargar canciones.</div>';
   }
@@ -2705,7 +2717,7 @@ function showEtResult(msg, ok) {
 }
 
 async function deleteTrackWeb(id, title) {
-  if (!confirm('¿Eliminar "' + title + '"? Esta acción no se puede deshacer.')) return;
+  if (!confirm('¿Eliminar "' + title + '"? Tendrás 48 horas para restaurarla antes de que se borre definitivamente.')) return;
   const token = localStorage.getItem('mbola_token');
   try {
     const r = await fetch(API_BASE + '/tracks/' + id, {
@@ -2720,6 +2732,24 @@ async function deleteTrackWeb(id, title) {
     }
   } catch(e) {
     alert('Error de red al eliminar.');
+  }
+}
+
+async function restoreTrackWeb(id) {
+  const token = localStorage.getItem('mbola_token');
+  try {
+    const r = await fetch(API_BASE + '/tracks/' + id + '/restore', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    if (r.ok) {
+      loadArtistTracksWeb(token);
+    } else {
+      const j = await r.json();
+      alert('Error: ' + (j.error || 'No se pudo restaurar.'));
+    }
+  } catch(e) {
+    alert('Error de red al restaurar.');
   }
 }
 

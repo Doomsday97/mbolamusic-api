@@ -4,7 +4,7 @@ const { z } = require('zod');
 const prisma = require('../config/prisma');
 const { signToken } = require('../utils/jwt');
 const { ok, fail } = require('../utils/response');
-const { upload: uploadFile, rewriteUrl } = require('../services/storage');
+const { upload: uploadFile, rewriteUrl, deleteFile } = require('../services/storage');
 const fs = require('fs');
 const subscriptionService = require('../services/subscriptionService');
 
@@ -286,6 +286,13 @@ async function updateAvatar(req, res) {
   if (!req.file) return fail(res, 'No se recibió ninguna imagen');
   if (!req.file.mimetype.startsWith('image/')) {
     return fail(res, 'El archivo debe ser una imagen (JPG, PNG, WebP…)');
+  }
+
+  // Si el avatar anterior era un archivo en el CDN (de antes de guardar en base64),
+  // lo borramos para no dejar huérfanos en R2 al reemplazarlo.
+  const current = await prisma.user.findUnique({ where: { id: req.user.id }, select: { avatarUrl: true } });
+  if (current?.avatarUrl && !current.avatarUrl.startsWith('data:')) {
+    deleteFile(current.avatarUrl).catch(() => {});
   }
 
   // Guardar como data URL en la BD — persiste aunque Render reinicie el servidor

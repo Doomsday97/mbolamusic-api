@@ -98,7 +98,7 @@ async function uploadTrack(req, res) {
 // GET /api/tracks?genre=...&search=...  -> catálogo público (solo publicadas)
 async function listTracks(req, res) {
   const { genre, search } = req.query;
-  const where = { isPublished: true };
+  const where = { isPublished: true, deletedAt: null };
   if (genre && genre !== 'all') where.genre = genre;
   if (search) where.title = { contains: search, mode: 'insensitive' };
 
@@ -114,7 +114,7 @@ async function listTracks(req, res) {
 // GET /api/tracks/charts  -> top por reproducciones
 async function charts(req, res) {
   const tracks = await prisma.track.findMany({
-    where: { isPublished: true },
+    where: { isPublished: true, deletedAt: null },
     include: { artist: { select: { artistName: true, id: true, userId: true } } },
     orderBy: { playCount: 'desc' },
     take: 50,
@@ -122,7 +122,8 @@ async function charts(req, res) {
   return ok(res, { tracks: rwAll(tracks) });
 }
 
-// GET /api/tracks/mine  -> catálogo del artista (incluye ocultas)
+// GET /api/tracks/mine  -> catálogo del artista (incluye ocultas y eliminadas
+// recientemente, para que pueda restaurarlas dentro del plazo de 48h)
 async function myTracks(req, res) {
   if (!req.user.artistProfile) return fail(res, 'No eres artista', 403);
   const tracks = await prisma.track.findMany({
@@ -138,7 +139,7 @@ async function myTracks(req, res) {
 // Sin suscripción -> 402.
 async function playTrack(req, res) {
   const track = await prisma.track.findUnique({ where: { id: req.params.id } });
-  if (!track || !track.isPublished) return fail(res, 'Canción no disponible', 404);
+  if (!track || !track.isPublished || track.deletedAt) return fail(res, 'Canción no disponible', 404);
 
   const role = req.user.role;
   const isAdmin  = role === 'ADMIN';
@@ -180,7 +181,7 @@ async function feed(req, res) {
   const artistIds = profiles.map((p) => p.id);
 
   const tracks = await prisma.track.findMany({
-    where: { artistId: { in: artistIds }, isPublished: true },
+    where: { artistId: { in: artistIds }, isPublished: true, deletedAt: null },
     include: { artist: { select: { artistName: true, id: true, userId: true } } },
     orderBy: { releaseDate: 'desc' },
     take: 50,
@@ -239,17 +240,29 @@ async function myFollowing(req, res) {
 }
 
 // DELETE /api/tracks/:id  (el artista dueño)
+// Borrado suave: se marca deletedAt y se oculta de todo listado público, pero
+// el registro y los archivos en R2 se conservan 48h por si se quiere restaurar.
+// Un job programado (ver jobs/purgeDeletedTracks.js) la borra definitivamente
+// pasado ese plazo.
 async function deleteTrack(req, res) {
   const track = await prisma.track.findUnique({ where: { id: req.params.id } });
-  if (!track) return fail(res, 'No encontrada', 404);
+  if (!track || track.deletedAt) return fail(res, 'No encontrada', 404);
   if (!req.user.artistProfile || track.artistId !== req.user.artistProfile.id) {
     return fail(res, 'No es tu canción', 403);
   }
-  await prisma.track.delete({ where: { id: track.id } });
-  // Borrar archivos del almacenamiento (no bloqueante: el track ya fue eliminado de DB)
-  storage.deleteFile(track.audioUrl).catch(() => {});
-  if (track.coverUrl) storage.deleteFile(track.coverUrl).catch(() => {});
-  return ok(res, { deleted: true });
+  await prisma.track.update({ where: { id: track.id }, data: { deletedAt: new Date() } });
+  return ok(res, { deleted: true, restorableUntil: new Date(Date.now() + 48 * 60 * 60 * 1000) });
+}
+
+// POST /api/tracks/:id/restore  -> restaura una canción eliminada dentro de las 48h
+async function restoreTrack(req, res) {
+  const track = await prisma.track.findUnique({ where: { id: req.params.id } });
+  if (!track || !track.deletedAt) return fail(res, 'No hay nada que restaurar', 404);
+  if (!req.user.artistProfile || track.artistId !== req.user.artistProfile.id) {
+    return fail(res, 'No es tu canción', 403);
+  }
+  await prisma.track.update({ where: { id: track.id }, data: { deletedAt: null } });
+  return ok(res, { restored: true });
 }
 
 // PATCH /api/tracks/:id  -> editar metadatos (título, género, álbum, letra, carátula)
@@ -284,7 +297,7 @@ async function updateTrack(req, res) {
 // GET /api/tracks/:id  -> info pública de una canción (player page)
 async function getTrack(req, res) {
   const track = await prisma.track.findFirst({
-    where: { id: req.params.id, isPublished: true },
+    where: { id: req.params.id, isPublished: true, deletedAt: null },
     include: {
       artist: { select: { artistName: true, userId: true } },
       _count: { select: { plays: true, downloads: true } },
@@ -338,12 +351,12 @@ async function likedTracks(req, res) {
     orderBy: { createdAt: 'desc' },
     take: 100,
   });
-  const tracks = likes.filter((l) => l.track.isPublished).map((l) => rw(l.track));
+  const tracks = likes.filter((l) => l.track.isPublished && !l.track.deletedAt).map((l) => rw(l.track));
   return ok(res, { tracks });
 }
 
 module.exports = {
-  uploadTrack, updateTrack, listTracks, charts, myTracks, playTrack, deleteTrack,
+  uploadTrack, updateTrack, listTracks, charts, myTracks, playTrack, deleteTrack, restoreTrack,
   feed, followArtist, unfollowArtist, myFollowing, getTrack,
   toggleLike, isLiked, likedTracks,
 };

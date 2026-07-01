@@ -523,25 +523,80 @@ async function fixMediaUrls(req, res) {
 // el CDN sin que el archivo existiera realmente ahí, restaurando la fuente original
 // pública de SoundHelix (siempre disponible). De paso, les asigna una carátula de
 // muestra (Lorem Picsum) si nunca tuvieron una, ya que el seed original no la incluía.
+// Intenta recuperar un archivo que quedó mal ubicado en el bucket por el bug de
+// S3_ENDPOINT (subido dentro de una subcarpeta con el nombre del propio bucket,
+// en vez de en la raíz). Si lo encuentra, lo copia a la raíz y devuelve la nueva
+// URL pública correcta; si no, devuelve { url: null, reason }.
+async function _recoverMisplacedFile(currentUrl) {
+  const path = require('path');
+  const cdn = (process.env.CDN_BASE_URL || '').replace(/\/$/, '');
+  const bucket = process.env.S3_BUCKET;
+  if (!cdn || !bucket || !currentUrl) return { url: null, reason: 'sin CDN/bucket configurado' };
+
+  const key = path.basename(currentUrl);
+  const misplacedUrl = `${cdn}/${bucket}/${key}`;
+  if (!(await _urlExists(misplacedUrl))) return { url: null, reason: 'no encontrado en ruta duplicada' };
+
+  try {
+    const { CopyObjectCommand } = require('@aws-sdk/client-s3');
+    const client = require('../services/storage').getS3Client();
+    await client.send(new CopyObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      CopySource: encodeURIComponent(`${bucket}/${bucket}/${key}`),
+    }));
+    const fixedUrl = `${cdn}/${key}`;
+    if (await _urlExists(fixedUrl)) return { url: fixedUrl };
+    return { url: null, reason: 'copiado pero no accesible tras copiar' };
+  } catch (e) {
+    return { url: null, reason: e.message };
+  }
+}
+
+// POST /api/admin/fix-seed-audio
+// Repara TODAS las canciones (subidas por usuarios y de prueba) cuyo audio o
+// carátula quedaron rotos:
+//  1. Canciones de prueba (SoundHelix) → restaura la URL pública original.
+//  2. Cualquier otra canción subida antes de corregir el bug de S3_ENDPOINT →
+//     recupera el archivo real copiándolo desde la ruta mal ubicada en el bucket.
+//  3. Canciones sin carátula → les asigna una de muestra (Lorem Picsum).
 async function fixSeedAudio(req, res) {
   const path = require('path');
   const tracks = await prisma.track.findMany({ select: { id: true, audioUrl: true, coverUrl: true, title: true } });
 
   let fixed = 0;
+  let recovered = 0;
   let coversAdded = 0;
-  for (const t of tracks) {
-    const filename = path.basename(t.audioUrl || '');
-    const match = filename.match(/^(SoundHelix-Song-\d+\.mp3)$/i);
-    if (!match) continue;
+  let stillBroken = 0;
+  const failures = [];
 
-    const originalUrl = `https://www.soundhelix.com/examples/mp3/${match[1]}`;
+  for (const t of tracks) {
     const data = {};
-    if (t.audioUrl !== originalUrl && !(await _urlExists(t.audioUrl))) {
-      data.audioUrl = originalUrl;
+
+    // ── Audio ──
+    if (t.audioUrl) {
+      const filename = path.basename(t.audioUrl);
+      const seedMatch = filename.match(/^(SoundHelix-Song-\d+\.mp3)$/i);
+      if (seedMatch) {
+        const originalUrl = `https://www.soundhelix.com/examples/mp3/${seedMatch[1]}`;
+        if (t.audioUrl !== originalUrl && !(await _urlExists(t.audioUrl))) {
+          data.audioUrl = originalUrl;
+        }
+      } else if (!(await _urlExists(t.audioUrl))) {
+        const { url, reason } = await _recoverMisplacedFile(t.audioUrl);
+        if (url) { data.audioUrl = url; recovered++; }
+        else { stillBroken++; failures.push({ track: t.title, field: 'audio', reason }); }
+      }
     }
-    if (!t.coverUrl) {
+
+    // ── Carátula ──
+    if (t.coverUrl && !(await _urlExists(t.coverUrl))) {
+      const { url } = await _recoverMisplacedFile(t.coverUrl);
+      if (url) { data.coverUrl = url; recovered++; }
+    } else if (!t.coverUrl) {
       data.coverUrl = `https://picsum.photos/seed/${t.id}/400`;
     }
+
     if (Object.keys(data).length > 0) {
       await prisma.track.update({ where: { id: t.id }, data });
       if (data.audioUrl) fixed++;
@@ -549,7 +604,7 @@ async function fixSeedAudio(req, res) {
     }
   }
 
-  return ok(res, { fixed, coversAdded });
+  return ok(res, { fixed, recovered, coversAdded, stillBroken, failures });
 }
 
 // POST /api/admin/fix-artist-trials

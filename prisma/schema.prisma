@@ -177,6 +177,11 @@ model Track {
   // Si el artista no paga su suscripción, su música se oculta (no se borra)
   isPublished   Boolean  @default(true)
 
+  // Borrado suave: al eliminar una canción se marca aquí en vez de borrarla al
+  // instante. Se puede restaurar dentro de las 48h siguientes; pasado ese plazo,
+  // un job programado la borra definitivamente (BD + archivos en R2).
+  deletedAt     DateTime?
+
   playCount     Int      @default(0)
   downloadCount Int      @default(0)
   likeCount     Int      @default(0)
@@ -190,6 +195,7 @@ model Track {
 
   @@index([genre])
   @@index([isPublished])
+  @@index([deletedAt])
 }
 
 // ------------------------------------------------------------------
