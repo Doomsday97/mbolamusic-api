@@ -1526,10 +1526,16 @@ function setLang(code, save = true) {
 const API = 'https://mbolamusic-apionrender.com/api';
 let _allTracks = [];
 
+// Escapa un valor para poder incrustarlo dentro de un atributo HTML delimitado
+// por comillas dobles (p.ej. onclick="..."). JSON.stringify() ya produce un
+// literal JS válido, pero usa comillas dobles que romperían el atributo si no
+// se escapan aquí.
+function _attrEsc(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
+
 function renderTrackCard(t, i) {
   const bgs = ['rgba(245,158,11,0.15)','rgba(63,81,181,0.2)','rgba(0,154,68,0.15)'];
   const artistName = (t.artist && t.artist.artistName) || t.artistName || '';
-  return `<div onclick="playWebTrack('${t.id}',${JSON.stringify(t.title)},${JSON.stringify(artistName)},${JSON.stringify(t.coverUrl||'')})"
+  return `<div onclick="playWebTrack('${t.id}',${_attrEsc(JSON.stringify(t.title))},${_attrEsc(JSON.stringify(artistName))},${_attrEsc(JSON.stringify(t.coverUrl||''))})"
        style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s;"
        onmouseover="this.style.borderColor='rgba(245,158,11,0.5)';this.style.transform='translateY(-3px)'"
        onmouseout="this.style.borderColor='rgba(255,255,255,0.06)';this.style.transform='translateY(0)'">
@@ -1795,7 +1801,7 @@ function loadTrending() {
       const tracks = ((j && j.data && j.data.tracks) || (j && j.data) || []).slice(0, 12);
       if (!tracks.length) { el.innerHTML = '<p style="color:var(--text2);opacity:.6;padding:1rem;">Sin datos disponibles.</p>'; return; }
       el.innerHTML = tracks.map(t => `
-        <div onclick="playWebTrack('${t.id}',${JSON.stringify(t.title)},${JSON.stringify((t.artist&&t.artist.artistName)||t.artistName||'')},${JSON.stringify(t.coverUrl||'')})"
+        <div onclick="playWebTrack('${t.id}',${_attrEsc(JSON.stringify(t.title))},${_attrEsc(JSON.stringify((t.artist&&t.artist.artistName)||t.artistName||''))},${_attrEsc(JSON.stringify(t.coverUrl||''))})"
              style="flex:0 0 160px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;cursor:pointer;scroll-snap-align:start;transition:border-color .2s,transform .15s;"
              onmouseover="this.style.borderColor='rgba(245,158,11,0.5)';this.style.transform='translateY(-3px)'"
              onmouseout="this.style.borderColor='rgba(255,255,255,0.07)';this.style.transform='translateY(0)'">
@@ -2260,7 +2266,8 @@ loadTrending();
   <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:420px;position:relative;">
     <button onclick="closeSubscribeModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;line-height:1;">✕</button>
     <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.4rem;color:var(--amber);">Suscripción Oyente</h3>
-    <p style="font-size:0.85rem;color:var(--text2);margin-bottom:1.5rem;">2.000 FCFA/mes · Todo incluido · Sin anuncios</p>
+    <p style="font-size:0.85rem;color:var(--text2);margin-bottom:0.2rem;">2.000 FCFA/mes · Todo incluido · Sin anuncios</p>
+    <p id="sm-fx" style="font-size:0.76rem;color:var(--text2);opacity:0.7;margin-bottom:1.3rem;"></p>
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem;">
       <label id="sm-method-label" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Método de pago</label>
       <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;">
@@ -2293,7 +2300,8 @@ loadTrending();
   <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:420px;position:relative;">
     <button onclick="closeArtistSubscribeModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;line-height:1;">✕</button>
     <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.4rem;color:var(--amber);">🎤 Suscripción Artista</h3>
-    <p style="font-size:0.85rem;color:var(--text2);margin-bottom:1.5rem;">10.000 FCFA / 31 días · Sube música ilimitada · Gana el 70%</p>
+    <p style="font-size:0.85rem;color:var(--text2);margin-bottom:0.2rem;">10.000 FCFA / 31 días · Sube música ilimitada · Gana el 70%</p>
+    <p id="asm-fx" style="font-size:0.76rem;color:var(--text2);opacity:0.7;margin-bottom:1.3rem;"></p>
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem;">
       <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Método de pago</label>
       <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;">
@@ -2339,12 +2347,13 @@ loadTrending();
     </div>
     <div style="margin-bottom:1rem;">
       <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:8px;">Monto (FCFA)</label>
-      <select id="wm-amount" style="width:100%;padding:11px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;">
+      <select id="wm-amount" onchange="updateWalletFx()" style="width:100%;padding:11px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;">
         <option value="2000">2.000 FCFA</option>
         <option value="5000">5.000 FCFA</option>
         <option value="10000">10.000 FCFA</option>
         <option value="20000">20.000 FCFA</option>
       </select>
+      <p id="wm-fx" style="font-size:0.76rem;color:var(--text2);opacity:0.7;margin-top:6px;"></p>
     </div>
     <div id="wm-result" style="display:none;padding:12px;border-radius:10px;font-size:0.85rem;margin-bottom:1rem;"></div>
     <button id="wm-btn" onclick="doWalletAction()" style="width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;"></button>
@@ -2594,7 +2603,7 @@ async function loadArtistTracksWeb(token) {
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
           <span style="font-size:0.68rem;padding:2px 8px;border-radius:20px;background:${t.isPublished ? 'rgba(74,222,128,0.12)' : 'rgba(248,113,113,0.12)'};color:${t.isPublished ? '#4ade80' : '#f87171'};">${t.isPublished ? 'Publicada' : 'Oculta'}</span>
-          <button onclick='openEditTrackWeb(${JSON.stringify(t)})' title="Editar" style="background:rgba(245,158,11,0.12);border:none;border-radius:7px;padding:6px 8px;cursor:pointer;color:var(--amber);font-size:0.85rem;">✏️</button>
+          <button onclick='openEditTrackWeb(${_escSqAttr(JSON.stringify(t))})' title="Editar" style="background:rgba(245,158,11,0.12);border:none;border-radius:7px;padding:6px 8px;cursor:pointer;color:var(--amber);font-size:0.85rem;">✏️</button>
           <button onclick="deleteTrackWeb('${t.id}','${escHtml(t.title).replace(/'/g,"\\'")}');" title="Eliminar" style="background:rgba(248,113,113,0.1);border:none;border-radius:7px;padding:6px 8px;cursor:pointer;color:#f87171;font-size:0.85rem;">🗑</button>
         </div>
       </div>`).join('');
@@ -2606,6 +2615,11 @@ async function loadArtistTracksWeb(token) {
 function escHtml(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+// Escapa apóstrofes como entidad HTML para poder incrustar JSON.stringify(...)
+// (que usa comillas dobles) dentro de un atributo onclick='...' de comillas simples,
+// sin que un apóstrofe dentro del texto (p.ej. título de canción) rompa el atributo.
+function _escSqAttr(s) { return String(s).replace(/'/g, '&#39;'); }
 
 function openEditTrackWeb(track) {
   document.getElementById('et-id').value     = track.id;
@@ -2705,11 +2719,31 @@ async function deleteTrackWeb(id, title) {
 }
 
 // ── Suscripción ───────────────────────────────────────────────────────────────
+// ── Conversión FCFA → EUR/USD (referencia informativa al pagar) ──────────────
+let _fxRates = null;
+async function _getFxRates() {
+  if (_fxRates) return _fxRates;
+  try {
+    const r = await fetch(API_BASE + '/currency-rates');
+    const j = await r.json();
+    if (j.success) _fxRates = j.data;
+  } catch (_) {}
+  return _fxRates;
+}
+async function fxLine(amountFcfa) {
+  const rates = await _getFxRates();
+  if (!rates) return '';
+  const eur = (amountFcfa / rates.fcfaPerEur).toFixed(2);
+  const usd = (amountFcfa / rates.fcfaPerUsd).toFixed(2);
+  return `≈ ${eur} € / $${usd} (referencial)`;
+}
+
 function openSubscribeModal() {
   const token = localStorage.getItem('mbola_token');
   if (!token) { openModal('login'); return; }
   document.getElementById('sm-result').style.display = 'none';
   document.getElementById('subscribe-overlay').style.display = 'flex';
+  fxLine(2000).then(t => { document.getElementById('sm-fx').textContent = t; });
 }
 function closeSubscribeModal() { document.getElementById('subscribe-overlay').style.display = 'none'; }
 
@@ -2721,6 +2755,7 @@ function openArtistSubscribeModal() {
   document.getElementById('asm-btn').textContent = 'Pagar 10.000 FCFA →';
   document.querySelector('input[name="artist-sub-method"][value="BANK_TRANSFER"]').checked = true;
   document.getElementById('artist-subscribe-overlay').style.display = 'flex';
+  fxLine(10000).then(t => { document.getElementById('asm-fx').textContent = t; });
 }
 function closeArtistSubscribeModal() { document.getElementById('artist-subscribe-overlay').style.display = 'none'; }
 
@@ -2808,6 +2843,11 @@ async function doSubscribeWeb() {
 // ── Topup / Withdraw Wallet ───────────────────────────────────────────────────
 let _walletMode = 'topup';  // 'topup' | 'wallet-withdraw' | 'earnings'
 
+function updateWalletFx() {
+  const amount = parseInt(document.getElementById('wm-amount').value, 10) || 0;
+  fxLine(amount).then(t => { document.getElementById('wm-fx').textContent = t; });
+}
+
 function openTopupModal() {
   const token = localStorage.getItem('mbola_token');
   if (!token) { openModal('login'); return; }
@@ -2817,6 +2857,7 @@ function openTopupModal() {
   document.getElementById('wm-method-section').style.display = '';
   document.getElementById('wm-result').style.display = 'none';
   document.getElementById('wallet-overlay').style.display = 'flex';
+  updateWalletFx();
 }
 
 function openWithdrawModal(mode) {
@@ -2829,6 +2870,7 @@ function openWithdrawModal(mode) {
   document.getElementById('wm-method-section').style.display = isEarnings ? 'none' : '';
   document.getElementById('wm-result').style.display = 'none';
   document.getElementById('wallet-overlay').style.display = 'flex';
+  updateWalletFx();
 }
 function closeWalletModal() { document.getElementById('wallet-overlay').style.display = 'none'; }
 
@@ -3030,19 +3072,27 @@ document.addEventListener('DOMContentLoaded', () => {
 // ─────────────────────────────────────────────────────────────
 function _escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+// Escapa para incrustar dentro de un string JS de comillas simples que a su vez
+// va dentro de un atributo HTML de comillas dobles (p.ej. onclick="window.open('...')").
+function _escJsAttr(s) { return _escH(String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'")); }
+
 function renderWebAd(ad) {
-  const link    = ad.linkUrl ? _escH(ad.linkUrl) : '#';
+  const hasLink = !!ad.linkUrl;
+  const hrefSafe = hasLink ? _escH(ad.linkUrl) : '#';
+  const jsSafeLink = hasLink ? _escJsAttr(ad.linkUrl) : '';
   const accent  = _escH(ad.accentColor || '#f5a623');
   const title   = _escH(ad.title || '');
   const desc    = ad.description ? _escH(ad.description) : '';
-  const ctaBtn  = ad.linkUrl
-    ? `<a href="${link}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;padding:5px 14px;background:${accent};color:#000;border-radius:20px;font-size:0.76rem;font-weight:700;text-decoration:none;">Ver más →</a>`
+  const ctaBtn  = hasLink
+    ? `<a href="${hrefSafe}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;padding:5px 14px;background:${accent};color:#000;border-radius:20px;font-size:0.76rem;font-weight:700;text-decoration:none;">Ver más →</a>`
     : '';
+  // Sin URL de destino: el anuncio se publica igual, simplemente no navega a ningún sitio al hacer clic.
+  const clickHandler = hasLink ? `onclick="window.open('${jsSafeLink}','_blank')"` : '';
 
   // ── Imagen ──
   if (ad.mediaType === 'image' && ad.mediaUrl) {
     return `
-    <div style="position:relative;border-radius:10px;overflow:hidden;width:100%;cursor:pointer;" onclick="${ad.linkUrl ? `window.open('${link}','_blank')` : ''}">
+    <div style="position:relative;border-radius:10px;overflow:hidden;width:100%;${hasLink ? 'cursor:pointer;' : ''}" ${clickHandler}>
       <img src="${_escH(ad.mediaUrl)}" alt="${title}" style="width:100%;max-height:220px;object-fit:cover;display:block;">
       <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,0.72) 0%,rgba(0,0,0,0.1) 65%,transparent 100%);display:flex;align-items:center;padding:20px 24px;">
         <div>
@@ -3078,7 +3128,7 @@ function renderWebAd(ad) {
   const iconMap = { star:'⭐', music:'🎵', phone:'📱', mic:'🎤', headphone:'🎧', diamond:'💎' };
   const icon = iconMap[ad.icon] || '⭐';
   return `
-  <div class="ad-placeholder" style="background:${_escH(ad.bgColor||'#1A1200')};border-radius:10px;padding:14px 18px;border:1px solid ${accent}33;width:100%;" ${ad.linkUrl ? `onclick="window.open('${link}','_blank')" style="cursor:pointer;"` : ''}>
+  <div class="ad-placeholder" style="background:${_escH(ad.bgColor||'#1A1200')};border-radius:10px;padding:14px 18px;border:1px solid ${accent}33;width:100%;${hasLink ? 'cursor:pointer;' : ''}" ${clickHandler}>
     <span style="font-size:2rem;flex-shrink:0;">${icon}</span>
     <div style="flex:1;">
       <strong style="color:#fff;font-size:0.95rem;">${title}</strong>

@@ -1514,7 +1514,7 @@ function renderAdsTab(el) {
             </div>
           </div>
           <div>
-            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">URL de destino (enlace al hacer clic)</label>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">URL de destino (opcional — si la dejas vacía, el anuncio se publica igual y no navega a ningún sitio al hacer clic)</label>
             <input id="ad-link" type="text" placeholder="https://… o #seccion" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;">
           </div>
           <div>
@@ -1780,7 +1780,7 @@ async function saveAd() {
       await apiFetch('/admin/ads/' + id, 'PATCH', body);
     } else {
       const r = await apiFetch('/admin/ads', 'POST', body);
-      adId = r.data.ad.id;
+      adId = r.ad.id;
     }
 
     // ── Subir / actualizar media ──
@@ -1788,11 +1788,13 @@ async function saveAd() {
       btn.textContent = 'Subiendo imagen…';
       const fd = new FormData();
       fd.append('media', _adMediaFile);
-      await fetch(API + '/admin/ads/' + adId + '/media', {
+      const mediaRes = await fetch(API + '/admin/ads/' + adId + '/media', {
         method: 'POST',
-        headers: { Authorization: 'Bearer ' + token },
+        headers: { Authorization: 'Bearer ' + _token },
         body: fd,
       });
+      const mediaJson = await mediaRes.json();
+      if (!mediaJson.success) throw new Error(mediaJson.error || 'Error al subir la imagen');
     } else if (_adMediaTab === 'video' && adId) {
       const videoUrl = (document.getElementById('ad-video-url').value || '').trim();
       if (videoUrl) {

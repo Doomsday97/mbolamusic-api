@@ -12,6 +12,12 @@ router.use('/chat',           require('./chatRoutes'));
 // Endpoint público: anuncios activos por slot
 router.get('/ads', require('../controllers/adminController').publicAds);
 
+// Endpoint público: tasas de conversión FCFA → EUR/USD (referencia para pagos)
+router.get('/currency-rates', async (req, res) => {
+  const rates = await require('../services/currencyService').getRates();
+  res.json({ success: true, data: rates, error: null });
+});
+
 router.get('/', (req, res) => {
   res.json({
     success: true,
