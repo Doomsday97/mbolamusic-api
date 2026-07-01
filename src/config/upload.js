@@ -18,4 +18,10 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB máx por archivo
 });
 
-module.exports = { upload };
+// Para avatares: almacena en memoria (no depende del disco efímero de Render)
+const uploadMemory = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB máx para fotos de perfil
+});
+
+module.exports = { upload, uploadMemory };

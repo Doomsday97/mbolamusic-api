@@ -260,26 +260,21 @@ async function listArtists(req, res) {
 
 function sanitize(user) {
   const { passwordHash, ...rest } = user;
-  // Reescribir avatarUrl al CDN actual (corrige URLs privadas S3 antiguas)
-  if (rest.avatarUrl) rest.avatarUrl = rewriteUrl(rest.avatarUrl);
+  // No reescribir data: URLs (base64 guardado en BD); solo reescribir URLs externas
+  if (rest.avatarUrl && !rest.avatarUrl.startsWith('data:')) rest.avatarUrl = rewriteUrl(rest.avatarUrl);
   return rest;
 }
 
 // POST /api/auth/avatar  — sube/cambia foto de perfil
+// Usa memoryStorage: el buffer llega en req.file.buffer (sin escribir al disco)
 async function updateAvatar(req, res) {
   if (!req.file) return fail(res, 'No se recibió ninguna imagen');
   if (!req.file.mimetype.startsWith('image/')) {
-    fs.unlinkSync(req.file.path);
     return fail(res, 'El archivo debe ser una imagen (JPG, PNG, WebP…)');
   }
 
-  let avatarUrl;
-  try {
-    avatarUrl = await uploadFile(req.file);
-  } catch (e) {
-    try { fs.unlinkSync(req.file.path); } catch (_) {}
-    return fail(res, 'Error al subir la imagen: ' + e.message);
-  }
+  // Guardar como data URL en la BD — persiste aunque Render reinicie el servidor
+  const avatarUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
 
   await prisma.user.update({
     where: { id: req.user.id },
