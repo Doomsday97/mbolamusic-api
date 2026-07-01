@@ -529,12 +529,15 @@ async function loadUsers(page = 1) {
   try {
     const qs = `?page=${page}&limit=20${_uRole ? '&role=' + _uRole : ''}`;
     const d = await apiFetch('/admin/users' + qs);
+    const subscribedCount = d.users.filter(u => u.subscriptions && u.subscriptions[0]).length;
+    const unsubscribedCount = d.users.length - subscribedCount;
     let rows = d.users.map(u => `
       <tr>
         <td>${esc(u.username)}</td>
         <td>${esc(u.email || u.phone || '—')}</td>
         <td><span class="badge badge-${u.role.toLowerCase()}">${u.role}</span></td>
         <td>${esc((u.artistProfile && u.artistProfile.artistName) || '—')}</td>
+        <td>${subBadge(u)}</td>
         <td>${fmt(u.walletBalance)} FCFA</td>
         <td>${new Date(u.createdAt).toLocaleDateString('es')}</td>
         <td>
@@ -548,7 +551,7 @@ async function loadUsers(page = 1) {
     var _toRemove = el.querySelector('.loading, .empty'); if (_toRemove) _toRemove.remove();
     el.innerHTML = `
       <div class="section-header">
-        <h2>Usuarios <small style="color:var(--muted)">(${d.total})</small></h2>
+        <h2>Usuarios <small style="color:var(--muted)">(${d.total}) · Suscritos: ${subscribedCount} · Sin suscripción: ${unsubscribedCount}</small></h2>
         <div class="filters">
           <select onchange="filterUsers(this.value)">
             <option value="">Todos</option>
@@ -559,8 +562,8 @@ async function loadUsers(page = 1) {
         </div>
       </div>
       <table>
-        <thead><tr><th>Usuario</th><th>Contacto</th><th>Rol</th><th>Nombre artístico</th><th>Monedero</th><th>Registro</th><th>Acciones</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="7" class="empty">Sin resultados</td></tr>'}</tbody>
+        <thead><tr><th>Usuario</th><th>Contacto</th><th>Rol</th><th>Nombre artístico</th><th>Suscripción</th><th>Monedero</th><th>Registro</th><th>Acciones</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="8" class="empty">Sin resultados</td></tr>'}</tbody>
       </table>
       <div class="pager">
         <button onclick="loadUsers(${page-1})" ${page<=1?'disabled':''}>← Anterior</button>
@@ -573,6 +576,21 @@ async function loadUsers(page = 1) {
 }
 
 function filterUsers(role) { _uRole = role; loadUsers(1); }
+
+function subBadge(u) {
+  const sub = u.subscriptions && u.subscriptions[0];
+  if (!sub) return `<span style="background:rgba(248,113,113,0.12);color:var(--error);padding:2px 8px;border-radius:99px;font-size:11px;">Sin suscripción</span>`;
+  const label = {
+    LISTENER_MONTHLY: 'Oyente mensual',
+    ARTIST_MONTHLY: 'Artista mensual',
+    LISTENER_FREE: 'Prueba oyente',
+    ARTIST_FREE: 'Prueba artista',
+  }[sub.type] || sub.type;
+  const exp = new Date(sub.endDate);
+  const isExp = exp < new Date();
+  if (isExp) return `<span style="background:rgba(148,148,148,0.12);color:var(--muted);padding:2px 8px;border-radius:99px;font-size:11px;">⏰ Expirada</span>`;
+  return `<span style="background:rgba(74,222,128,0.12);color:var(--success);padding:2px 8px;border-radius:99px;font-size:11px;" title="Vence ${exp.toLocaleDateString('es')}">✓ ${label}</span>`;
+}
 
 // ── User detail modal ─────────────────────────────────────────────────────────
 let _currentUserId = null;
