@@ -3148,6 +3148,10 @@ function _escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').
 // va dentro de un atributo HTML de comillas dobles (p.ej. onclick="window.open('...')").
 function _escJsAttr(s) { return _escH(String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'")); }
 
+function _trackAd(id, kind) {
+  fetch(`${API_BASE}/ads/${id}/${kind}`, { method: 'POST' }).catch(() => {});
+}
+
 function renderWebAd(ad) {
   const hasLink = !!ad.linkUrl;
   const hrefSafe = hasLink ? _escH(ad.linkUrl) : '#';
@@ -3156,10 +3160,10 @@ function renderWebAd(ad) {
   const title   = _escH(ad.title || '');
   const desc    = ad.description ? _escH(ad.description) : '';
   const ctaBtn  = hasLink
-    ? `<a href="${hrefSafe}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;padding:5px 14px;background:${accent};color:#000;border-radius:20px;font-size:0.76rem;font-weight:700;text-decoration:none;">Ver más →</a>`
+    ? `<a href="${hrefSafe}" target="_blank" rel="noopener" onclick="_trackAd('${ad.id}','click')" style="display:inline-block;margin-top:8px;padding:5px 14px;background:${accent};color:#000;border-radius:20px;font-size:0.76rem;font-weight:700;text-decoration:none;">Ver más →</a>`
     : '';
   // Sin URL de destino: el anuncio se publica igual, simplemente no navega a ningún sitio al hacer clic.
-  const clickHandler = hasLink ? `onclick="window.open('${jsSafeLink}','_blank')"` : '';
+  const clickHandler = hasLink ? `onclick="_trackAd('${ad.id}','click');window.open('${jsSafeLink}','_blank')"` : '';
 
   // ── Imagen ──
   if (ad.mediaType === 'image' && ad.mediaUrl) {
@@ -3197,7 +3201,8 @@ function renderWebAd(ad) {
   }
 
   // ── Sin media: banner con icono ──
-  const iconMap = { star:'⭐', music:'🎵', phone:'📱', mic:'🎤', headphone:'🎧', diamond:'💎' };
+  const iconMap = { star:'⭐', mic:'🎤', download_done:'✅', people:'👥',
+    music_note:'🎵', headphones:'🎧', trending_up:'📈', campaign:'📢' };
   const icon = iconMap[ad.icon] || '⭐';
   return `
   <div class="ad-placeholder" style="background:${_escH(ad.bgColor||'#1A1200')};border-radius:10px;padding:14px 18px;border:1px solid ${accent}33;width:100%;${hasLink ? 'cursor:pointer;' : ''}" ${clickHandler}>
@@ -3213,10 +3218,13 @@ function renderWebAd(ad) {
 
 async function loadWebAds() {
   try {
-    const r = await fetch(API_BASE + '/ads?slot=web-mid');
+    // Trae todos los anuncios activos y usa cualquiera destinado a la web
+    // (web-top / web-mid / web-bottom) en los dos huecos disponibles de la página.
+    const r = await fetch(API_BASE + '/ads');
     const data = await r.json();
     if (!data.success || !data.data.ads || !data.data.ads.length) return;
-    const ads = data.data.ads;
+    const ads = data.data.ads.filter(a => (a.slot || '').startsWith('web-'));
+    if (!ads.length) return;
 
     const slotEls = [
       document.getElementById('ad-slot-1'),
@@ -3226,6 +3234,7 @@ async function loadWebAds() {
       if (!el) return;
       const ad = ads[i % ads.length];
       el.innerHTML = renderWebAd(ad);
+      _trackAd(ad.id, 'impression');
     });
   } catch(_) {}
 }

@@ -776,6 +776,24 @@ async function publicAds(req, res) {
   return ok(res, { ads });
 }
 
+// POST /api/ads/:id/click  -> incrementa el contador de clics (público, sin auth)
+async function trackAdClick(req, res) {
+  await prisma.ad.update({
+    where: { id: req.params.id },
+    data: { clicks: { increment: 1 } },
+  }).catch(() => {});
+  return ok(res, { tracked: true });
+}
+
+// POST /api/ads/:id/impression  -> incrementa el contador de impresiones (público, sin auth)
+async function trackAdImpression(req, res) {
+  await prisma.ad.update({
+    where: { id: req.params.id },
+    data: { impressions: { increment: 1 } },
+  }).catch(() => {});
+  return ok(res, { tracked: true });
+}
+
 module.exports = {
   stats, listUsers, getUser, updateUser, resetPassword,
   blockArtist, unblockArtist, listPayments,
@@ -784,4 +802,5 @@ module.exports = {
   subscriptionDistributions, runSubscriptionDistribution,
   subscriptionConfig, monthlyReport, fixMediaUrls, fixSeedAudio, fixArtistTrials, storageDiagnostics, setupRls,
   listAds, createAd, updateAd, deleteAd, toggleAd, uploadAdMedia, removeAdMedia, publicAds,
+  trackAdClick, trackAdImpression,
 };
