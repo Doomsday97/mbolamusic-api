@@ -164,7 +164,7 @@
   <header>
     <h1>🎵 MbôláMusic Admin</h1>
     <span id="admin-name"></span>
-    <button class="lang-btn" onclick="toggleLang()" id="lang-toggle-btn">FR</button>
+    <button class="lang-btn" onclick="toggleLang()" id="lang-toggle-btn">ES</button>
     <button onclick="openChangePasswordModal()" style="width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;">🔒 <span data-i18n="changePasswordBtn">Contraseña</span></button>
     <button onclick="logout()" style="width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;" data-i18n="logout">Salir</button>
   </header>
@@ -1097,6 +1097,7 @@ async function refreshOnlineBadge() {
 // ── Chat ──────────────────────────────────────────────────────────────────────
 let _chatUserId = null;
 let _chatPollTimer = null;
+let _chatTranslateTarget = null; // se inicializa al idioma del panel al abrir la primera conversación
 
 async function loadChat() {
   const el = document.getElementById('tab-chat');
@@ -1153,12 +1154,24 @@ async function openConversation(userId, username, itemEl) {
   if (b) b.remove();
 
   _chatUserId = userId;
+  if (!_chatTranslateTarget) _chatTranslateTarget = _lang;
   // Clear old poll
   if (_chatPollTimer) clearInterval(_chatPollTimer);
 
   const win = document.getElementById('chat-window');
   win.innerHTML = `
-    <div class="chat-window-header">💬 ${esc(username)}</div>
+    <div class="chat-window-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <span>💬 ${esc(username)}</span>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:400;color:var(--muted);">
+        🌐 ${i18n('chatTranslateToLabel','Traducir a')}
+        <select id="chat-translate-target" onchange="_chatTranslateTarget = this.value" style="width:auto;padding:4px 8px;background:var(--surface2);color:var(--text);border-radius:6px;border:none;font-size:12px;">
+          <option value="es"${_chatTranslateTarget === 'es' ? ' selected' : ''}>Español</option>
+          <option value="fr"${_chatTranslateTarget === 'fr' ? ' selected' : ''}>Français</option>
+          <option value="pt"${_chatTranslateTarget === 'pt' ? ' selected' : ''}>Português</option>
+          <option value="en"${_chatTranslateTarget === 'en' ? ' selected' : ''}>English</option>
+        </select>
+      </label>
+    </div>
     <div class="chat-messages" id="chat-msgs"><div class="loading">${i18n('loadingLabel','Cargando…')}</div></div>
     <div id="chat-attachment-preview" style="display:none;padding:0 16px;font-size:12px;color:var(--muted);"></div>
     <div class="chat-input-row">
@@ -1217,7 +1230,7 @@ async function translateBubble(msgId) {
   box.style.display = '';
   box.textContent = i18n('translatingLabel','Traduciendo…');
   try {
-    const data = await apiFetch('/chat/translate', 'POST', { text, target: _lang });
+    const data = await apiFetch('/chat/translate', 'POST', { text, target: _chatTranslateTarget });
     box.textContent = data.translatedText || '';
   } catch (e) {
     box.textContent = i18n('translateErrorLabel','No se pudo traducir') + ': ' + e.message;
@@ -1564,6 +1577,7 @@ const _translations = {
     deleteAccountReasonPrompt:'Motif de la suppression (enregistré) :',
     attachFileLabel:'Joindre un fichier', videoLabel:'Vidéo',
     translateLabel:'Traduire', translatingLabel:'Traduction…', translateErrorLabel:'Échec de la traduction',
+    chatTranslateToLabel:'Traduire en',
   },
   pt: {
     logout:'Sair', statUsers:'Utilizadores', statArtists:'Artistas',
@@ -1695,6 +1709,7 @@ const _translations = {
     deleteAccountReasonPrompt:'Motivo da eliminação (fica registado):',
     attachFileLabel:'Anexar ficheiro', videoLabel:'Vídeo',
     translateLabel:'Traduzir', translatingLabel:'A traduzir…', translateErrorLabel:'Falha ao traduzir',
+    chatTranslateToLabel:'Traduzir para',
   },
   en: {
     logout:'Logout', statUsers:'Users', statArtists:'Artists',
@@ -1826,6 +1841,7 @@ const _translations = {
     deleteAccountReasonPrompt:'Reason for deletion (saved to the record):',
     attachFileLabel:'Attach file', videoLabel:'Video',
     translateLabel:'Translate', translatingLabel:'Translating…', translateErrorLabel:'Translation failed',
+    chatTranslateToLabel:'Translate to',
   },
 };
 const _langs = ['es','fr','pt','en'];
@@ -1851,8 +1867,7 @@ function applyLang() {
     el.setAttribute('placeholder', t);
   });
   const btn = document.getElementById('lang-toggle-btn');
-  const nextLang = _langs[(_langs.indexOf(_lang) + 1) % _langs.length];
-  if (btn) btn.textContent = _langLabels[nextLang];
+  if (btn) btn.textContent = _langLabels[_lang];
 }
 
 // Re-renderiza el contenido dinámico de la pestaña activa para que recoja el nuevo idioma
