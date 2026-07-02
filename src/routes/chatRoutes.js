@@ -9,6 +9,7 @@ router.use(authenticate);
 router.get('/messages',       chat.getMyMessages);
 router.post('/messages',      uploadChatMedia.single('media'), chat.sendMessage);
 router.get('/unread',         chat.unreadCount);
+router.post('/translate',     chat.translateMessage);
 
 // Admin endpoints
 router.get('/admin/conversations',          requireRole('ADMIN'), chat.adminListConversations);

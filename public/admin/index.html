@@ -104,7 +104,10 @@
   .chat-bubble { max-width: 70%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.5; word-break: break-word; }
   .chat-bubble.from-user  { background: var(--surface2); align-self: flex-start; border-bottom-left-radius: 4px; }
   .chat-bubble.from-admin { background: var(--accent); color: #000; align-self: flex-end; border-bottom-right-radius: 4px; }
-  .chat-bubble .cb-meta { font-size: 10px; margin-top: 4px; opacity: .6; }
+  .chat-bubble .cb-meta { font-size: 10px; margin-top: 4px; opacity: .6; display: flex; align-items: center; gap: 6px; }
+  .cb-translate-btn { background: none; border: none; cursor: pointer; font-size: 11px; opacity: .8; padding: 0; width: auto; color: inherit; }
+  .cb-translate-btn:hover { opacity: 1; }
+  .cb-translation { font-size: 12.5px; margin-top: 4px; opacity: .85; font-style: italic; border-top: 1px solid rgba(128,128,128,.25); padding-top: 4px; }
   .chat-input-row { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--surface2); }
   .chat-input-row textarea { flex: 1; resize: none; height: 42px; padding: 10px 12px; background: var(--surface2); border: none; border-radius: 8px; color: var(--text); font-size: 14px; font-family: inherit; }
   .chat-input-row button { width: auto; padding: 0 20px; background: var(--accent); color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
@@ -1191,13 +1194,34 @@ async function fetchMessages(userId) {
             ? `<a href="${esc(m.mediaUrl)}" target="_blank" rel="noopener" style="display:block;margin-bottom:6px;text-decoration:none;color:inherit;">▶ ${i18n('videoLabel','Video')}</a>`
             : `<img src="${esc(m.mediaUrl)}" style="max-width:180px;max-height:180px;border-radius:8px;display:block;margin-bottom:6px;cursor:pointer;" onclick="window.open('${esc(m.mediaUrl)}','_blank')">`)
         : '';
-      div.innerHTML = `${media}${m.body ? esc(m.body) : ''}<div class="cb-meta">${time}</div>`;
+      const translateBtn = m.body
+        ? `<button class="cb-translate-btn" onclick="translateBubble('${m.id}')" title="${i18n('translateLabel','Traducir')}">🌐 ${i18n('translateLabel','Traducir')}</button>`
+        : '';
+      div.innerHTML = `${media}${m.body ? esc(m.body) : ''}<div class="cb-meta"><span>${time}</span>${translateBtn}</div><div class="cb-translation" id="cb-translation-${m.id}" style="display:none;"></div>`;
+      if (m.body) div.dataset.body = m.body;
       el.appendChild(div);
     });
     el.scrollTop = el.scrollHeight;
     // Update global unread badge
     refreshChatBadge();
   } catch (_) {}
+}
+
+async function translateBubble(msgId) {
+  const box = document.getElementById(`cb-translation-${msgId}`);
+  if (!box) return;
+  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  const bubble = box.closest('.chat-bubble');
+  const text = bubble && bubble.dataset.body;
+  if (!text) return;
+  box.style.display = '';
+  box.textContent = i18n('translatingLabel','Traduciendo…');
+  try {
+    const data = await apiFetch('/chat/translate', 'POST', { text, target: _lang });
+    box.textContent = data.translatedText || '';
+  } catch (e) {
+    box.textContent = i18n('translateErrorLabel','No se pudo traducir') + ': ' + e.message;
+  }
 }
 
 let _chatMediaFile = null;
@@ -1539,6 +1563,7 @@ const _translations = {
     deleteAccountConfirm:'Supprimer le compte de {0} ? L\'accès sera bloqué et ses données personnelles anonymisées immédiatement. Les paiements et l\'historique d\'écoute sont conservés pendant le délai légal avant suppression automatique.',
     deleteAccountReasonPrompt:'Motif de la suppression (enregistré) :',
     attachFileLabel:'Joindre un fichier', videoLabel:'Vidéo',
+    translateLabel:'Traduire', translatingLabel:'Traduction…', translateErrorLabel:'Échec de la traduction',
   },
   pt: {
     logout:'Sair', statUsers:'Utilizadores', statArtists:'Artistas',
@@ -1669,6 +1694,7 @@ const _translations = {
     deleteAccountConfirm:'Eliminar a conta de {0}? O acesso será bloqueado e os dados pessoais anonimizados de imediato. Os pagamentos e o histórico de reproduções são conservados pelo prazo legal antes de serem apagados automaticamente.',
     deleteAccountReasonPrompt:'Motivo da eliminação (fica registado):',
     attachFileLabel:'Anexar ficheiro', videoLabel:'Vídeo',
+    translateLabel:'Traduzir', translatingLabel:'A traduzir…', translateErrorLabel:'Falha ao traduzir',
   },
   en: {
     logout:'Logout', statUsers:'Users', statArtists:'Artists',
@@ -1799,6 +1825,7 @@ const _translations = {
     deleteAccountConfirm:'Delete {0}\'s account? Access will be blocked and their personal data anonymized immediately. Payments and playback history are kept for the legally required period before being automatically purged.',
     deleteAccountReasonPrompt:'Reason for deletion (saved to the record):',
     attachFileLabel:'Attach file', videoLabel:'Video',
+    translateLabel:'Translate', translatingLabel:'Translating…', translateErrorLabel:'Translation failed',
   },
 };
 const _langs = ['es','fr','pt','en'];

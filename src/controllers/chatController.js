@@ -168,6 +168,38 @@ async function adminSendMessage(req, res) {
   }
 }
 
+// ── Traducir un mensaje del chat (usuario o admin) ─────────────────────────
+const TRANSLATE_LANGS = ['es', 'fr', 'pt', 'en'];
+
+async function translateMessage(req, res) {
+  const text = (req.body.text || '').trim();
+  const target = req.body.target;
+  if (!text) {
+    return res.status(400).json({ success: false, data: null, error: 'Falta el texto a traducir' });
+  }
+  if (!TRANSLATE_LANGS.includes(target)) {
+    return res.status(400).json({ success: false, data: null, error: 'Idioma de destino no soportado' });
+  }
+  if (text.length > 2000) {
+    return res.status(400).json({ success: false, data: null, error: 'Texto demasiado largo para traducir' });
+  }
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(text)}`;
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      return res.status(502).json({ success: false, data: null, error: 'Servicio de traducción no disponible' });
+    }
+    const json = await resp.json();
+    const translatedText = Array.isArray(json[0])
+      ? json[0].map((chunk) => (Array.isArray(chunk) ? chunk[0] : '')).join('')
+      : '';
+    const detectedLanguage = typeof json[2] === 'string' ? json[2] : null;
+    res.json({ success: true, data: { translatedText, detectedLanguage }, error: null });
+  } catch (e) {
+    res.status(502).json({ success: false, data: null, error: 'No se pudo traducir el mensaje' });
+  }
+}
+
 module.exports = {
   getMyMessages,
   sendMessage,
@@ -175,4 +207,5 @@ module.exports = {
   adminListConversations,
   adminGetMessages,
   adminSendMessage,
+  translateMessage,
 };
