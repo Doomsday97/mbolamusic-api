@@ -664,6 +664,10 @@ const T = {
     tabLogin:'Iniciar sesión', tabRegister:'Registrarse',
     downloadCta:'⬇ Descargar APK',
     nowPlaying: 'Reproduciendo ahora',
+    cpTitle:'🔒 Cambiar contraseña', cpCurrentLabel:'Contraseña actual', cpNewLabel:'Nueva contraseña',
+    cpConfirmLabel:'Confirmar nueva contraseña', cpSaveBtn:'Guardar contraseña', cpSavingBtn:'Guardando…',
+    cpMinLength:'La nueva contraseña debe tener al menos 6 caracteres.', cpMismatch:'Las contraseñas no coinciden.',
+    cpSuccess:'✅ Contraseña actualizada correctamente.',
     // Features
     featLabel:'Características', featTitle:'Todo lo que necesitas',
     featSub:'Diseñado para funcionar en las condiciones reales de Guinea Ecuatorial.',
@@ -758,6 +762,10 @@ const T = {
     tabLogin:'Se connecter', tabRegister:"S'inscrire",
     downloadCta:'⬇ Télécharger APK',
     nowPlaying: 'En lecture',
+    cpTitle:'🔒 Changer le mot de passe', cpCurrentLabel:'Mot de passe actuel', cpNewLabel:'Nouveau mot de passe',
+    cpConfirmLabel:'Confirmer le nouveau mot de passe', cpSaveBtn:'Enregistrer', cpSavingBtn:'Enregistrement…',
+    cpMinLength:'Le nouveau mot de passe doit comporter au moins 6 caractères.', cpMismatch:'Les mots de passe ne correspondent pas.',
+    cpSuccess:'✅ Mot de passe mis à jour avec succès.',
     featLabel:'Fonctionnalités', featTitle:'Tout ce dont tu as besoin',
     featSub:'Conçu pour fonctionner dans les conditions réelles de la Guinée Équatoriale.',
     feat1h:'Streaming de qualité', feat1p:'Écoute des millions de chansons en haute qualité. Découvre les meilleurs artistes de Guinée Équatoriale et du monde.',
@@ -841,6 +849,10 @@ const T = {
     tabLogin:'Iniciar sessão', tabRegister:'Registar',
     downloadCta:'⬇ Descarregar APK',
     nowPlaying: 'A reproduzir agora',
+    cpTitle:'🔒 Alterar palavra-passe', cpCurrentLabel:'Palavra-passe atual', cpNewLabel:'Nova palavra-passe',
+    cpConfirmLabel:'Confirmar nova palavra-passe', cpSaveBtn:'Guardar palavra-passe', cpSavingBtn:'A guardar…',
+    cpMinLength:'A nova palavra-passe deve ter pelo menos 6 caracteres.', cpMismatch:'As palavras-passe não coincidem.',
+    cpSuccess:'✅ Palavra-passe atualizada com sucesso.',
     featLabel:'Funcionalidades', featTitle:'Tudo o que precisas',
     featSub:'Desenvolvido para funcionar nas condições reais da Guiné Equatorial.',
     feat1h:'Streaming de qualidade', feat1p:'Ouve milhões de músicas em alta qualidade. Descobre os melhores artistas da Guiné Equatorial e do mundo.',
@@ -924,6 +936,10 @@ const T = {
     tabLogin:'Log in', tabRegister:'Sign up',
     downloadCta:'⬇ Download APK',
     nowPlaying: 'Now playing',
+    cpTitle:'🔒 Change password', cpCurrentLabel:'Current password', cpNewLabel:'New password',
+    cpConfirmLabel:'Confirm new password', cpSaveBtn:'Save password', cpSavingBtn:'Saving…',
+    cpMinLength:'The new password must be at least 6 characters long.', cpMismatch:'Passwords do not match.',
+    cpSuccess:'✅ Password updated successfully.',
     featLabel:'Features', featTitle:'Everything you need',
     featSub:'Built to work in the real conditions of Equatorial Guinea.',
     feat1h:'Quality streaming', feat1p:'Listen to millions of songs in high quality. Discover the best artists from Equatorial Guinea and the world.',
@@ -1057,6 +1073,13 @@ function setLang(code, save = true) {
   setText('ep-bio-lbl',      t.epBioLbl);
   setText('ep-save-btn',     t.epSave);
   setText('ep-avatar-label', t.epAvatarLabel);
+  // Cambiar contraseña
+  setText('cp-title', t.cpTitle);
+  setText('cp-current-label', t.cpCurrentLabel);
+  setText('cp-new-label', t.cpNewLabel);
+  setText('cp-confirm-label', t.cpConfirmLabel);
+  const cpBtn = document.getElementById('cp-save-btn');
+  if (cpBtn && !cpBtn.disabled) cpBtn.textContent = t.cpSaveBtn;
   // Phone mockup
   setText('mockup-now-playing', t.nowPlaying);
   // Features
@@ -2113,18 +2136,18 @@ loadTrending();
 <div id="change-password-overlay" onclick="if(event.target===this)closeChangePasswordModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:11600;align-items:center;justify-content:center;padding:1rem;">
   <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:400px;position:relative;">
     <button onclick="closeChangePasswordModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;line-height:1;">✕</button>
-    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;color:var(--amber);">🔒 Cambiar contraseña</h3>
+    <h3 id="cp-title" style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;color:var(--amber);">🔒 Cambiar contraseña</h3>
 
     <div style="margin-bottom:0.9rem;">
-      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px;">Contraseña actual</label>
+      <label id="cp-current-label" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px;">Contraseña actual</label>
       <input type="password" id="cp-current" style="width:100%;padding:11px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:0.9rem;box-sizing:border-box;">
     </div>
     <div style="margin-bottom:0.9rem;">
-      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px;">Nueva contraseña</label>
+      <label id="cp-new-label" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px;">Nueva contraseña</label>
       <input type="password" id="cp-new" style="width:100%;padding:11px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:0.9rem;box-sizing:border-box;">
     </div>
     <div style="margin-bottom:1rem;">
-      <label style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px;">Confirmar nueva contraseña</label>
+      <label id="cp-confirm-label" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:6px;">Confirmar nueva contraseña</label>
       <input type="password" id="cp-confirm" style="width:100%;padding:11px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:0.9rem;box-sizing:border-box;">
     </div>
     <div id="cp-err" style="display:none;color:#f87171;font-size:0.82rem;margin-bottom:10px;"></div>
@@ -2532,17 +2555,24 @@ async function openMiCuenta() {
 function closeMiCuenta() { document.getElementById('mi-cuenta-overlay').style.display = 'none'; }
 
 // ── Cambiar contraseña (web) ──────────────────────────────────────────────────
+function _currentT() {
+  const lang = localStorage.getItem('mbola_lang') || 'es';
+  return T[lang] || T['es'];
+}
+
 function openChangePasswordModal() {
   document.getElementById('cp-current').value = '';
   document.getElementById('cp-new').value = '';
   document.getElementById('cp-confirm').value = '';
   document.getElementById('cp-err').style.display = 'none';
+  document.getElementById('cp-save-btn').textContent = _currentT().cpSaveBtn;
   document.getElementById('change-password-overlay').style.display = 'flex';
 }
 function closeChangePasswordModal() {
   document.getElementById('change-password-overlay').style.display = 'none';
 }
 async function submitChangePassword() {
+  const t = _currentT();
   const token = localStorage.getItem('mbola_token');
   const current = document.getElementById('cp-current').value;
   const newPass = document.getElementById('cp-new').value;
@@ -2551,17 +2581,17 @@ async function submitChangePassword() {
   const btn = document.getElementById('cp-save-btn');
 
   if (newPass.length < 6) {
-    errEl.textContent = 'La nueva contraseña debe tener al menos 6 caracteres.';
+    errEl.textContent = t.cpMinLength;
     errEl.style.display = '';
     return;
   }
   if (newPass !== confirm) {
-    errEl.textContent = 'Las contraseñas no coinciden.';
+    errEl.textContent = t.cpMismatch;
     errEl.style.display = '';
     return;
   }
 
-  btn.disabled = true; btn.textContent = 'Guardando…';
+  btn.disabled = true; btn.textContent = t.cpSavingBtn;
   errEl.style.display = 'none';
   try {
     const r = await fetch(API_BASE + '/auth/change-password', {
@@ -2570,14 +2600,14 @@ async function submitChangePassword() {
       body: JSON.stringify({ currentPassword: current, newPassword: newPass }),
     });
     const j = await r.json();
-    if (!j.success) throw new Error(j.error || 'Error al cambiar la contraseña');
+    if (!j.success) throw new Error(j.error || 'Error');
     closeChangePasswordModal();
-    alert('✅ Contraseña actualizada correctamente.');
+    alert(t.cpSuccess);
   } catch (e) {
     errEl.textContent = e.message;
     errEl.style.display = '';
   } finally {
-    btn.disabled = false; btn.textContent = 'Guardar contraseña';
+    btn.disabled = false; btn.textContent = t.cpSaveBtn;
   }
 }
 

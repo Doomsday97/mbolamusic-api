@@ -227,14 +227,14 @@
 <!-- Change my password modal -->
 <div id="change-password-modal" class="modal-overlay hidden">
   <div class="modal-box">
-    <h3>🔒 Cambiar mi contraseña</h3>
-    <div class="mfield"><label>Contraseña actual</label><input id="cp-current" type="password" /></div>
-    <div class="mfield"><label>Nueva contraseña</label><input id="cp-new" type="password" /></div>
-    <div class="mfield"><label>Confirmar nueva contraseña</label><input id="cp-confirm" type="password" /></div>
+    <h3 data-i18n="cpTitle">🔒 Cambiar mi contraseña</h3>
+    <div class="mfield"><label data-i18n="cpCurrentLabel">Contraseña actual</label><input id="cp-current" type="password" /></div>
+    <div class="mfield"><label data-i18n="cpNewLabel">Nueva contraseña</label><input id="cp-new" type="password" /></div>
+    <div class="mfield"><label data-i18n="cpConfirmLabel">Confirmar nueva contraseña</label><input id="cp-confirm" type="password" /></div>
     <div id="cp-err" style="display:none;color:var(--error);font-size:13px;margin-bottom:8px;"></div>
     <div class="modal-actions">
-      <button class="btn-primary" id="cp-save-btn" onclick="submitChangePassword()">Guardar</button>
-      <button class="btn-secondary" onclick="closeChangePasswordModal()">Cancelar</button>
+      <button class="btn-primary" id="cp-save-btn" onclick="submitChangePassword()" data-i18n="cpSaveBtn">Guardar</button>
+      <button class="btn-secondary" onclick="closeChangePasswordModal()" data-i18n="cancelBtn">Cancelar</button>
     </div>
   </div>
 </div>
@@ -717,19 +717,20 @@ async function submitChangePassword() {
   const confirm = document.getElementById('cp-confirm').value;
   const errEl = document.getElementById('cp-err');
   const btn = document.getElementById('cp-save-btn');
+  const saveLabel = i18n('cpSaveBtn', 'Guardar');
 
   if (newPass.length < 6) {
-    errEl.textContent = 'La nueva contraseña debe tener al menos 6 caracteres.';
+    errEl.textContent = i18n('cpMinLength', 'La nueva contraseña debe tener al menos 6 caracteres.');
     errEl.style.display = '';
     return;
   }
   if (newPass !== confirm) {
-    errEl.textContent = 'Las contraseñas no coinciden.';
+    errEl.textContent = i18n('cpMismatch', 'Las contraseñas no coinciden.');
     errEl.style.display = '';
     return;
   }
 
-  btn.disabled = true; btn.textContent = 'Guardando…';
+  btn.disabled = true; btn.textContent = i18n('processing', 'Guardando…');
   errEl.style.display = 'none';
   try {
     await apiFetch('/auth/change-password', 'POST', {
@@ -737,12 +738,12 @@ async function submitChangePassword() {
       newPassword: newPass,
     });
     closeChangePasswordModal();
-    alert('✅ Contraseña actualizada correctamente.');
+    alert(i18n('cpSuccess', '✅ Contraseña actualizada correctamente.'));
   } catch (e) {
     errEl.textContent = e.message;
     errEl.style.display = '';
   } finally {
-    btn.disabled = false; btn.textContent = 'Guardar';
+    btn.disabled = false; btn.textContent = saveLabel;
   }
 }
 
@@ -1361,6 +1362,10 @@ const _translations = {
     withdrawSuccess:'Retrait enregistré', remaining:'Restant',
     tabStats:'Statistiques', tabUsers:'Utilisateurs', tabPayments:'Paiements en attente',
     tabTracks:'🎵 Chansons', tabOnline:'🟢 En ligne', tabChat:'💬 Support',
+    cpTitle:'🔒 Changer mon mot de passe', cpCurrentLabel:'Mot de passe actuel',
+    cpNewLabel:'Nouveau mot de passe', cpConfirmLabel:'Confirmer le nouveau mot de passe',
+    cpSaveBtn:'Enregistrer', cpMinLength:'Le nouveau mot de passe doit comporter au moins 6 caractères.',
+    cpMismatch:'Les mots de passe ne correspondent pas.', cpSuccess:'✅ Mot de passe mis à jour avec succès.',
   },
   pt: {
     logout:'Sair', statUsers:'Utilizadores', statArtists:'Artistas',
@@ -1376,6 +1381,10 @@ const _translations = {
     withdrawSuccess:'Levantamento registado', remaining:'Restante',
     tabStats:'Estatísticas', tabUsers:'Utilizadores', tabPayments:'Pagamentos pendentes',
     tabTracks:'🎵 Músicas', tabOnline:'🟢 Online', tabChat:'💬 Suporte',
+    cpTitle:'🔒 Alterar a minha palavra-passe', cpCurrentLabel:'Palavra-passe atual',
+    cpNewLabel:'Nova palavra-passe', cpConfirmLabel:'Confirmar nova palavra-passe',
+    cpSaveBtn:'Guardar', cpMinLength:'A nova palavra-passe deve ter pelo menos 6 caracteres.',
+    cpMismatch:'As palavras-passe não coincidem.', cpSuccess:'✅ Palavra-passe atualizada com sucesso.',
   },
   en: {
     logout:'Logout', statUsers:'Users', statArtists:'Artists',
@@ -1391,6 +1400,10 @@ const _translations = {
     withdrawSuccess:'Withdrawal registered', remaining:'Remaining',
     tabStats:'Statistics', tabUsers:'Users', tabPayments:'Pending payments',
     tabTracks:'🎵 Tracks', tabOnline:'🟢 Online', tabChat:'💬 Support',
+    cpTitle:'🔒 Change my password', cpCurrentLabel:'Current password',
+    cpNewLabel:'New password', cpConfirmLabel:'Confirm new password',
+    cpSaveBtn:'Save', cpMinLength:'The new password must be at least 6 characters long.',
+    cpMismatch:'Passwords do not match.', cpSuccess:'✅ Password updated successfully.',
   },
 };
 const _langs = ['es','fr','pt','en'];
