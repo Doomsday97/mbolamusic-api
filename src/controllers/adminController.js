@@ -111,26 +111,36 @@ async function unblockArtist(req, res) {
 }
 
 // GET /api/admin/payments?status=VERIFYING
+const PAYMENT_STATUSES = ['PENDING', 'COMPLETED', 'FAILED', 'VERIFYING'];
+
 async function listPayments(req, res) {
   const page   = Math.max(1, parseInt(req.query.page) || 1);
   const limit  = Math.min(100, parseInt(req.query.limit) || 20);
   const status = req.query.status;
 
-  const where = status ? { status } : {};
-  const [payments, total] = await Promise.all([
-    prisma.payment.findMany({
-      where,
-      include: {
-        user: { select: { username: true, email: true, phone: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
-      take: limit,
-    }),
-    prisma.payment.count({ where }),
-  ]);
+  if (status && !PAYMENT_STATUSES.includes(status)) {
+    return fail(res, `Estado de pago inválido: ${status}`);
+  }
 
-  return ok(res, { payments, total, page, pages: Math.ceil(total / limit) });
+  try {
+    const where = status ? { status } : {};
+    const [payments, total] = await Promise.all([
+      prisma.payment.findMany({
+        where,
+        include: {
+          user: { select: { username: true, email: true, phone: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.payment.count({ where }),
+    ]);
+
+    return ok(res, { payments, total, page, pages: Math.ceil(total / limit) });
+  } catch (e) {
+    return fail(res, 'Error al cargar los pagos', 500);
+  }
 }
 
 // GET /api/admin/tracks

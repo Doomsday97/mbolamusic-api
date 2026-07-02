@@ -5,8 +5,53 @@ const { getProvider } = require('../services/payment');
 const subscriptionService = require('../services/subscriptionService');
 const notif = require('./notificationController');
 
+// El monedero interno es saldo propio del usuario, no un proveedor externo:
+// se verifica y descuenta atómicamente aquí mismo (nunca pasaba por aquí
+// antes -- el mock provider marcaba cualquier pago con method:'WALLET' como
+// completado sin comprobar ni descontar el saldo real).
+async function processWalletPayment({ user, amount, purpose, trackId }) {
+  let artistShare = 0, platformShare = 0;
+  if (purpose === 'PER_PLAY' || purpose === 'PER_DOWNLOAD') {
+    artistShare = Math.round(amount * business.revenueSplit.artist);
+    platformShare = amount - artistShare;
+  }
+
+  // UPDATE atómico con condición de saldo suficiente: evita condiciones de
+  // carrera entre comprobar el saldo y descontarlo (ej. doble clic rápido).
+  const deducted = await prisma.user.updateMany({
+    where: { id: user.id, walletBalance: { gte: amount } },
+    data: { walletBalance: { decrement: amount } },
+  });
+  const success = deducted.count > 0;
+
+  const payment = await prisma.payment.create({
+    data: {
+      userId: user.id,
+      amount,
+      method: 'WALLET',
+      purpose,
+      trackId,
+      status: success ? 'COMPLETED' : 'FAILED',
+      externalRef: success ? 'WALLET-' + Date.now().toString(36) : null,
+      artistShare: success ? artistShare : 0,
+      platformShare: success ? platformShare : 0,
+      completedAt: success ? new Date() : null,
+    },
+  });
+
+  return {
+    payment,
+    result: {
+      status: success ? 'COMPLETED' : 'FAILED',
+      message: success ? undefined : 'Saldo insuficiente en el monedero',
+    },
+  };
+}
+
 // Crea un registro de pago y lo procesa con el proveedor activo
 async function processPayment({ user, amount, method, purpose, trackId = null }) {
+  if (method === 'WALLET') return processWalletPayment({ user, amount, purpose, trackId });
+
   const provider = getProvider();
   const result = await provider.charge({
     amount,
@@ -124,31 +169,40 @@ async function payListenerYearlySubscription(req, res) {
   return ok(res, { payment, result });
 }
 
+const PAYMENT_METHODS = ['SIM_BALANCE', 'BANK_TRANSFER', 'CARD', 'WALLET'];
+
 // POST /api/payments/per-play   body: { trackId, method }
 async function payPerPlay(req, res) {
   const { trackId, method } = req.body;
-  const track = await prisma.track.findUnique({ where: { id: trackId } });
-  if (!track) return fail(res, 'Canción no encontrada', 404);
+  if (!PAYMENT_METHODS.includes(method)) return fail(res, `Método de pago inválido: ${method}`);
+  try {
+    const track = await prisma.track.findUnique({ where: { id: trackId } });
+    if (!track) return fail(res, 'Canción no encontrada', 404);
 
-  const { payment, result } = await processPayment({
-    user: req.user,
-    amount: business.prices.perPlay,
-    method,
-    purpose: 'PER_PLAY',
-    trackId,
-  });
+    const { payment, result } = await processPayment({
+      user: req.user,
+      amount: business.prices.perPlay,
+      method,
+      purpose: 'PER_PLAY',
+      trackId,
+    });
 
-  if (result.status === 'COMPLETED') {
-    await registerPlay(req.user.id, track, false);
-    await creditArtist(track.artistId, payment.artistShare);
+    if (result.status === 'COMPLETED') {
+      await registerPlay(req.user.id, track, false);
+      await creditArtist(track.artistId, payment.artistShare);
+    }
+
+    return ok(res, { payment, result });
+  } catch (e) {
+    return fail(res, 'Error al procesar el pago', 500);
   }
-
-  return ok(res, { payment, result });
 }
 
 // POST /api/payments/per-download   body: { trackId, method }
 async function payPerDownload(req, res) {
   const { trackId, method } = req.body;
+  if (!PAYMENT_METHODS.includes(method)) return fail(res, `Método de pago inválido: ${method}`);
+  try {
   const track = await prisma.track.findUnique({ where: { id: trackId } });
   if (!track) return fail(res, 'Canción no encontrada', 404);
 
@@ -170,6 +224,9 @@ async function payPerDownload(req, res) {
   }
 
   return ok(res, { payment, result, audioUrl: track.audioUrl });
+  } catch (e) {
+    return fail(res, 'Error al procesar el pago', 500);
+  }
 }
 
 // Límite mensual de 100.000 FCFA entre recargas y retiros
