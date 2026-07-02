@@ -85,6 +85,9 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  deletedAt       DateTime? // cuenta eliminada por el admin (anonimizada, bloqueada; ver Política de Privacidad §4)
+  deletionReason  String?
+
   artistProfile    ArtistProfile?
   subscriptions    Subscription[]
   payments         Payment[]

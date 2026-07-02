@@ -113,6 +113,7 @@ async function login(req, res) {
     include: { artistProfile: true },
   });
   if (!user) return fail(res, 'Credenciales incorrectas', 401);
+  if (user.deletedAt) return fail(res, 'Esta cuenta ha sido eliminada', 403);
 
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) return fail(res, 'Credenciales incorrectas', 401);

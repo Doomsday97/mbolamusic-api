@@ -59,6 +59,7 @@ async function listUsers(req, res) {
         id: true, username: true, email: true, phone: true,
         role: true, country: true, city: true, isSuperAdmin: true,
         walletBalance: true, isVerified: true, createdAt: true,
+        deletedAt: true, deletionReason: true,
         artistProfile: { select: { artistName: true, idVerified: true, totalEarnings: true } },
         subscriptions: {
           where: { status: 'ACTIVE' },
@@ -216,6 +217,62 @@ async function resetPassword(req, res) {
   const hash = await bcrypt.hash(newPassword, 10);
   await prisma.user.update({ where: { id: req.params.id }, data: { passwordHash: hash } });
   return ok(res, { reset: true });
+}
+
+// POST /api/admin/users/:id/delete-account  body: { reason }
+// Elimina una cuenta que infringe las reglas/términos: bloquea el acceso de
+// inmediato y anonimiza los datos personales (usuario, email, teléfono,
+// avatar…), conforme a la Política de Privacidad §4 ("Cuenta cancelada:
+// anonimizamos los datos en un plazo máximo de 30 días"). Los registros de
+// pagos y reproducciones/descargas NO se borran aquí: se conservan por sus
+// propios plazos legales (10 y 2 años respectivamente) y los purga
+// automáticamente el job programado (ver jobs/purgeExpiredData.js).
+async function deleteAccount(req, res) {
+  const { reason } = req.body;
+  const target = await prisma.user.findUnique({
+    where: { id: req.params.id },
+    include: { artistProfile: true },
+  });
+  if (!target) return fail(res, 'Usuario no encontrado', 404);
+  if (target.deletedAt) return fail(res, 'Esa cuenta ya está eliminada');
+  if (target.isSuperAdmin) return fail(res, 'No puedes eliminar al administrador principal');
+
+  // Elimina el avatar de R2 (no está sujeto a retención legal, a diferencia
+  // de los pagos y el documento de identidad del artista, que se conservan).
+  if (target.avatarUrl) {
+    await require('../services/storage').deleteFile(target.avatarUrl).catch(() => {});
+  }
+
+  const bcrypt = require('bcryptjs');
+  const unusableHash = await bcrypt.hash(require('crypto').randomUUID(), 10);
+  const anonId = target.id.slice(0, 8);
+
+  const updated = await prisma.user.update({
+    where: { id: req.params.id },
+    data: {
+      deletedAt: new Date(),
+      deletionReason: reason || null,
+      username: `usuario_eliminado_${anonId}`,
+      email: null,
+      phone: null,
+      passwordHash: unusableHash,
+      avatarUrl: null,
+      city: null,
+      favoriteGenres: [],
+    },
+  });
+
+  // Oculta toda la música si era artista, sin borrar el historial de
+  // reproducciones/descargas ya generado (necesario para el reparto a otros
+  // artistas ya distribuido y para la retención de pagos).
+  if (target.artistProfile) {
+    await prisma.track.updateMany({
+      where: { artistId: target.artistProfile.id },
+      data: { isPublished: false },
+    });
+  }
+
+  return ok(res, { user: stripPassword(updated) });
 }
 
 // POST /api/admin/users/:id/promote-admin  -> solo el admin principal puede designar otros admins.
@@ -851,4 +908,5 @@ module.exports = {
   listAds, createAd, updateAd, deleteAd, toggleAd, uploadAdMedia, removeAdMedia, publicAds,
   trackAdClick, trackAdImpression,
   promoteToAdmin, demoteFromAdmin, bootstrapSuperAdmin,
+  deleteAccount,
 };

@@ -16,6 +16,7 @@ async function authenticate(req, res, next) {
       include: { artistProfile: true },
     });
     if (!user) return fail(res, 'Usuario no encontrado', 401);
+    if (user.deletedAt) return fail(res, 'Esta cuenta ha sido eliminada', 403);
 
     req.user = user;
     onlineTracker.track(req); // registrar presencia

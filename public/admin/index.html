@@ -554,7 +554,7 @@ async function loadUsers(page = 1) {
     const unsubscribedCount = d.users.length - subscribedCount;
     let rows = d.users.map(u => `
       <tr>
-        <td>${esc(u.username)} ${u.isSuperAdmin ? `<span title="${i18n('superAdminLabel','Admin principal')}">👑</span>` : ''}</td>
+        <td>${esc(u.username)} ${u.isSuperAdmin ? `<span title="${i18n('superAdminLabel','Admin principal')}">👑</span>` : ''} ${u.deletedAt ? `<span class="badge badge-failed" title="${esc(u.deletionReason || '')}">${i18n('deletedAccountLabel','Eliminada')}</span>` : ''}</td>
         <td>${esc(u.email || u.phone || '—')}</td>
         <td><span class="badge badge-${u.role.toLowerCase()}">${u.role}</span></td>
         <td>${esc((u.artistProfile && u.artistProfile.artistName) || '—')}</td>
@@ -563,15 +563,18 @@ async function loadUsers(page = 1) {
         <td>${new Date(u.createdAt).toLocaleDateString(_lang)}</td>
         <td>
           <button class="btn-sm btn-success" onclick="viewUser('${u.id}')">${i18n('detailsBtn','Detalles')}</button>
-          ${u.role === 'ARTIST' ? `
+          ${u.role === 'ARTIST' && !u.deletedAt ? `
             <button class="btn-sm btn-warn" onclick="blockUser('${u.id}', '${esc(u.username)}')">${i18n('hideBtn','Ocultar')}</button>
             <button class="btn-sm btn-success" onclick="unblockUser('${u.id}')">${i18n('restoreBtn','Restaurar')}</button>
           ` : ''}
-          ${_user && _user.isSuperAdmin && u.id !== _user.id ? (
+          ${_user && !u.deletedAt && _user.isSuperAdmin && u.id !== _user.id ? (
             u.role === 'ADMIN'
               ? (u.isSuperAdmin ? '' : `<button class="btn-sm btn-danger" onclick="demoteAdmin('${u.id}','${esc(u.username)}')">${i18n('demoteAdminBtn','Quitar admin')}</button>`)
               : `<button class="btn-sm" onclick="promoteAdmin('${u.id}','${esc(u.username)}')">${i18n('promoteAdminBtn','Hacer admin')}</button>`
           ) : ''}
+          ${_user && !u.deletedAt && u.id !== _user.id && !u.isSuperAdmin && (u.role !== 'ADMIN' || _user.isSuperAdmin) ? `
+            <button class="btn-sm btn-danger" onclick="deleteAccount('${u.id}','${esc(u.username)}')">${i18n('deleteAccountBtn','Eliminar cuenta')}</button>
+          ` : ''}
         </td>
       </tr>`).join('');
     var _toRemove = el.querySelector('.loading, .empty'); if (_toRemove) _toRemove.remove();
@@ -767,6 +770,16 @@ async function demoteAdmin(id, name) {
   if (!confirm(i18n('demoteAdminConfirm','¿Quitar la función de administrador a {0}? Recuperará su rol anterior.').replace('{0}', name))) return;
   try { await apiFetch('/admin/users/' + id + '/demote-admin', 'POST'); loadUsers(_uPage); }
   catch (e) { alert(e.message); }
+}
+
+async function deleteAccount(id, name) {
+  if (!confirm(i18n('deleteAccountConfirm','¿Eliminar la cuenta de {0}? Se bloqueará el acceso y se anonimizarán sus datos personales de inmediato. Los pagos y el historial de reproducciones se conservan por el plazo legal antes de borrarse automáticamente.').replace('{0}', name))) return;
+  const reason = prompt(i18n('deleteAccountReasonPrompt','Motivo de la eliminación (se guarda en el registro):'), '');
+  if (reason === null) return;
+  try {
+    await apiFetch('/admin/users/' + id + '/delete-account', 'POST', { reason });
+    loadUsers(_uPage);
+  } catch (e) { alert(e.message); }
 }
 
 // ── Payments ──────────────────────────────────────────────────────────────────
@@ -1479,6 +1492,9 @@ const _translations = {
     superAdminLabel:'Administrateur principal', promoteAdminBtn:'Nommer admin', demoteAdminBtn:'Retirer admin',
     promoteAdminConfirm:'Désigner {0} comme administrateur ? Il/elle cessera d\'être auditeur/artiste et n\'aura plus que l\'accès administrateur.',
     demoteAdminConfirm:'Retirer la fonction d\'administrateur à {0} ? Il/elle retrouvera son rôle précédent.',
+    deletedAccountLabel:'Supprimé', deleteAccountBtn:'Supprimer le compte',
+    deleteAccountConfirm:'Supprimer le compte de {0} ? L\'accès sera bloqué et ses données personnelles anonymisées immédiatement. Les paiements et l\'historique d\'écoute sont conservés pendant le délai légal avant suppression automatique.',
+    deleteAccountReasonPrompt:'Motif de la suppression (enregistré) :',
   },
   pt: {
     logout:'Sair', statUsers:'Utilizadores', statArtists:'Artistas',
@@ -1605,6 +1621,9 @@ const _translations = {
     superAdminLabel:'Administrador principal', promoteAdminBtn:'Tornar admin', demoteAdminBtn:'Remover admin',
     promoteAdminConfirm:'Designar {0} como administrador? Deixará de ser ouvinte/artista e terá apenas acesso de administrador.',
     demoteAdminConfirm:'Remover a função de administrador de {0}? Recuperará a sua função anterior.',
+    deletedAccountLabel:'Eliminada', deleteAccountBtn:'Eliminar conta',
+    deleteAccountConfirm:'Eliminar a conta de {0}? O acesso será bloqueado e os dados pessoais anonimizados de imediato. Os pagamentos e o histórico de reproduções são conservados pelo prazo legal antes de serem apagados automaticamente.',
+    deleteAccountReasonPrompt:'Motivo da eliminação (fica registado):',
   },
   en: {
     logout:'Logout', statUsers:'Users', statArtists:'Artists',
@@ -1731,6 +1750,9 @@ const _translations = {
     superAdminLabel:'Main administrator', promoteAdminBtn:'Make admin', demoteAdminBtn:'Remove admin',
     promoteAdminConfirm:'Designate {0} as administrator? They will stop being a listener/artist and will only have administrator access.',
     demoteAdminConfirm:'Remove administrator status from {0}? They will regain their previous role.',
+    deletedAccountLabel:'Deleted', deleteAccountBtn:'Delete account',
+    deleteAccountConfirm:'Delete {0}\'s account? Access will be blocked and their personal data anonymized immediately. Payments and playback history are kept for the legally required period before being automatically purged.',
+    deleteAccountReasonPrompt:'Reason for deletion (saved to the record):',
   },
 };
 const _langs = ['es','fr','pt','en'];

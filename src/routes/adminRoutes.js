@@ -15,6 +15,7 @@ router.post('/users/:id/block',            admin.blockArtist);
 router.post('/users/:id/unblock',          admin.unblockArtist);
 router.post('/users/:id/promote-admin',    admin.promoteToAdmin);
 router.post('/users/:id/demote-admin',     admin.demoteFromAdmin);
+router.post('/users/:id/delete-account',   admin.deleteAccount);
 router.get('/payments',                    admin.listPayments);
 router.post('/payments/:id/confirm',       pay.adminConfirmPayment);
 router.post('/payments/:id/reject',        pay.adminRejectPayment);
