@@ -79,8 +79,11 @@ function s3PublicUrl(key) {
 
 /**
  * Reescribe una URL almacenada al CDN público actual.
- * Útil para corregir URLs antiguas (endpoint privado S3 o /uploads/) sin migración de BD.
- * Solo actúa si CDN_BASE_URL está definido y la URL no lo usa ya.
+ * Útil para corregir URLs antiguas que apuntaban a nuestro propio almacenamiento
+ * (ruta relativa /uploads/... o el endpoint privado de S3) sin migración de BD.
+ * NO toca URLs externas legítimas (soundhelix.com, picsum.photos, etc.) — solo
+ * el último segmento de esas URLs no es un "nombre de archivo" reescribible,
+ * así que tratarlas igual las rompería (p.ej. ".../seed/x/400" → ".../400").
  */
 function rewriteUrl(url) {
   if (!url) return url;
@@ -88,6 +91,24 @@ function rewriteUrl(url) {
   if (!cdn) return url;
   const base = cdn.replace(/\/$/, '');
   if (url.startsWith(base)) return url; // ya es CDN
+
+  // Ruta relativa local (antiguo /uploads/archivo.mp3) → sí hay que reescribir
+  const isRelative = url.startsWith('/');
+
+  // URL de nuestro propio endpoint S3/R2 (antiguo enlace privado) → sí hay que reescribir
+  let isOwnS3Endpoint = false;
+  if (!isRelative) {
+    try {
+      const urlHost = new URL(url).host;
+      const s3Host = process.env.S3_ENDPOINT ? new URL(_cleanEndpoint(process.env.S3_ENDPOINT)).host : null;
+      isOwnS3Endpoint = s3Host && urlHost === s3Host;
+    } catch {
+      return url; // URL inválida: no tocar
+    }
+  }
+
+  if (!isRelative && !isOwnS3Endpoint) return url; // dominio externo ajeno: no tocar
+
   const path = require('path');
   const filename = path.basename(url);
   if (!filename) return url;
