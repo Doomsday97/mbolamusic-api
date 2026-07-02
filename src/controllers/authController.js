@@ -152,6 +152,17 @@ async function me(req, res) {
   return ok(res, { user: sanitize(req.user) });
 }
 
+// POST /api/auth/fcm-token — registra/actualiza el token de notificaciones push del dispositivo
+async function updateFcmToken(req, res) {
+  const { token } = req.body;
+  if (typeof token !== 'string' || !token.trim()) return fail(res, 'Falta el token');
+  await prisma.user.update({
+    where: { id: req.user.id },
+    data: { fcmToken: token.trim() },
+  });
+  return ok(res, { saved: true });
+}
+
 // GET /api/auth/my-referral
 async function myReferral(req, res) {
   let ref = await prisma.referral.findFirst({ where: { referrerId: req.user.id } });
@@ -353,4 +364,4 @@ async function updateAvatar(req, res) {
   return ok(res, { user: sanitize(fresh), avatarUrl });
 }
 
-module.exports = { register, login, me, myReferral, updateProfile, updateAvatar, listArtists, changePassword, setSecurityQuestions, recoverChallenge, recoverVerify };
+module.exports = { register, login, me, myReferral, updateProfile, updateAvatar, listArtists, changePassword, setSecurityQuestions, recoverChallenge, recoverVerify, updateFcmToken };

@@ -10,6 +10,7 @@ router.get('/my-referral',                       authenticate, auth.myReferral);
 router.put('/profile',                           authenticate, auth.updateProfile);
 router.post('/change-password',                  authenticate, auth.changePassword);
 router.post('/avatar',                           authenticate, uploadMemory.single('avatar'), auth.updateAvatar);
+router.post('/fcm-token',                        authenticate, auth.updateFcmToken);
 router.get('/artists',                           authenticate, requireRole('ADMIN'), auth.listArtists);
 
 // Preguntas de seguridad

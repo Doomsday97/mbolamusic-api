@@ -908,6 +908,26 @@ async function trackAdImpression(req, res) {
   return ok(res, { tracked: true });
 }
 
+// POST /api/system/broadcast-update — llamado por el workflow de CI justo
+// despues de publicar una nueva APK, para avisar por push a todos los
+// usuarios con token FCM registrado. No pasa por sesion de usuario: se
+// protege con un secreto compartido (header X-Update-Secret) en vez de JWT,
+// ya que quien lo llama es el pipeline de build, no una persona logueada.
+async function broadcastUpdate(req, res) {
+  const secret = req.headers['x-update-secret'];
+  if (!process.env.UPDATE_BROADCAST_SECRET || secret !== process.env.UPDATE_BROADCAST_SECRET) {
+    return fail(res, 'No autorizado', 401);
+  }
+  const { versionName, apkUrl, releaseNotes } = req.body;
+  if (!versionName || !apkUrl) return fail(res, 'Faltan versionName/apkUrl');
+  try {
+    const result = await require('../services/push').broadcastUpdate({ versionName, apkUrl, releaseNotes });
+    return ok(res, result);
+  } catch (e) {
+    return fail(res, 'Error al enviar las notificaciones push', 500);
+  }
+}
+
 module.exports = {
   stats, listUsers, getUser, updateUser, resetPassword,
   blockArtist, unblockArtist, listPayments,
@@ -919,4 +939,5 @@ module.exports = {
   trackAdClick, trackAdImpression,
   promoteToAdmin, demoteFromAdmin, bootstrapSuperAdmin,
   deleteAccount,
+  broadcastUpdate,
 };

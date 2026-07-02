@@ -4,3 +4,6 @@ uploads/
 *.log
 dist/
 .DS_Store
+
+# Credencial de Firebase Admin SDK — nunca debe subirse al repositorio
+firebase-service-account.json

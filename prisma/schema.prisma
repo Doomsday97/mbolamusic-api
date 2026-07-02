@@ -80,6 +80,7 @@ model User {
   favoriteGenres String[]  @default([])
 
   walletBalance Int       @default(0) // saldo monedero en FCFA
+  fcmToken      String?   // token de notificaciones push (Firebase Cloud Messaging)
 
   isVerified    Boolean   @default(false) // email/phone verificado
   createdAt     DateTime  @default(now())

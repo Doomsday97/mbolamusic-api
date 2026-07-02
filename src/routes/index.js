@@ -9,6 +9,10 @@ router.use('/playlists',      require('./playlistRoutes'));
 router.use('/notifications',  require('./notificationRoutes'));
 router.use('/chat',           require('./chatRoutes'));
 
+// Llamado por el workflow de CI tras publicar una nueva APK (ver nota de
+// seguridad en adminController.broadcastUpdate: usa secreto compartido, no JWT).
+router.post('/system/broadcast-update', require('../controllers/adminController').broadcastUpdate);
+
 // Endpoint público: anuncios activos por slot
 router.get('/ads', require('../controllers/adminController').publicAds);
 router.post('/ads/:id/click',      require('../controllers/adminController').trackAdClick);
