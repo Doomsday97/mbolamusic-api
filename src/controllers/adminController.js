@@ -2,6 +2,12 @@
 const prisma = require('../config/prisma');
 const { ok, fail } = require('../utils/response');
 
+// Nunca devolver el hash de contraseña en respuestas de la API
+function stripPassword(user) {
+  const { passwordHash, ...rest } = user;
+  return rest;
+}
+
 // GET /api/admin/stats  -> resumen general de la plataforma
 async function stats(req, res) {
   const [
@@ -51,7 +57,7 @@ async function listUsers(req, res) {
       where,
       select: {
         id: true, username: true, email: true, phone: true,
-        role: true, country: true, city: true,
+        role: true, country: true, city: true, isSuperAdmin: true,
         walletBalance: true, isVerified: true, createdAt: true,
         artistProfile: { select: { artistName: true, idVerified: true, totalEarnings: true } },
         subscriptions: {
@@ -160,7 +166,7 @@ async function getUser(req, res) {
       where: { id: req.params.id },
       select: {
         id: true, username: true, email: true, phone: true,
-        role: true, country: true, city: true, isVerified: true,
+        role: true, country: true, city: true, isVerified: true, isSuperAdmin: true,
         walletBalance: true, createdAt: true,
         artistProfile: { select: { artistName: true, bio: true, totalEarnings: true } },
         payments: {
@@ -196,7 +202,7 @@ async function updateUser(req, res) {
         ...(walletBalance !== undefined && { walletBalance: parseInt(walletBalance) }),
       },
     });
-    return ok(res, { user: updated });
+    return ok(res, { user: stripPassword(updated) });
   } catch (e) {
     return fail(res, 'Error al actualizar usuario: ' + e.message, 500);
   }
@@ -210,6 +216,47 @@ async function resetPassword(req, res) {
   const hash = await bcrypt.hash(newPassword, 10);
   await prisma.user.update({ where: { id: req.params.id }, data: { passwordHash: hash } });
   return ok(res, { reset: true });
+}
+
+// POST /api/admin/users/:id/promote-admin  -> solo el admin principal puede designar otros admins.
+// El usuario designado deja de ser oyente/artista (se guarda su rol anterior para poder restaurarlo).
+async function promoteToAdmin(req, res) {
+  if (!req.user.isSuperAdmin) {
+    return fail(res, 'Solo el administrador principal puede designar administradores', 403);
+  }
+  const target = await prisma.user.findUnique({ where: { id: req.params.id } });
+  if (!target) return fail(res, 'Usuario no encontrado', 404);
+  if (target.role === 'ADMIN') return fail(res, 'Ese usuario ya es administrador');
+
+  const updated = await prisma.user.update({
+    where: { id: req.params.id },
+    data: { role: 'ADMIN', previousRole: target.role },
+  });
+  return ok(res, { user: stripPassword(updated) });
+}
+
+// POST /api/admin/users/:id/demote-admin  -> solo el admin principal puede quitar la función de admin.
+// Restaura el rol que el usuario tenía antes de ser designado (oyente u artista).
+async function demoteFromAdmin(req, res) {
+  if (!req.user.isSuperAdmin) {
+    return fail(res, 'Solo el administrador principal puede quitar administradores', 403);
+  }
+  const target = await prisma.user.findUnique({ where: { id: req.params.id } });
+  if (!target) return fail(res, 'Usuario no encontrado', 404);
+  if (target.role !== 'ADMIN') return fail(res, 'Ese usuario no es administrador');
+  if (target.isSuperAdmin) return fail(res, 'No puedes quitar al administrador principal');
+
+  const updated = await prisma.user.update({
+    where: { id: req.params.id },
+    data: { role: target.previousRole || 'LISTENER', previousRole: null },
+  });
+  return ok(res, { user: stripPassword(updated) });
+}
+
+// POST /api/admin/bootstrap-super-admin  -> designa manualmente al admin principal si aún no existe
+async function bootstrapSuperAdmin(req, res) {
+  const result = await require('../jobs/bootstrapSuperAdmin').run();
+  return ok(res, result);
 }
 
 // POST /api/admin/tracks  -> sube sin requerir suscripción de artista
@@ -803,4 +850,5 @@ module.exports = {
   subscriptionConfig, monthlyReport, fixMediaUrls, fixSeedAudio, fixArtistTrials, storageDiagnostics, setupRls,
   listAds, createAd, updateAd, deleteAd, toggleAd, uploadAdMedia, removeAdMedia, publicAds,
   trackAdClick, trackAdImpression,
+  promoteToAdmin, demoteFromAdmin, bootstrapSuperAdmin,
 };

@@ -5,10 +5,12 @@ module.exports = {
   currency: 'FCFA',
 
   prices: {
-    artistMonthly: 10000,    // suscripción artista / mes
-    listenerMonthly: 2000,   // suscripción oyente / mes
-    perPlay: 50,             // pago por reproducción
-    perDownload: 200,        // pago por descarga
+    artistMonthly: 10000,        // suscripción artista / mes
+    listenerMonthly: 2000,       // suscripción oyente / mes
+    listenerYearly: 12000,       // suscripción anual oyente
+    listenerYearlyFirstTime: 10000, // precio de la primera suscripción anual del oyente
+    perPlay: 50,                 // pago por reproducción
+    perDownload: 200,            // pago por descarga
   },
 
   // Reparto de ingresos pay-per-use (reproducción/descarga sueltas)
@@ -22,7 +24,8 @@ module.exports = {
     artistFreeDays: 30,      // 1 mes gratis para artistas nuevos
   },
 
-  subscriptionDurationDays: 30, // duración de un ciclo de suscripción
+  subscriptionDurationDays: 30,       // duración de un ciclo de suscripción mensual
+  subscriptionDurationDaysYearly: 365, // duración de un ciclo de suscripción anual
 
   referral: {
     rewardDaysForReferrer: 15, // días gratis que gana quien refiere

@@ -10,6 +10,8 @@ router.use(authenticate);
 
 router.post('/artist-subscription',  pay.payArtistSubscription);
 router.post('/listener-subscription', pay.payListenerSubscription);
+router.get('/listener-subscription-yearly/price', pay.getListenerYearlyPrice);
+router.post('/listener-subscription-yearly',       pay.payListenerYearlySubscription);
 router.post('/per-play',             pay.payPerPlay);
 router.post('/per-download',         pay.payPerDownload);
 router.post('/wallet-topup',             pay.walletTopup);

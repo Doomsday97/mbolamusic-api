@@ -37,8 +37,10 @@ async function tryAutoRenew(userId, expiredSub) {
   // Los periodos gratuitos no se auto-renuevan
   if (expiredSub.type === 'ARTIST_FREE' || expiredSub.type === 'LISTENER_FREE') return null;
   const cost = expiredSub.type === 'ARTIST_MONTHLY'
-    ? 10000
-    : 2000; // LISTENER_MONTHLY
+    ? business.prices.artistMonthly
+    : expiredSub.type === 'LISTENER_YEARLY'
+      ? business.prices.listenerYearly // la renovación nunca lleva el descuento de primera vez
+      : business.prices.listenerMonthly; // LISTENER_MONTHLY
 
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { walletBalance: true } });
   if (!user || user.walletBalance < cost) return null;
@@ -83,7 +85,9 @@ async function createSubscription(userId, type) {
     ? business.trials.listenerFreeDays
     : type === 'ARTIST_FREE'
       ? business.trials.artistFreeDays
-      : business.subscriptionDurationDays;
+      : type === 'LISTENER_YEARLY'
+        ? business.subscriptionDurationDaysYearly
+        : business.subscriptionDurationDays;
 
   const sub = await prisma.subscription.create({
     data: {
@@ -134,11 +138,31 @@ async function hasActiveArtistSubscription(userId) {
   return subs.some((s) => !isExpired(s.endDate));
 }
 
+// ¿Ya tuvo el oyente alguna vez una suscripción anual (activa, expirada o cancelada)?
+// Determina si le corresponde el precio de primera vez (10.000 FCFA) o el precio normal (12.000 FCFA).
+async function hasEverHadYearlySubscription(userId) {
+  const count = await prisma.subscription.count({
+    where: { userId, type: 'LISTENER_YEARLY' },
+  });
+  return count > 0;
+}
+
+// Precio que le corresponde a este oyente por la suscripción anual ahora mismo.
+async function listenerYearlyPrice(userId) {
+  const hadBefore = await hasEverHadYearlySubscription(userId);
+  return {
+    amount: hadBefore ? business.prices.listenerYearly : business.prices.listenerYearlyFirstTime,
+    isFirstTime: !hadBefore,
+  };
+}
+
 module.exports = {
   getActiveSubscription,
   createSubscription,
   applySubscriptionEffects,
   listenerHasAccess,
   hasActiveArtistSubscription,
+  hasEverHadYearlySubscription,
+  listenerYearlyPrice,
   tryAutoRenew,
 };

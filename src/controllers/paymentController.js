@@ -91,6 +91,39 @@ async function payListenerSubscription(req, res) {
   return ok(res, { payment, result });
 }
 
+// GET /api/payments/listener-subscription-yearly/price
+// Devuelve el precio que le corresponde al oyente autenticado: 10.000 FCFA la
+// primera vez que se suscribe al plan anual, 12.000 FCFA en adelante.
+async function getListenerYearlyPrice(req, res) {
+  const price = await subscriptionService.listenerYearlyPrice(req.user.id);
+  return ok(res, price);
+}
+
+// POST /api/payments/listener-subscription-yearly  body: { method, autoRenew? }
+async function payListenerYearlySubscription(req, res) {
+  const { method, autoRenew } = req.body;
+  const { amount } = await subscriptionService.listenerYearlyPrice(req.user.id);
+
+  const { payment, result } = await processPayment({
+    user: req.user,
+    amount,
+    method,
+    purpose: 'LISTENER_SUBSCRIPTION_YEARLY',
+  });
+
+  if (result.status === 'COMPLETED') {
+    const sub = await subscriptionService.createSubscription(req.user.id, 'LISTENER_YEARLY');
+    if (autoRenew) {
+      await prisma.subscription.update({
+        where: { id: sub.id },
+        data: { autoRenew: true },
+      });
+    }
+  }
+
+  return ok(res, { payment, result });
+}
+
 // POST /api/payments/per-play   body: { trackId, method }
 async function payPerPlay(req, res) {
   const { trackId, method } = req.body;
@@ -432,6 +465,8 @@ async function _finalizePayment(payment, status) {
     await subscriptionService.createSubscription(payment.userId, 'ARTIST_MONTHLY');
   } else if (payment.purpose === 'LISTENER_SUBSCRIPTION') {
     await subscriptionService.createSubscription(payment.userId, 'LISTENER_MONTHLY');
+  } else if (payment.purpose === 'LISTENER_SUBSCRIPTION_YEARLY') {
+    await subscriptionService.createSubscription(payment.userId, 'LISTENER_YEARLY');
   } else if (payment.purpose === 'WALLET_TOPUP') {
     await prisma.user.update({
       where: { id: payment.userId },
@@ -465,6 +500,7 @@ async function registerPlay(userId, track, bySubscription) {
   const shouldCount =
     !bySubscription ||
     subType === 'LISTENER_MONTHLY' ||
+    subType === 'LISTENER_YEARLY' ||
     subType === 'ARTIST_MONTHLY';
 
   // Auto-reproducciones del propio artista sobre su propia canción: capped en
@@ -514,6 +550,8 @@ async function creditArtist(artistId, amount) {
 module.exports = {
   payArtistSubscription,
   payListenerSubscription,
+  payListenerYearlySubscription,
+  getListenerYearlyPrice,
   payPerPlay,
   payPerDownload,
   walletTopup,

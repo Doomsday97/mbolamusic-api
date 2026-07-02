@@ -107,27 +107,44 @@ async function runDistribution(month) {
   const ADMIN_PCT         = cfg.adminPct  / 100;
   const ARTIST_PCT        = cfg.artistPct / 100;
   const THRESHOLD         = cfg.minPlaysThreshold;
-  const ARTIST_POOL_PER   = Math.round(SUBSCRIPTION_VAL * ARTIST_PCT);  // 1400
-  const ADMIN_SHARE_PER   = SUBSCRIPTION_VAL - ARTIST_POOL_PER;         // 600
 
   // ── 1. Suscriptores válidos (excluyendo artistas) ───────────────────────────
-  const allSubs = await prisma.subscription.findMany({
-    where: {
-      type:      'LISTENER_MONTHLY',
-      startDate: { lt: end },
-      endDate:   { gt: start },
-    },
-    select:   { userId: true },
-    distinct: ['userId'],
-  });
+  // Los anuales aportan al fondo mensual su equivalente prorrateado (valor
+  // anual estándar / 12), sin importar si pagaron el precio de primera vez con
+  // descuento — así el descuento promocional no reduce el reparto a artistas.
+  const YEARLY_MONTHLY_VALUE = Math.round(require('../config/business').prices.listenerYearly / 12);
 
-  const allUserIds   = allSubs.map(s => s.userId);
+  const [monthlySubs, yearlySubs] = await Promise.all([
+    prisma.subscription.findMany({
+      where: { type: 'LISTENER_MONTHLY', startDate: { lt: end }, endDate: { gt: start } },
+      select: { userId: true },
+      distinct: ['userId'],
+    }),
+    prisma.subscription.findMany({
+      where: { type: 'LISTENER_YEARLY', startDate: { lt: end }, endDate: { gt: start } },
+      select: { userId: true },
+      distinct: ['userId'],
+    }),
+  ]);
+
+  // Un mismo usuario no debería tener ambos tipos activos a la vez, pero por si
+  // acaso: prioriza la mensual (evita contarlo dos veces).
+  const monthlyUserIds = new Set(monthlySubs.map(s => s.userId));
+  const allUserIds = [...monthlyUserIds, ...yearlySubs.map(s => s.userId).filter(id => !monthlyUserIds.has(id))];
+
   const artistUsers  = await prisma.user.findMany({
     where:  { id: { in: allUserIds }, role: 'ARTIST' },
     select: { id: true },
   });
   const artistUserSet = new Set(artistUsers.map(u => u.id));
-  const validSubs     = allSubs.filter(s => !artistUserSet.has(s.userId));
+
+  const validSubs = allUserIds
+    .filter(userId => !artistUserSet.has(userId))
+    .map(userId => {
+      const monthlyValue  = monthlyUserIds.has(userId) ? SUBSCRIPTION_VAL : YEARLY_MONTHLY_VALUE;
+      const artistPoolPer = Math.round(monthlyValue * ARTIST_PCT);
+      return { userId, monthlyValue, artistPoolPer, adminSharePer: monthlyValue - artistPoolPer };
+    });
 
   const S = validSubs.length;
   if (S === 0) {
@@ -137,9 +154,9 @@ async function runDistribution(month) {
     };
   }
 
-  const TOTAL_FUND      = S * SUBSCRIPTION_VAL;
-  const ADMIN_TOTAL     = S * ADMIN_SHARE_PER;
-  const ARTIST_POOL_MAX = S * ARTIST_POOL_PER;
+  const TOTAL_FUND      = validSubs.reduce((s, v) => s + v.monthlyValue,  0);
+  const ADMIN_TOTAL     = validSubs.reduce((s, v) => s + v.adminSharePer, 0);
+  const ARTIST_POOL_MAX = validSubs.reduce((s, v) => s + v.artistPoolPer, 0);
 
   // ── 2. Artistas elegibles (plays globales >= umbral) ────────────────────────
   const globalGroups = await prisma.play.groupBy({
@@ -163,7 +180,7 @@ async function runDistribution(month) {
   const results = { month, total: S, processed: 0, skipped: 0, errors: [] };
   const artistTotals = {}; // { artistProfileId → total FCFA }
 
-  for (const { userId } of validSubs) {
+  for (const { userId, artistPoolPer, adminSharePer } of validSubs) {
     // Idempotency
     const existing = await prisma.monthlyDistribution.findUnique({
       where: { userId_month: { userId, month } },
@@ -192,7 +209,7 @@ async function runDistribution(month) {
 
       for (const g of subGroups) {
         const r_ij     = g._count.id;
-        const rawShare = T_j > 0 ? (r_ij / T_j) * ARTIST_POOL_PER : 0;
+        const rawShare = T_j > 0 ? (r_ij / T_j) * artistPoolPer : 0;
         if (eligibleSet.has(g.artistId)) {
           eligiblePlays.push({ artistId: g.artistId, playsCount: r_ij, weight: r_ij });
           remEligibleWeight += r_ij;
@@ -208,16 +225,16 @@ async function runDistribution(month) {
       if (eligiblePlays.length === 0) {
         // Ningún artista elegible → todo va a reserva
         distributablePool = 0;
-        reserveForSub     = ARTIST_POOL_PER;
+        reserveForSub     = artistPoolPer;
         items             = [];
       } else {
         // Redistribuir remanente entre elegibles (proporcional a plays de este sub)
-        distributablePool = ARTIST_POOL_PER; // 0 va a reserva cuando hay elegibles
+        distributablePool = artistPoolPer; // 0 va a reserva cuando hay elegibles
         reserveForSub     = 0;
 
-        // Total pool = ARTIST_POOL_PER (elegible fraction + remanente redistributed)
-        // We distribute the full ARTIST_POOL_PER using weights = plays_of_eligible_artists
-        items = distributePool(ARTIST_POOL_PER, eligiblePlays);
+        // Total pool = artistPoolPer (elegible fraction + remanente redistributed)
+        // We distribute the full artistPoolPer using weights = plays_of_eligible_artists
+        items = distributePool(artistPoolPer, eligiblePlays);
       }
 
       // ── Guardar en base de datos (transacción) ────────────────────────────
@@ -228,7 +245,7 @@ async function runDistribution(month) {
             month,
             totalPlays:    T_j,
             artistPool:    distributablePool,
-            adminShare:    ADMIN_SHARE_PER,
+            adminShare:    adminSharePer,
             reserveAmount: reserveForSub,
             processedAt:   new Date(),
             artistEarnings: items.length > 0 ? {

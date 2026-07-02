@@ -13,6 +13,8 @@ router.put('/users/:id',                   admin.updateUser);
 router.post('/users/:id/reset-password',   admin.resetPassword);
 router.post('/users/:id/block',            admin.blockArtist);
 router.post('/users/:id/unblock',          admin.unblockArtist);
+router.post('/users/:id/promote-admin',    admin.promoteToAdmin);
+router.post('/users/:id/demote-admin',     admin.demoteFromAdmin);
 router.get('/payments',                    admin.listPayments);
 router.post('/payments/:id/confirm',       pay.adminConfirmPayment);
 router.post('/payments/:id/reject',        pay.adminRejectPayment);
@@ -41,6 +43,9 @@ router.post('/setup-rls',                  admin.setupRls);
 
 // Dar prueba gratuita de 30 días a todos los artistas sin suscripción activa
 router.post('/fix-artist-trials',          admin.fixArtistTrials);
+
+// Designa al admin principal (super admin) si todavía no existe ninguno
+router.post('/bootstrap-super-admin',      admin.bootstrapSuperAdmin);
 
 // Gestión de publicidad
 router.get('/ads',                         admin.listAds);

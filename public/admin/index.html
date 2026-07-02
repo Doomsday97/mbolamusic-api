@@ -554,7 +554,7 @@ async function loadUsers(page = 1) {
     const unsubscribedCount = d.users.length - subscribedCount;
     let rows = d.users.map(u => `
       <tr>
-        <td>${esc(u.username)}</td>
+        <td>${esc(u.username)} ${u.isSuperAdmin ? `<span title="${i18n('superAdminLabel','Admin principal')}">👑</span>` : ''}</td>
         <td>${esc(u.email || u.phone || '—')}</td>
         <td><span class="badge badge-${u.role.toLowerCase()}">${u.role}</span></td>
         <td>${esc((u.artistProfile && u.artistProfile.artistName) || '—')}</td>
@@ -567,6 +567,11 @@ async function loadUsers(page = 1) {
             <button class="btn-sm btn-warn" onclick="blockUser('${u.id}', '${esc(u.username)}')">${i18n('hideBtn','Ocultar')}</button>
             <button class="btn-sm btn-success" onclick="unblockUser('${u.id}')">${i18n('restoreBtn','Restaurar')}</button>
           ` : ''}
+          ${_user && _user.isSuperAdmin && u.id !== _user.id ? (
+            u.role === 'ADMIN'
+              ? (u.isSuperAdmin ? '' : `<button class="btn-sm btn-danger" onclick="demoteAdmin('${u.id}','${esc(u.username)}')">${i18n('demoteAdminBtn','Quitar admin')}</button>`)
+              : `<button class="btn-sm" onclick="promoteAdmin('${u.id}','${esc(u.username)}')">${i18n('promoteAdminBtn','Hacer admin')}</button>`
+          ) : ''}
         </td>
       </tr>`).join('');
     var _toRemove = el.querySelector('.loading, .empty'); if (_toRemove) _toRemove.remove();
@@ -598,6 +603,7 @@ function subBadge(u) {
   if (!sub) return `<span style="background:rgba(248,113,113,0.12);color:var(--error);padding:2px 8px;border-radius:99px;font-size:11px;">${i18n('noSubscriptionLabel','Sin suscripción')}</span>`;
   const label = {
     LISTENER_MONTHLY: i18n('listenerMonthlyLabel','Oyente mensual'),
+    LISTENER_YEARLY: i18n('listenerYearlyLabel','Oyente anual'),
     ARTIST_MONTHLY: i18n('artistMonthlySubLabel','Artista mensual'),
     LISTENER_FREE: i18n('listenerTrialLabel','Prueba oyente'),
     ARTIST_FREE: i18n('artistTrialLabel','Prueba artista'),
@@ -749,6 +755,17 @@ async function blockUser(id, name) {
 }
 async function unblockUser(id) {
   try { await apiFetch('/admin/users/' + id + '/unblock', 'POST'); loadUsers(_uPage); }
+  catch (e) { alert(e.message); }
+}
+
+async function promoteAdmin(id, name) {
+  if (!confirm(i18n('promoteAdminConfirm','¿Designar a {0} como administrador? Dejará de ser oyente/artista y solo tendrá acceso de administrador.').replace('{0}', name))) return;
+  try { await apiFetch('/admin/users/' + id + '/promote-admin', 'POST'); loadUsers(_uPage); }
+  catch (e) { alert(e.message); }
+}
+async function demoteAdmin(id, name) {
+  if (!confirm(i18n('demoteAdminConfirm','¿Quitar la función de administrador a {0}? Recuperará su rol anterior.').replace('{0}', name))) return;
+  try { await apiFetch('/admin/users/' + id + '/demote-admin', 'POST'); loadUsers(_uPage); }
   catch (e) { alert(e.message); }
 }
 
@@ -1391,7 +1408,7 @@ const _translations = {
     subscribedLabel:'Abonnés', unsubscribedLabel:'Sans abonnement', contactLabel:'Contact', roleLabel:'Rôle',
     walletShortLabel:'Portefeuille', registeredLabel:'Inscription', actionsLabel:'Actions',
     noResultsLabel:'Aucun résultat', previousBtn:'Précédent', pageLabel:'Page', nextBtn:'Suivant',
-    noSubscriptionLabel:'Sans abonnement', listenerMonthlyLabel:'Auditeur mensuel', artistMonthlySubLabel:'Artiste mensuel',
+    noSubscriptionLabel:'Sans abonnement', listenerMonthlyLabel:'Auditeur mensuel', listenerYearlyLabel:'Auditeur annuel', artistMonthlySubLabel:'Artiste mensuel',
     listenerTrialLabel:'Essai auditeur', artistTrialLabel:'Essai artiste', expiredLabel:'Expiré', expiresLabel:'Expire le',
     downloadsShortLabel:'Téléchargements', noTransactionsLabel:'Aucune transaction',
     savedOkLabel:'Enregistré avec succès',
@@ -1459,6 +1476,9 @@ const _translations = {
     uploadingImageLabel:"Téléversement de l'image…", imageUploadError:"Erreur lors du téléversement de l'image",
     deleteAdConfirm:'Supprimer la publicité « {0} » ? Cette action est irréversible.',
     subscriptionLabel:'Abonnement', publishBtn:'Publier',
+    superAdminLabel:'Administrateur principal', promoteAdminBtn:'Nommer admin', demoteAdminBtn:'Retirer admin',
+    promoteAdminConfirm:'Désigner {0} comme administrateur ? Il/elle cessera d\'être auditeur/artiste et n\'aura plus que l\'accès administrateur.',
+    demoteAdminConfirm:'Retirer la fonction d\'administrateur à {0} ? Il/elle retrouvera son rôle précédent.',
   },
   pt: {
     logout:'Sair', statUsers:'Utilizadores', statArtists:'Artistas',
@@ -1514,7 +1534,7 @@ const _translations = {
     subscribedLabel:'Subscritos', unsubscribedLabel:'Sem subscrição', contactLabel:'Contacto', roleLabel:'Função',
     walletShortLabel:'Carteira', registeredLabel:'Registo', actionsLabel:'Ações',
     noResultsLabel:'Sem resultados', previousBtn:'Anterior', pageLabel:'Página', nextBtn:'Seguinte',
-    noSubscriptionLabel:'Sem subscrição', listenerMonthlyLabel:'Ouvinte mensal', artistMonthlySubLabel:'Artista mensal',
+    noSubscriptionLabel:'Sem subscrição', listenerMonthlyLabel:'Ouvinte mensal', listenerYearlyLabel:'Ouvinte anual', artistMonthlySubLabel:'Artista mensal',
     listenerTrialLabel:'Teste ouvinte', artistTrialLabel:'Teste artista', expiredLabel:'Expirada', expiresLabel:'Expira em',
     downloadsShortLabel:'Transferências', noTransactionsLabel:'Sem transações',
     savedOkLabel:'Guardado com sucesso',
@@ -1582,6 +1602,9 @@ const _translations = {
     uploadingImageLabel:'A carregar imagem…', imageUploadError:'Erro ao carregar a imagem',
     deleteAdConfirm:'Eliminar o anúncio "{0}"? Esta ação não pode ser desfeita.',
     subscriptionLabel:'Subscrição', publishBtn:'Publicar',
+    superAdminLabel:'Administrador principal', promoteAdminBtn:'Tornar admin', demoteAdminBtn:'Remover admin',
+    promoteAdminConfirm:'Designar {0} como administrador? Deixará de ser ouvinte/artista e terá apenas acesso de administrador.',
+    demoteAdminConfirm:'Remover a função de administrador de {0}? Recuperará a sua função anterior.',
   },
   en: {
     logout:'Logout', statUsers:'Users', statArtists:'Artists',
@@ -1637,7 +1660,7 @@ const _translations = {
     subscribedLabel:'Subscribed', unsubscribedLabel:'Not subscribed', contactLabel:'Contact', roleLabel:'Role',
     walletShortLabel:'Wallet', registeredLabel:'Registered', actionsLabel:'Actions',
     noResultsLabel:'No results', previousBtn:'Previous', pageLabel:'Page', nextBtn:'Next',
-    noSubscriptionLabel:'No subscription', listenerMonthlyLabel:'Monthly listener', artistMonthlySubLabel:'Monthly artist',
+    noSubscriptionLabel:'No subscription', listenerMonthlyLabel:'Monthly listener', listenerYearlyLabel:'Yearly listener', artistMonthlySubLabel:'Monthly artist',
     listenerTrialLabel:'Listener trial', artistTrialLabel:'Artist trial', expiredLabel:'Expired', expiresLabel:'Expires',
     downloadsShortLabel:'Downloads', noTransactionsLabel:'No transactions',
     savedOkLabel:'Saved successfully',
@@ -1705,6 +1728,9 @@ const _translations = {
     uploadingImageLabel:'Uploading image…', imageUploadError:'Error uploading the image',
     deleteAdConfirm:'Delete the ad "{0}"? This action cannot be undone.',
     subscriptionLabel:'Subscription', publishBtn:'Publish',
+    superAdminLabel:'Main administrator', promoteAdminBtn:'Make admin', demoteAdminBtn:'Remove admin',
+    promoteAdminConfirm:'Designate {0} as administrator? They will stop being a listener/artist and will only have administrator access.',
+    demoteAdminConfirm:'Remove administrator status from {0}? They will regain their previous role.',
   },
 };
 const _langs = ['es','fr','pt','en'];
