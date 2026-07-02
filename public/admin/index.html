@@ -161,7 +161,7 @@
   <header>
     <h1>🎵 MbôláMusic Admin</h1>
     <span id="admin-name"></span>
-    <button class="lang-btn" onclick="toggleLang()" id="lang-toggle-btn">🇫🇷 FR</button>
+    <button class="lang-btn" onclick="toggleLang()" id="lang-toggle-btn">FR</button>
     <button onclick="openChangePasswordModal()" style="width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;">🔒 <span data-i18n="changePasswordBtn">Contraseña</span></button>
     <button onclick="logout()" style="width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;" data-i18n="logout">Salir</button>
   </header>
@@ -1708,7 +1708,7 @@ const _translations = {
   },
 };
 const _langs = ['es','fr','pt','en'];
-const _langLabels = { es:'🇪🇸 ES', fr:'🇫🇷 FR', pt:'🇵🇹 PT', en:'🇬🇧 EN' };
+const _langLabels = { es:'ES', fr:'FR', pt:'PT', en:'EN' };
 let _lang = localStorage.getItem('adminLang') || 'es';
 
 function i18n(key, fallback) {
