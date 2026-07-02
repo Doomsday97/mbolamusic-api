@@ -1,15 +1,15 @@
 const mockProvider = require('../src/services/payment/mockProvider');
 
 describe('Proveedor de pago simulado', () => {
-  test('pago SIM_BALANCE se completa instantáneamente', async () => {
+  test('pago SIM_BALANCE queda en VERIFYING', async () => {
     const result = await mockProvider.charge({
       amount: 2000,
       method: 'SIM_BALANCE',
       userId: 'user-1',
       purpose: 'LISTENER_SUBSCRIPTION',
     });
-    expect(result.status).toBe('COMPLETED');
-    expect(result.externalRef).toMatch(/^MOCK-/);
+    expect(result.status).toBe('VERIFYING');
+    expect(result.externalRef).toMatch(/^SIM-/);
   });
 
   test('pago CARD se completa instantáneamente', async () => {
