@@ -21,18 +21,30 @@ async function getMyMessages(req, res) {
   }
 }
 
+// Sube el adjunto (si lo hay) al almacenamiento activo y devuelve { mediaUrl, mediaType }
+async function _uploadAttachment(file) {
+  if (!file) return { mediaUrl: null, mediaType: null };
+  const storage = require('../services/storage');
+  const mediaUrl = await storage.upload(file);
+  const mediaType = file.mimetype.startsWith('video/') ? 'video' : 'image';
+  return { mediaUrl, mediaType };
+}
+
 // ── Usuario: enviar mensaje al admin ───────────────────────────────────────
 async function sendMessage(req, res) {
-  const { body } = req.body;
-  if (!body || !body.trim()) {
+  const body = (req.body.body || '').trim();
+  if (!body && !req.file) {
     return res.status(400).json({ success: false, data: null, error: 'El mensaje no puede estar vacío' });
   }
   try {
+    const { mediaUrl, mediaType } = await _uploadAttachment(req.file);
     const msg = await prisma.chatMessage.create({
       data: {
         userId:    req.user.id,
         fromAdmin: false,
-        body:      body.trim(),
+        body,
+        mediaUrl,
+        mediaType,
       },
     });
     res.json({ success: true, data: msg, error: null });
@@ -117,8 +129,8 @@ async function adminGetMessages(req, res) {
 // ── Admin: responder a un usuario ─────────────────────────────────────────
 async function adminSendMessage(req, res) {
   const { userId } = req.params;
-  const { body } = req.body;
-  if (!body || !body.trim()) {
+  const body = (req.body.body || '').trim();
+  if (!body && !req.file) {
     return res.status(400).json({ success: false, data: null, error: 'El mensaje no puede estar vacío' });
   }
   try {
@@ -126,21 +138,27 @@ async function adminSendMessage(req, res) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return res.status(404).json({ success: false, data: null, error: 'Usuario no encontrado' });
 
+    const { mediaUrl, mediaType } = await _uploadAttachment(req.file);
     const msg = await prisma.chatMessage.create({
       data: {
         userId,
         fromAdmin: true,
-        body:      body.trim(),
+        body,
+        mediaUrl,
+        mediaType,
       },
     });
 
     // Crear notificación para el usuario
+    const notifBody = body
+      ? (body.length > 80 ? body.slice(0, 80) + '…' : body)
+      : (mediaType === 'video' ? '📹 Video' : '📷 Imagen');
     await prisma.notification.create({
       data: {
         userId,
         type:  'ADMIN_MESSAGE',
         title: 'Mensaje del administrador',
-        body:  body.trim().length > 80 ? body.trim().slice(0, 80) + '…' : body.trim(),
+        body:  notifBody,
       },
     });
 

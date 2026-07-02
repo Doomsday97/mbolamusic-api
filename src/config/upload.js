@@ -24,4 +24,17 @@ const uploadMemory = multer({
   limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB máx para fotos de perfil
 });
 
-module.exports = { upload, uploadMemory };
+// Adjuntos del chat de soporte: foto o video corto (máx. ~15 s)
+const uploadChatMedia = multer({
+  storage,
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB máx
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Solo se permiten imágenes o videos'));
+    }
+  },
+});
+
+module.exports = { upload, uploadMemory, uploadChatMedia };

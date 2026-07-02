@@ -1157,7 +1157,10 @@ async function openConversation(userId, username, itemEl) {
   win.innerHTML = `
     <div class="chat-window-header">💬 ${esc(username)}</div>
     <div class="chat-messages" id="chat-msgs"><div class="loading">${i18n('loadingLabel','Cargando…')}</div></div>
+    <div id="chat-attachment-preview" style="display:none;padding:0 16px;font-size:12px;color:var(--muted);"></div>
     <div class="chat-input-row">
+      <button onclick="document.getElementById('chat-media-input').click()" title="${i18n('attachFileLabel','Adjuntar archivo')}" style="width:auto;padding:0 12px;background:var(--surface2);color:var(--muted);border-radius:8px;">📎</button>
+      <input type="file" id="chat-media-input" accept="image/*,video/*" style="display:none;" onchange="onChatMediaSelected(this)">
       <textarea id="chat-reply-input" placeholder="${i18n('writeReplyPlaceholder','Escribe una respuesta…')}" onkeydown="chatKeydown(event)"></textarea>
       <button onclick="adminReply()">${i18n('sendBtn','Enviar')}</button>
     </div>`;
@@ -1183,7 +1186,12 @@ async function fetchMessages(userId) {
       const div = document.createElement('div');
       div.className = `chat-bubble ${m.fromAdmin ? 'from-admin' : 'from-user'}`;
       const time = new Date(m.createdAt).toLocaleTimeString(_lang, { hour: '2-digit', minute: '2-digit' });
-      div.innerHTML = `${esc(m.body)}<div class="cb-meta">${time}</div>`;
+      const media = m.mediaUrl
+        ? (m.mediaType === 'video'
+            ? `<a href="${esc(m.mediaUrl)}" target="_blank" rel="noopener" style="display:block;margin-bottom:6px;text-decoration:none;color:inherit;">▶ ${i18n('videoLabel','Video')}</a>`
+            : `<img src="${esc(m.mediaUrl)}" style="max-width:180px;max-height:180px;border-radius:8px;display:block;margin-bottom:6px;cursor:pointer;" onclick="window.open('${esc(m.mediaUrl)}','_blank')">`)
+        : '';
+      div.innerHTML = `${media}${m.body ? esc(m.body) : ''}<div class="cb-meta">${time}</div>`;
       el.appendChild(div);
     });
     el.scrollTop = el.scrollHeight;
@@ -1192,14 +1200,49 @@ async function fetchMessages(userId) {
   } catch (_) {}
 }
 
+let _chatMediaFile = null;
+
+function onChatMediaSelected(input) {
+  _chatMediaFile = input.files[0] || null;
+  const preview = document.getElementById('chat-attachment-preview');
+  if (!preview) return;
+  if (_chatMediaFile) {
+    preview.style.display = '';
+    preview.textContent = `📎 ${_chatMediaFile.name}`;
+  } else {
+    preview.style.display = 'none';
+    preview.textContent = '';
+  }
+}
+
 async function adminReply() {
   const input = document.getElementById('chat-reply-input');
   if (!input || !_chatUserId) return;
   const body = input.value.trim();
-  if (!body) return;
+  if (!body && !_chatMediaFile) return;
   input.value = '';
+  const file = _chatMediaFile;
+  _chatMediaFile = null;
+  const preview = document.getElementById('chat-attachment-preview');
+  if (preview) { preview.style.display = 'none'; preview.textContent = ''; }
+  const mediaInput = document.getElementById('chat-media-input');
+  if (mediaInput) mediaInput.value = '';
+
   try {
-    await apiFetch(`/chat/admin/conversations/${_chatUserId}`, 'POST', { body });
+    if (file) {
+      const fd = new FormData();
+      fd.append('body', body);
+      fd.append('media', file);
+      const res = await fetch(`${API}/chat/admin/conversations/${_chatUserId}`, {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + _token },
+        body: fd,
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Error');
+    } else {
+      await apiFetch(`/chat/admin/conversations/${_chatUserId}`, 'POST', { body });
+    }
     await fetchMessages(_chatUserId);
   } catch (e) {
     alert(i18n('sendErrorLabel','Error al enviar') + ': ' + e.message);
@@ -1495,6 +1538,7 @@ const _translations = {
     deletedAccountLabel:'Supprimé', deleteAccountBtn:'Supprimer le compte',
     deleteAccountConfirm:'Supprimer le compte de {0} ? L\'accès sera bloqué et ses données personnelles anonymisées immédiatement. Les paiements et l\'historique d\'écoute sont conservés pendant le délai légal avant suppression automatique.',
     deleteAccountReasonPrompt:'Motif de la suppression (enregistré) :',
+    attachFileLabel:'Joindre un fichier', videoLabel:'Vidéo',
   },
   pt: {
     logout:'Sair', statUsers:'Utilizadores', statArtists:'Artistas',
@@ -1624,6 +1668,7 @@ const _translations = {
     deletedAccountLabel:'Eliminada', deleteAccountBtn:'Eliminar conta',
     deleteAccountConfirm:'Eliminar a conta de {0}? O acesso será bloqueado e os dados pessoais anonimizados de imediato. Os pagamentos e o histórico de reproduções são conservados pelo prazo legal antes de serem apagados automaticamente.',
     deleteAccountReasonPrompt:'Motivo da eliminação (fica registado):',
+    attachFileLabel:'Anexar ficheiro', videoLabel:'Vídeo',
   },
   en: {
     logout:'Logout', statUsers:'Users', statArtists:'Artists',
@@ -1753,6 +1798,7 @@ const _translations = {
     deletedAccountLabel:'Deleted', deleteAccountBtn:'Delete account',
     deleteAccountConfirm:'Delete {0}\'s account? Access will be blocked and their personal data anonymized immediately. Payments and playback history are kept for the legally required period before being automatically purged.',
     deleteAccountReasonPrompt:'Reason for deletion (saved to the record):',
+    attachFileLabel:'Attach file', videoLabel:'Video',
   },
 };
 const _langs = ['es','fr','pt','en'];
