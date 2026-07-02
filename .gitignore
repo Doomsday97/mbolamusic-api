@@ -7,3 +7,4 @@ dist/
 
 # Credencial de Firebase Admin SDK — nunca debe subirse al repositorio
 firebase-service-account.json
+FCM_SECRETS_SETUP.txt
