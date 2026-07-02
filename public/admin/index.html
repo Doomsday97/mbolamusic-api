@@ -1565,6 +1565,8 @@ const _translations = {
     videoExampleLabel:'Exemple : https://… /spot.mp4 · Uniquement des vidéos courtes (max. 15 s)',
     saveAdBtn:'Enregistrer la publicité', editAdTitle:'Modifier la publicité',
     imageMaxSizeError:"L'image ne peut pas dépasser 2 Mo. Compresse le fichier avant de le téléverser.",
+    cropImageTitle:'Ajuster l\'image de la publicité', cropImageHint:'Fais glisser pour déplacer, utilise le zoom et fais pivoter si besoin, pour que l\'image s\'adapte à l\'espace de la publicité.',
+    rotateLeftBtn:'Pivoter à gauche', rotateRightBtn:'Pivoter à droite', applyCropBtn:'Appliquer', imageLoadError:"Impossible de lire l'image sélectionnée.",
     titleRequiredLabel:'Le titre est obligatoire.', savingBtn:'Enregistrement…',
     uploadingImageLabel:"Téléversement de l'image…", imageUploadError:"Erreur lors du téléversement de l'image",
     deleteAdConfirm:'Supprimer la publicité « {0} » ? Cette action est irréversible.',
@@ -1697,6 +1699,8 @@ const _translations = {
     videoExampleLabel:'Exemplo: https://… /spot.mp4 · Apenas vídeos curtos (máx. 15 s)',
     saveAdBtn:'Guardar anúncio', editAdTitle:'Editar anúncio',
     imageMaxSizeError:'A imagem não pode exceder 2 MB. Comprime o ficheiro antes de o carregar.',
+    cropImageTitle:'Ajustar a imagem do anúncio', cropImageHint:'Arrasta para mover, usa o zoom e roda se necessário, para que a imagem se ajuste ao espaço do anúncio.',
+    rotateLeftBtn:'Rodar à esquerda', rotateRightBtn:'Rodar à direita', applyCropBtn:'Aplicar', imageLoadError:'Não foi possível ler a imagem selecionada.',
     titleRequiredLabel:'O título é obrigatório.', savingBtn:'A guardar…',
     uploadingImageLabel:'A carregar imagem…', imageUploadError:'Erro ao carregar a imagem',
     deleteAdConfirm:'Eliminar o anúncio "{0}"? Esta ação não pode ser desfeita.',
@@ -1829,6 +1833,8 @@ const _translations = {
     videoExampleLabel:'Example: https://… /spot.mp4 · Short videos only (max. 15s)',
     saveAdBtn:'Save ad', editAdTitle:'Edit ad',
     imageMaxSizeError:'The image cannot exceed 2 MB. Compress the file before uploading it.',
+    cropImageTitle:'Adjust the ad image', cropImageHint:'Drag to move, use the zoom control and rotate if needed, so the image fits the ad space.',
+    rotateLeftBtn:'Rotate left', rotateRightBtn:'Rotate right', applyCropBtn:'Apply', imageLoadError:'Could not read the selected image.',
     titleRequiredLabel:'Title is required.', savingBtn:'Saving…',
     uploadingImageLabel:'Uploading image…', imageUploadError:'Error uploading the image',
     deleteAdConfirm:'Delete the ad "{0}"? This action cannot be undone.',
@@ -1986,6 +1992,30 @@ function renderAdsTab(el) {
       </table>
     </div>
     `}
+
+    <!-- Modal recortar/rotar imagen de anuncio -->
+    <div id="ad-crop-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;align-items:center;justify-content:center;">
+      <div style="background:var(--surface);border-radius:14px;padding:24px;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;color:var(--accent);">${i18n('cropImageTitle','Ajustar imagen del anuncio')}</h3>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">${i18n('cropImageHint','Arrastra para mover, usa el control de zoom y gira si hace falta, para que encaje con el espacio del anuncio.')}</p>
+        <div style="display:flex;justify-content:center;background:#000;border-radius:8px;overflow:hidden;">
+          <canvas id="ad-crop-canvas" style="max-width:100%;cursor:grab;touch-action:none;"></canvas>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:14px;">
+          <span style="font-size:12px;color:var(--muted);">🔍−</span>
+          <input id="ad-crop-zoom" type="range" min="0" max="100" value="0" style="flex:1;" oninput="_cropOnZoom(this.value)">
+          <span style="font-size:12px;color:var(--muted);">🔍+</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button onclick="_cropRotate(-90)" style="flex:1;padding:8px;background:var(--surface2);border-radius:8px;color:var(--text);">⟲ ${i18n('rotateLeftBtn','Girar izquierda')}</button>
+          <button onclick="_cropRotate(90)" style="flex:1;padding:8px;background:var(--surface2);border-radius:8px;color:var(--text);">⟳ ${i18n('rotateRightBtn','Girar derecha')}</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px;">
+          <button onclick="_cropCancel()" style="flex:1;padding:10px;background:var(--surface2);border-radius:8px;color:var(--muted);">${i18n('cancelBtn','Cancelar')}</button>
+          <button onclick="_cropApply()" style="flex:2;padding:10px;background:var(--accent);color:#000;border-radius:8px;font-weight:700;">${i18n('applyCropBtn','Aplicar')}</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Modal crear/editar anuncio -->
     <div id="ad-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;">
@@ -2163,15 +2193,135 @@ function onAdImageSelected(input) {
     alert(i18n('imageMaxSizeError','La imagen no puede superar 2 MB. Comprime el archivo antes de subirlo.'));
     input.value = ''; return;
   }
-  _adMediaFile = file;
-  const reader = new FileReader();
-  reader.onload = e => {
+  // Web (web-top/mid/bottom) es un banner apaisado ~5:1; los slots de la
+  // app (app-*) son un icono cuadrado 1:1 — ver AppBannerAd en el móvil.
+  const slot = document.getElementById('ad-slot')?.value || 'web-mid';
+  const isApp = slot.startsWith('app-');
+  const aspect = isApp ? { w: 1, h: 1, targetW: 512, targetH: 512 }
+                        : { w: 5, h: 1, targetW: 1100, targetH: 220 };
+  openCropModal(file, aspect, (blob) => {
+    _adMediaFile = new File([blob], 'ad-image.jpg', { type: 'image/jpeg' });
     const img = document.getElementById('ad-image-preview');
     const wrap = document.getElementById('ad-image-preview-wrap');
-    img.src = e.target.result;
+    img.src = URL.createObjectURL(blob);
     wrap.style.display = 'block';
+  });
+  input.value = ''; // permite volver a elegir el mismo archivo si se cancela
+}
+
+// ── Recortar / rotar imagen antes de subir ──────────────────────────────────
+let _cropState = null; // { img, rotation, scale, minScale, panX, panY, aspect, onApply }
+
+function openCropModal(file, aspect, onApply) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      _cropState = { img, rotation: 0, panX: 0, panY: 0, aspect, onApply };
+      const canvas = document.getElementById('ad-crop-canvas');
+      // Tamaño de vista proporcional al aspecto real, limitado a 520px de ancho
+      const viewW = Math.min(520, aspect.targetW);
+      canvas.width = viewW;
+      canvas.height = Math.round(viewW * aspect.h / aspect.w);
+      _cropState.minScale = _cropFitScale();
+      _cropState.scale = _cropState.minScale;
+      document.getElementById('ad-crop-zoom').value = 0;
+      document.getElementById('ad-crop-modal').style.display = 'flex';
+      _cropAttachDrag();
+      _cropRender();
+    };
+    img.onerror = () => alert(i18n('imageLoadError','No se pudo leer la imagen seleccionada.'));
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+function _cropFitScale() {
+  const { img, rotation } = _cropState;
+  const canvas = document.getElementById('ad-crop-canvas');
+  const rotated = rotation % 180 !== 0;
+  const iw = rotated ? img.height : img.width;
+  const ih = rotated ? img.width : img.height;
+  return Math.max(canvas.width / iw, canvas.height / ih);
+}
+
+function _cropRotate(deg) {
+  _cropState.rotation = (_cropState.rotation + deg + 360) % 360;
+  const newMin = _cropFitScale();
+  // Mantener el zoom relativo al nuevo minimo tras rotar
+  const ratio = _cropState.scale / _cropState.minScale;
+  _cropState.minScale = newMin;
+  _cropState.scale = newMin * ratio;
+  _cropState.panX = 0; _cropState.panY = 0;
+  document.getElementById('ad-crop-zoom').value = 0;
+  _cropRender();
+}
+
+function _cropOnZoom(sliderValue) {
+  const { minScale } = _cropState;
+  const maxScale = minScale * 3;
+  _cropState.scale = minScale + (maxScale - minScale) * (sliderValue / 100);
+  _cropRender();
+}
+
+function _cropRender() {
+  const { img, rotation, scale, panX, panY } = _cropState;
+  const canvas = document.getElementById('ad-crop-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.translate(canvas.width / 2 + panX, canvas.height / 2 + panY);
+  ctx.rotate(rotation * Math.PI / 180);
+  ctx.scale(scale, scale);
+  ctx.drawImage(img, -img.width / 2, -img.height / 2);
+  ctx.restore();
+}
+
+function _cropAttachDrag() {
+  const canvas = document.getElementById('ad-crop-canvas');
+  let dragging = false, lastX = 0, lastY = 0;
+  const start = (x, y) => { dragging = true; lastX = x; lastY = y; canvas.style.cursor = 'grabbing'; };
+  const move = (x, y) => {
+    if (!dragging) return;
+    _cropState.panX += x - lastX;
+    _cropState.panY += y - lastY;
+    lastX = x; lastY = y;
+    _cropRender();
+  };
+  const end = () => { dragging = false; canvas.style.cursor = 'grab'; };
+
+  canvas.onmousedown = (e) => start(e.offsetX, e.offsetY);
+  canvas.onmousemove = (e) => move(e.offsetX, e.offsetY);
+  window.onmouseup = end;
+  canvas.ontouchstart = (e) => { const t = e.touches[0]; const r = canvas.getBoundingClientRect(); start(t.clientX - r.left, t.clientY - r.top); };
+  canvas.ontouchmove = (e) => { e.preventDefault(); const t = e.touches[0]; const r = canvas.getBoundingClientRect(); move(t.clientX - r.left, t.clientY - r.top); };
+  canvas.ontouchend = end;
+}
+
+function _cropCancel() {
+  document.getElementById('ad-crop-modal').style.display = 'none';
+  _cropState = null;
+}
+
+function _cropApply() {
+  const { img, rotation, scale, panX, panY, aspect, onApply } = _cropState;
+  const canvas = document.getElementById('ad-crop-canvas');
+  const factor = aspect.targetW / canvas.width; // escala la vista al tamaño final de exportacion
+  const out = document.createElement('canvas');
+  out.width = aspect.targetW;
+  out.height = aspect.targetH;
+  const ctx = out.getContext('2d');
+  ctx.save();
+  ctx.translate(out.width / 2 + panX * factor, out.height / 2 + panY * factor);
+  ctx.rotate(rotation * Math.PI / 180);
+  ctx.scale(scale * factor, scale * factor);
+  ctx.drawImage(img, -img.width / 2, -img.height / 2);
+  ctx.restore();
+  out.toBlob((blob) => {
+    if (blob) onApply(blob);
+    document.getElementById('ad-crop-modal').style.display = 'none';
+    _cropState = null;
+  }, 'image/jpeg', 0.9);
 }
 
 function updateAdVideoPreview() {
