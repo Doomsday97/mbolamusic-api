@@ -607,6 +607,22 @@ async function fixSeedAudio(req, res) {
   return ok(res, { fixed, recovered, coversAdded, stillBroken, failures });
 }
 
+// POST /api/admin/setup-rls
+// (Re)activa Row Level Security en las tablas sensibles de PostgreSQL. Ya se
+// ejecuta automáticamente en cada arranque (start-prod.js); este endpoint
+// permite verificarlo/relanzarlo bajo demanda sin acceso directo a la BD.
+// Es idempotente: puede llamarse varias veces sin efectos secundarios.
+async function setupRls(req, res) {
+  try {
+    const { run } = require('../../scripts/setup-rls');
+    const logs = [];
+    const result = await run(prisma, (msg) => logs.push(msg));
+    return ok(res, { ...result, logs });
+  } catch (e) {
+    return fail(res, 'Error activando RLS: ' + e.message, 500);
+  }
+}
+
 // POST /api/admin/fix-artist-trials
 // Da 30 días gratis a todos los artistas existentes que no tienen suscripción activa.
 async function fixArtistTrials(req, res) {
@@ -766,6 +782,6 @@ module.exports = {
   listAllTracks, listArtists, adminUploadTrack, adminDeleteTrack, togglePublish,
   onlineUsers, platformEarnings, platformWithdraw,
   subscriptionDistributions, runSubscriptionDistribution,
-  subscriptionConfig, monthlyReport, fixMediaUrls, fixSeedAudio, fixArtistTrials, storageDiagnostics,
+  subscriptionConfig, monthlyReport, fixMediaUrls, fixSeedAudio, fixArtistTrials, storageDiagnostics, setupRls,
   listAds, createAd, updateAd, deleteAd, toggleAd, uploadAdMedia, removeAdMedia, publicAds,
 };

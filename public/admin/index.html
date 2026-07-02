@@ -194,6 +194,13 @@
       </div>
 
       <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
+        <h3 style="margin-bottom:8px;">🔐 Row Level Security (PostgreSQL)</h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Activa RLS en las tablas sensibles (usuarios, pagos, suscripciones, etc.) para que solo el rol de la app pueda leerlas/escribirlas; cualquier otra conexión directa a la BD queda bloqueada. Ya se ejecuta automáticamente en cada arranque — usa esto para verificarlo o relanzarlo. Es seguro ejecutarlo varias veces.</p>
+        <button onclick="runAdminTool('setup-rls','Activando RLS...')" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;">Activar / verificar RLS</button>
+        <div id="tool-setup-rls-result" style="margin-top:12px;font-size:13px;white-space:pre-wrap;"></div>
+      </div>
+
+      <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
         <h3 style="margin-bottom:8px;">📸 Corregir URLs de medios (CDN)</h3>
         <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Actualiza las URLs de audio y carátulas de canciones para que usen el CDN público configurado en CDN_BASE_URL, solo si el archivo nuevo realmente existe ahí (nunca borra ni deja vacío lo existente). No toca avatares de perfil.</p>
         <button onclick="runAdminTool('fix-media-urls','Corrigiendo URLs...')" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;">Corregir URLs de medios</button>

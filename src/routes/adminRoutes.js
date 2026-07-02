@@ -36,6 +36,9 @@ router.post('/fix-seed-audio',             admin.fixSeedAudio);
 // Diagnóstico: sube un archivo de prueba y comprueba si es accesible desde CDN_BASE_URL
 router.post('/storage-diagnostics',        admin.storageDiagnostics);
 
+// (Re)activa Row Level Security en las tablas sensibles de PostgreSQL
+router.post('/setup-rls',                  admin.setupRls);
+
 // Dar prueba gratuita de 30 días a todos los artistas sin suscripción activa
 router.post('/fix-artist-trials',          admin.fixArtistTrials);
 

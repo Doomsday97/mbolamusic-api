@@ -81,7 +81,10 @@ app.use(cors({
   origin: (origin, cb) => {
     // Sin origen = petición móvil nativa o curl → permitir
     if (!origin) return cb(null, true);
-    const ok = ALL_ORIGINS.some(o => origin === o || origin.startsWith(o));
+    // Comparación EXACTA: usar startsWith() aquí permitiría que un origen como
+    // "https://mbolamusic.com.attacker.com" pasara el filtro por tener el
+    // dominio propio como prefijo.
+    const ok = ALL_ORIGINS.includes(origin);
     if (ok) return cb(null, true);
     cb(Object.assign(new Error('CORS no permitido'), { status: 403 }));
   },
