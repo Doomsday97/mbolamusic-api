@@ -35,150 +35,564 @@
   .right-card p { font-size: 0.82rem; margin: 0; }
   footer-note { display: block; color: var(--text2); font-size: 0.82rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
   @media(max-width:520px) { .rights-grid { grid-template-columns: 1fr; } }
+  .lang-switcher { position:relative; margin-left:auto; }
+  .lang-btn { display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:0.35rem 0.7rem;cursor:pointer;color:var(--text);font-size:0.82rem;font-weight:600; }
+  .lang-btn:hover { border-color:var(--amber); }
+  .lang-dropdown { position:absolute;top:calc(100% + 6px);right:0;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:6px;min-width:130px;display:none;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,0.5); }
+  .lang-switcher:hover .lang-dropdown,.lang-switcher:focus-within .lang-dropdown { display:block; }
+  .lang-opt { display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:0.85rem;color:var(--text2);transition:background .15s; }
+  .lang-opt:hover,.lang-opt.active { background:rgba(245,158,11,0.12);color:var(--amber); }
 </style>
 </head>
 <body>
 <nav>
   <div class="nav-inner">
-    <a class="back" href="/">← Inicio</a>
+    <a class="back" href="/" id="l-back">← Inicio</a>
     <a class="logo" href="/"><div class="logo-icon">🎵</div> MbôláMusic</a>
+    <div class="lang-switcher">
+      <button class="lang-btn" id="lang-current">🌐 ES</button>
+      <div class="lang-dropdown">
+        <div class="lang-opt active" onclick="setLang('es')">🇪🇸 Español</div>
+        <div class="lang-opt" onclick="setLang('fr')">🇫🇷 Français</div>
+        <div class="lang-opt" onclick="setLang('pt')">🇵🇹 Português</div>
+        <div class="lang-opt" onclick="setLang('en')">🇬🇧 English</div>
+      </div>
+    </div>
   </div>
 </nav>
 
 <div class="page">
-  <span class="badge">RGPD / GDPR · CCPA Compliant</span>
-  <h1>Política de Privacidad</h1>
-  <p class="subtitle">
+  <span class="badge" id="l-badge">RGPD / GDPR · CCPA Compliant</span>
+  <h1 id="l-h1">Política de Privacidad</h1>
+  <p class="subtitle" id="l-subtitle">
     Última actualización: 30 de junio de 2026 · Versión 1.1<br>
     Aplicable a la plataforma web y la aplicación móvil MbôláMusic
   </p>
 
-  <h2>1. Responsable del Tratamiento</h2>
+  <h2 id="l-s1-h2">1. Responsable del Tratamiento</h2>
   <div class="highlight">
     <p><strong>MbôláMusic SARL</strong><br>
     Malabo, Guinea Ecuatorial<br>
-    Correo: <a href="mailto:privacidad@mbolamusic.com">privacidad@mbolamusic.com</a><br>
-    Delegado de Protección de Datos (DPO): <a href="mailto:dpo@mbolamusic.com">dpo@mbolamusic.com</a></p>
+    <span id="l-s1-correo">Correo</span>: <a href="mailto:privacidad@mbolamusic.com">privacidad@mbolamusic.com</a><br>
+    <span id="l-s1-dpo">Delegado de Protección de Datos (DPO)</span>: <a href="mailto:dpo@mbolamusic.com">dpo@mbolamusic.com</a></p>
   </div>
 
-  <h2>2. Datos Personales que Recogemos</h2>
+  <h2 id="l-s2-h2">2. Datos Personales que Recogemos</h2>
   <table>
-    <thead><tr><th>Categoría</th><th>Datos específicos</th><th>Fuente</th></tr></thead>
+    <thead><tr><th id="l-s2-th1">Categoría</th><th id="l-s2-th2">Datos específicos</th><th id="l-s2-th3">Fuente</th></tr></thead>
     <tbody>
-      <tr><td>Identidad</td><td>Nombre de usuario, nombre real (artistas)</td><td>Registro</td></tr>
-      <tr><td>Contacto</td><td>Correo electrónico, número de teléfono</td><td>Registro</td></tr>
-      <tr><td>Ubicación</td><td>País, ciudad (voluntario)</td><td>Registro</td></tr>
-      <tr><td>Financiero</td><td>Historial de pagos, saldo del monedero</td><td>Uso del servicio</td></tr>
-      <tr><td>Consumo</td><td>Canciones reproducidas, descargas</td><td>Uso del servicio</td></tr>
-      <tr><td>Técnico</td><td>Dirección IP, navegador, sistema operativo</td><td>Automático</td></tr>
-      <tr><td>Artístico</td><td>Música subida, nombre artístico, biografía (solo artistas)</td><td>Uso del servicio</td></tr>
+      <tr><td id="l-s2-r1c1">Identidad</td><td id="l-s2-r1c2">Nombre de usuario, nombre real (artistas)</td><td id="l-s2-r1c3">Registro</td></tr>
+      <tr><td id="l-s2-r2c1">Contacto</td><td id="l-s2-r2c2">Correo electrónico, número de teléfono</td><td id="l-s2-r2c3">Registro</td></tr>
+      <tr><td id="l-s2-r3c1">Ubicación</td><td id="l-s2-r3c2">País, ciudad (voluntario)</td><td id="l-s2-r3c3">Registro</td></tr>
+      <tr><td id="l-s2-r4c1">Financiero</td><td id="l-s2-r4c2">Historial de pagos, saldo del monedero</td><td id="l-s2-r4c3">Uso del servicio</td></tr>
+      <tr><td id="l-s2-r5c1">Consumo</td><td id="l-s2-r5c2">Canciones reproducidas, descargas</td><td id="l-s2-r5c3">Uso del servicio</td></tr>
+      <tr><td id="l-s2-r6c1">Técnico</td><td id="l-s2-r6c2">Dirección IP, navegador, sistema operativo</td><td id="l-s2-r6c3">Automático</td></tr>
+      <tr><td id="l-s2-r7c1">Artístico</td><td id="l-s2-r7c2">Música subida, nombre artístico, biografía (solo artistas)</td><td id="l-s2-r7c3">Uso del servicio</td></tr>
     </tbody>
   </table>
-  <p>No tratamos datos de categorías especiales (salud, origen racial, opiniones políticas, etc.).</p>
+  <p id="l-s2-p1">No tratamos datos de categorías especiales (salud, origen racial, opiniones políticas, etc.).</p>
 
-  <h2>3. Finalidad y Base Legal del Tratamiento</h2>
+  <h2 id="l-s3-h2">3. Finalidad y Base Legal del Tratamiento</h2>
   <table>
-    <thead><tr><th>Finalidad</th><th>Base legal (RGPD art. 6)</th></tr></thead>
+    <thead><tr><th id="l-s3-th1">Finalidad</th><th id="l-s3-th2">Base legal (RGPD art. 6)</th></tr></thead>
     <tbody>
-      <tr><td>Gestionar tu cuenta y autenticación</td><td>Ejecución de contrato (6.1.b)</td></tr>
-      <tr><td>Procesar pagos y suscripciones</td><td>Ejecución de contrato (6.1.b)</td></tr>
-      <tr><td>Distribuir ganancias a artistas</td><td>Ejecución de contrato (6.1.b)</td></tr>
-      <tr><td>Mejorar el servicio y personalizar recomendaciones</td><td>Interés legítimo (6.1.f)</td></tr>
-      <tr><td>Cumplir obligaciones legales y fiscales</td><td>Obligación legal (6.1.c)</td></tr>
-      <tr><td>Comunicaciones de marketing (si aceptas)</td><td>Consentimiento (6.1.a)</td></tr>
+      <tr><td id="l-s3-r1c1">Gestionar tu cuenta y autenticación</td><td id="l-s3-r1c2">Ejecución de contrato (6.1.b)</td></tr>
+      <tr><td id="l-s3-r2c1">Procesar pagos y suscripciones</td><td id="l-s3-r2c2">Ejecución de contrato (6.1.b)</td></tr>
+      <tr><td id="l-s3-r3c1">Distribuir ganancias a artistas</td><td id="l-s3-r3c2">Ejecución de contrato (6.1.b)</td></tr>
+      <tr><td id="l-s3-r4c1">Mejorar el servicio y personalizar recomendaciones</td><td id="l-s3-r4c2">Interés legítimo (6.1.f)</td></tr>
+      <tr><td id="l-s3-r5c1">Cumplir obligaciones legales y fiscales</td><td id="l-s3-r5c2">Obligación legal (6.1.c)</td></tr>
+      <tr><td id="l-s3-r6c1">Comunicaciones de marketing (si aceptas)</td><td id="l-s3-r6c2">Consentimiento (6.1.a)</td></tr>
     </tbody>
   </table>
 
-  <h2>4. Plazos de Conservación</h2>
+  <h2 id="l-s4-h2">4. Plazos de Conservación</h2>
   <ul>
-    <li><strong>Datos de cuenta activa:</strong> durante toda la relación contractual.</li>
-    <li><strong>Datos de pagos y transacciones:</strong> 10 años (obligación contable).</li>
-    <li><strong>Registros de reproducción y descarga:</strong> 2 años.</li>
-    <li><strong>Datos técnicos (logs):</strong> 90 días.</li>
-    <li><strong>Cuenta cancelada:</strong> anonimizamos los datos en un plazo máximo de 30 días, excepto los que debemos conservar por ley.</li>
+    <li><strong id="l-s4-li1-strong">Datos de cuenta activa:</strong> <span id="l-s4-li1-text">durante toda la relación contractual.</span></li>
+    <li><strong id="l-s4-li2-strong">Datos de pagos y transacciones:</strong> <span id="l-s4-li2-text">10 años (obligación contable).</span></li>
+    <li><strong id="l-s4-li3-strong">Registros de reproducción y descarga:</strong> <span id="l-s4-li3-text">2 años.</span></li>
+    <li><strong id="l-s4-li4-strong">Datos técnicos (logs):</strong> <span id="l-s4-li4-text">90 días.</span></li>
+    <li><strong id="l-s4-li5-strong">Cuenta cancelada:</strong> <span id="l-s4-li5-text">anonimizamos los datos en un plazo máximo de 30 días, excepto los que debemos conservar por ley.</span></li>
   </ul>
 
-  <h2>5. Destinatarios y Transferencias</h2>
-  <h3>5.1 Proveedores de servicios (encargados del tratamiento)</h3>
+  <h2 id="l-s5-h2">5. Destinatarios y Transferencias</h2>
+  <h3 id="l-s5-h3a">5.1 Proveedores de servicios (encargados del tratamiento)</h3>
   <ul>
-    <li><strong>Render</strong> (EE. UU.) — Hospedaje del servidor. Protección adecuada: Cláusulas Contractuales Tipo CE.</li>
-    <li><strong>Neon.tech</strong> (EE. UU.) — Base de datos PostgreSQL. Cláusulas Contractuales Tipo CE.</li>
-    <li><strong>Cloudflare R2</strong> — Almacenamiento de archivos de audio. Certificado EU-U.S. Data Privacy Framework.</li>
-    <li><strong>Flutterwave</strong> — Procesador de pagos. Datos mínimos necesarios para la transacción.</li>
+    <li><strong>Render</strong> <span id="l-s5-li1">(EE.&nbsp;UU.) — Hospedaje del servidor. Protección adecuada: Cláusulas Contractuales Tipo CE.</span></li>
+    <li><strong>Neon.tech</strong> <span id="l-s5-li2">(EE.&nbsp;UU.) — Base de datos PostgreSQL. Cláusulas Contractuales Tipo CE.</span></li>
+    <li><strong>Cloudflare R2</strong> <span id="l-s5-li3">— Almacenamiento de archivos de audio. Certificado EU-U.S. Data Privacy Framework.</span></li>
+    <li><strong>Flutterwave</strong> <span id="l-s5-li4">— Procesador de pagos. Datos mínimos necesarios para la transacción.</span></li>
   </ul>
-  <h3>5.2 Transferencias internacionales</h3>
-  <p>Cuando transferimos datos fuera del Espacio Económico Europeo, aplicamos las salvaguardas exigidas por el RGPD (Cláusulas Contractuales Tipo o decisiones de adecuación de la Comisión Europea).</p>
-  <p>No vendemos datos personales a terceros.</p>
+  <h3 id="l-s5-h3b">5.2 Transferencias internacionales</h3>
+  <p id="l-s5-p1">Cuando transferimos datos fuera del Espacio Económico Europeo, aplicamos las salvaguardas exigidas por el RGPD (Cláusulas Contractuales Tipo o decisiones de adecuación de la Comisión Europea).</p>
+  <p id="l-s5-p2">No vendemos datos personales a terceros.</p>
 
-  <h2>6. Tus Derechos (RGPD arts. 15–22)</h2>
+  <h2 id="l-s6-h2">6. Tus Derechos (RGPD arts. 15–22)</h2>
   <div class="rights-grid">
-    <div class="right-card"><div class="icon">📋</div><h4>Acceso</h4><p>Solicitar una copia de todos tus datos personales.</p></div>
-    <div class="right-card"><div class="icon">✏️</div><h4>Rectificación</h4><p>Corregir datos inexactos o completar datos incompletos.</p></div>
-    <div class="right-card"><div class="icon">🗑️</div><h4>Supresión ("derecho al olvido")</h4><p>Solicitar la eliminación de tus datos cuando ya no sean necesarios.</p></div>
-    <div class="right-card"><div class="icon">⏸️</div><h4>Limitación</h4><p>Restringir el tratamiento mientras se verifica una reclamación.</p></div>
-    <div class="right-card"><div class="icon">📦</div><h4>Portabilidad</h4><p>Recibir tus datos en formato estructurado (JSON/CSV).</p></div>
-    <div class="right-card"><div class="icon">🚫</div><h4>Oposición</h4><p>Oponerte al tratamiento basado en interés legítimo o marketing.</p></div>
-    <div class="right-card"><div class="icon">🤖</div><h4>Decisiones automatizadas</h4><p>No aplicamos decisiones basadas exclusivamente en perfiles automáticos con efectos jurídicos.</p></div>
-    <div class="right-card"><div class="icon">↩️</div><h4>Retirar el consentimiento</h4><p>Si el tratamiento se basa en tu consentimiento, puedes retirarlo en cualquier momento.</p></div>
+    <div class="right-card"><div class="icon">📋</div><h4 id="l-s6-h4-1">Acceso</h4><p id="l-s6-p-1">Solicitar una copia de todos tus datos personales.</p></div>
+    <div class="right-card"><div class="icon">✏️</div><h4 id="l-s6-h4-2">Rectificación</h4><p id="l-s6-p-2">Corregir datos inexactos o completar datos incompletos.</p></div>
+    <div class="right-card"><div class="icon">🗑️</div><h4 id="l-s6-h4-3">Supresión ("derecho al olvido")</h4><p id="l-s6-p-3">Solicitar la eliminación de tus datos cuando ya no sean necesarios.</p></div>
+    <div class="right-card"><div class="icon">⏸️</div><h4 id="l-s6-h4-4">Limitación</h4><p id="l-s6-p-4">Restringir el tratamiento mientras se verifica una reclamación.</p></div>
+    <div class="right-card"><div class="icon">📦</div><h4 id="l-s6-h4-5">Portabilidad</h4><p id="l-s6-p-5">Recibir tus datos en formato estructurado (JSON/CSV).</p></div>
+    <div class="right-card"><div class="icon">🚫</div><h4 id="l-s6-h4-6">Oposición</h4><p id="l-s6-p-6">Oponerte al tratamiento basado en interés legítimo o marketing.</p></div>
+    <div class="right-card"><div class="icon">🤖</div><h4 id="l-s6-h4-7">Decisiones automatizadas</h4><p id="l-s6-p-7">No aplicamos decisiones basadas exclusivamente en perfiles automáticos con efectos jurídicos.</p></div>
+    <div class="right-card"><div class="icon">↩️</div><h4 id="l-s6-h4-8">Retirar el consentimiento</h4><p id="l-s6-p-8">Si el tratamiento se basa en tu consentimiento, puedes retirarlo en cualquier momento.</p></div>
   </div>
-  <p>Para ejercer tus derechos, escribe a <a href="mailto:privacidad@mbolamusic.com">privacidad@mbolamusic.com</a>. Respondemos en un plazo máximo de <strong>30 días</strong>. Si no estás satisfecho/a, puedes reclamar ante la autoridad de control competente (AEPD en España, o la autoridad del Estado miembro de la UE donde residas).</p>
+  <p><span id="l-s6-p-pre">Para ejercer tus derechos, escribe a</span> <a href="mailto:privacidad@mbolamusic.com">privacidad@mbolamusic.com</a>. <span id="l-s6-p-post">Respondemos en un plazo máximo de <strong>30 días</strong>. Si no estás satisfecho/a, puedes reclamar ante la autoridad de control competente (AEPD en España, o la autoridad del Estado miembro de la UE donde residas).</span></p>
 
-  <h2>7. Cookies y Tecnologías Similares</h2>
+  <h2 id="l-s7-h2">7. Cookies y Tecnologías Similares</h2>
   <table>
-    <thead><tr><th>Cookie / Tecnología</th><th>Tipo</th><th>Finalidad</th><th>Duración</th></tr></thead>
+    <thead><tr><th id="l-s7-th1">Cookie / Tecnología</th><th id="l-s7-th2">Tipo</th><th id="l-s7-th3">Finalidad</th><th id="l-s7-th4">Duración</th></tr></thead>
     <tbody>
-      <tr><td>mbola_token (localStorage)</td><td>Funcional</td><td>Mantener la sesión autenticada</td><td>30 días</td></tr>
-      <tr><td>mbola_user (localStorage)</td><td>Funcional</td><td>Perfil del usuario en la web</td><td>30 días</td></tr>
-      <tr><td>Cookies analíticas</td><td>No se usan actualmente</td><td>—</td><td>—</td></tr>
+      <tr><td>mbola_token (localStorage)</td><td id="l-s7-r1c2">Funcional</td><td id="l-s7-r1c3">Mantener la sesión autenticada</td><td id="l-s7-r1c4">30 días</td></tr>
+      <tr><td>mbola_user (localStorage)</td><td id="l-s7-r2c2">Funcional</td><td id="l-s7-r2c3">Perfil del usuario en la web</td><td id="l-s7-r2c4">30 días</td></tr>
+      <tr><td id="l-s7-r3c1">Cookies analíticas</td><td id="l-s7-r3c2">No se usan actualmente</td><td>—</td><td>—</td></tr>
     </tbody>
   </table>
-  <p>No usamos cookies de seguimiento de terceros ni publicidad comportamental.</p>
+  <p id="l-s7-p1">No usamos cookies de seguimiento de terceros ni publicidad comportamental.</p>
 
-  <h2>8. Seguridad</h2>
+  <h2 id="l-s8-h2">8. Seguridad</h2>
   <ul>
-    <li>Contraseñas almacenadas con hash bcrypt (factor de coste ≥ 10).</li>
-    <li>Comunicaciones cifradas con TLS 1.2+ (HTTPS obligatorio).</li>
-    <li>Tokens JWT con expiración de 30 días y validación en cada petición.</li>
-    <li>Archivos de audio protegidos con cifrado AES-128 CBC en la aplicación móvil.</li>
-    <li>Acceso a la base de datos restringido por credenciales de entorno, nunca expuestas en el código.</li>
-    <li>Panel de administración con control de roles (ADMIN, ARTIST, LISTENER).</li>
+    <li id="l-s8-li1">Contraseñas almacenadas con hash bcrypt (factor de coste ≥ 10).</li>
+    <li id="l-s8-li2">Comunicaciones cifradas con TLS 1.2+ (HTTPS obligatorio).</li>
+    <li id="l-s8-li3">Tokens JWT con expiración de 30 días y validación en cada petición.</li>
+    <li id="l-s8-li4">Archivos de audio protegidos con cifrado AES-128 CBC en la aplicación móvil.</li>
+    <li id="l-s8-li5">Acceso a la base de datos restringido por credenciales de entorno, nunca expuestas en el código.</li>
+    <li id="l-s8-li6">Panel de administración con control de roles (ADMIN, ARTIST, LISTENER).</li>
   </ul>
-  <p>En caso de violación de seguridad que afecte a tus datos, te notificaremos en el plazo máximo de 72 horas si el riesgo es elevado, conforme al art. 34 RGPD.</p>
+  <p id="l-s8-p1">En caso de violación de seguridad que afecte a tus datos, te notificaremos en el plazo máximo de 72 horas si el riesgo es elevado, conforme al art. 34 RGPD.</p>
 
-  <h2>9. Menores de Edad</h2>
-  <p>MbôláMusic no recopila conscientemente datos de menores de 16 años. Si detectamos que un menor se ha registrado sin consentimiento parental verificable, eliminaremos su cuenta. Escríbenos a <a href="mailto:privacidad@mbolamusic.com">privacidad@mbolamusic.com</a>.</p>
+  <h2 id="l-s9-h2">9. Menores de Edad</h2>
+  <p><span id="l-s9-p-pre">MbôláMusic no recopila conscientemente datos de menores de 16 años. Si detectamos que un menor se ha registrado sin consentimiento parental verificable, eliminaremos su cuenta. Escríbenos a</span> <a href="mailto:privacidad@mbolamusic.com">privacidad@mbolamusic.com</a>.</p>
 
-  <h2>10. Derechos Adicionales para Residentes de California (CCPA/CPRA)</h2>
-  <p>Si resides en California (EE. UU.), la California Consumer Privacy Act (CCPA), modificada por la CPRA, te otorga los siguientes derechos:</p>
+  <h2 id="l-s10-h2">10. Derechos Adicionales para Residentes de California (CCPA/CPRA)</h2>
+  <p id="l-s10-p1">Si resides en California (EE.&nbsp;UU.), la California Consumer Privacy Act (CCPA), modificada por la CPRA, te otorga los siguientes derechos:</p>
   <ul>
-    <li><strong>Derecho a saber:</strong> qué categorías de datos personales recogemos, usamos y divulgamos, y con qué finalidad (ver Secciones 2 y 3).</li>
-    <li><strong>Derecho a eliminar</strong> tus datos personales, sujeto a las excepciones legales aplicables.</li>
-    <li><strong>Derecho a corregir</strong> datos personales inexactos.</li>
-    <li><strong>Derecho a no ser discriminado/a</strong> por ejercer cualquiera de estos derechos.</li>
-    <li><strong>Derecho a optar por no vender ni compartir</strong> tu información personal con terceros.</li>
+    <li><strong id="l-s10-li1-strong">Derecho a saber:</strong> <span id="l-s10-li1-text">qué categorías de datos personales recogemos, usamos y divulgamos, y con qué finalidad (ver Secciones 2 y 3).</span></li>
+    <li><strong id="l-s10-li2-strong">Derecho a eliminar</strong> <span id="l-s10-li2-text">tus datos personales, sujeto a las excepciones legales aplicables.</span></li>
+    <li><strong id="l-s10-li3-strong">Derecho a corregir</strong> <span id="l-s10-li3-text">datos personales inexactos.</span></li>
+    <li><strong id="l-s10-li4-strong">Derecho a no ser discriminado/a</strong> <span id="l-s10-li4-text">por ejercer cualquiera de estos derechos.</span></li>
+    <li><strong id="l-s10-li5-strong">Derecho a optar por no vender ni compartir</strong> <span id="l-s10-li5-text">tu información personal con terceros.</span></li>
   </ul>
   <div class="highlight">
-    <p><strong>No vendemos ni compartimos información personal</strong> a cambio de contraprestación, ni la usamos con fines de publicidad conductual entre plataformas ("cross-context behavioral advertising"). Para ejercer cualquier derecho CCPA, escribe a <a href="mailto:privacidad@mbolamusic.com">privacidad@mbolamusic.com</a> indicando "Solicitud CCPA" en el asunto. Responderemos en un máximo de 45 días.</p>
+    <p><span id="l-s10-highlight-pre"><strong>No vendemos ni compartimos información personal</strong> a cambio de contraprestación, ni la usamos con fines de publicidad conductual entre plataformas ("cross-context behavioral advertising"). Para ejercer cualquier derecho CCPA, escribe a</span> <a href="mailto:privacidad@mbolamusic.com">privacidad@mbolamusic.com</a> <span id="l-s10-highlight-post">indicando "Solicitud CCPA" en el asunto. Responderemos en un máximo de 45 días.</span></p>
   </div>
 
-  <h2>11. Cambios en esta Política</h2>
-  <p>Te notificaremos con al menos 30 días de antelación cualquier cambio material en esta política, por correo electrónico o mediante aviso en la plataforma. La continuación del uso del servicio tras esa fecha implica la aceptación de los cambios.</p>
+  <h2 id="l-s11-h2">11. Cambios en esta Política</h2>
+  <p id="l-s11-p1">Te notificaremos con al menos 30 días de antelación cualquier cambio material en esta política, por correo electrónico o mediante aviso en la plataforma. La continuación del uso del servicio tras esa fecha implica la aceptación de los cambios.</p>
 
-  <h2>12. Contacto y DPO</h2>
+  <h2 id="l-s12-h2">12. Contacto y DPO</h2>
   <div class="highlight">
     <p>
-      <strong>Delegado de Protección de Datos (DPO):</strong><br>
+      <strong id="l-s12-dpo-strong">Delegado de Protección de Datos (DPO):</strong><br>
       <a href="mailto:dpo@mbolamusic.com">dpo@mbolamusic.com</a><br><br>
-      <strong>Consultas de privacidad generales:</strong><br>
+      <strong id="l-s12-general-strong">Consultas de privacidad generales:</strong><br>
       <a href="mailto:privacidad@mbolamusic.com">privacidad@mbolamusic.com</a>
     </p>
   </div>
 
   <p style="margin-top:2rem;color:var(--text2);font-size:0.82rem;border-top:1px solid var(--border);padding-top:1.5rem;">
-    Esta política se ha redactado conforme al Reglamento (UE) 2016/679 del Parlamento Europeo y del Consejo (RGPD/GDPR),
-    la Directiva 2002/58/CE (ePrivacy) y la normativa local de Guinea Ecuatorial.
-    · <a href="/terminos.html">Términos de uso</a> · <a href="/">Volver al inicio</a>
+    <span id="l-footer-legal">Esta política se ha redactado conforme al Reglamento (UE) 2016/679 del Parlamento Europeo y del Consejo (RGPD/GDPR),
+    la Directiva 2002/58/CE (ePrivacy) y la normativa local de Guinea Ecuatorial.</span>
+    · <a href="/terminos.html" id="l-footer-terms">Términos de uso</a> · <a href="/" id="l-footer-home">Volver al inicio</a>
   </p>
 </div>
+
+<script>
+const LANGS = {
+  es: { flag:'🇪🇸', code:'ES' }, fr: { flag:'🇫🇷', code:'FR' },
+  pt: { flag:'🇵🇹', code:'PT' }, en: { flag:'🇬🇧', code:'EN' },
+};
+
+const T = {
+  es: {
+    back:'← Inicio', badge:'RGPD / GDPR · CCPA Compliant', h1:'Política de Privacidad',
+    subtitle:'Última actualización: 30 de junio de 2026 · Versión 1.1<br>Aplicable a la plataforma web y la aplicación móvil MbôláMusic',
+    s1h2:'1. Responsable del Tratamiento', s1correo:'Correo', s1dpo:'Delegado de Protección de Datos (DPO)',
+    s2h2:'2. Datos Personales que Recogemos',
+    s2th1:'Categoría', s2th2:'Datos específicos', s2th3:'Fuente',
+    s2r1c1:'Identidad', s2r1c2:'Nombre de usuario, nombre real (artistas)', s2r1c3:'Registro',
+    s2r2c1:'Contacto', s2r2c2:'Correo electrónico, número de teléfono', s2r2c3:'Registro',
+    s2r3c1:'Ubicación', s2r3c2:'País, ciudad (voluntario)', s2r3c3:'Registro',
+    s2r4c1:'Financiero', s2r4c2:'Historial de pagos, saldo del monedero', s2r4c3:'Uso del servicio',
+    s2r5c1:'Consumo', s2r5c2:'Canciones reproducidas, descargas', s2r5c3:'Uso del servicio',
+    s2r6c1:'Técnico', s2r6c2:'Dirección IP, navegador, sistema operativo', s2r6c3:'Automático',
+    s2r7c1:'Artístico', s2r7c2:'Música subida, nombre artístico, biografía (solo artistas)', s2r7c3:'Uso del servicio',
+    s2p1:'No tratamos datos de categorías especiales (salud, origen racial, opiniones políticas, etc.).',
+    s3h2:'3. Finalidad y Base Legal del Tratamiento', s3th1:'Finalidad', s3th2:'Base legal (RGPD art. 6)',
+    s3r1c1:'Gestionar tu cuenta y autenticación', s3r1c2:'Ejecución de contrato (6.1.b)',
+    s3r2c1:'Procesar pagos y suscripciones', s3r2c2:'Ejecución de contrato (6.1.b)',
+    s3r3c1:'Distribuir ganancias a artistas', s3r3c2:'Ejecución de contrato (6.1.b)',
+    s3r4c1:'Mejorar el servicio y personalizar recomendaciones', s3r4c2:'Interés legítimo (6.1.f)',
+    s3r5c1:'Cumplir obligaciones legales y fiscales', s3r5c2:'Obligación legal (6.1.c)',
+    s3r6c1:'Comunicaciones de marketing (si aceptas)', s3r6c2:'Consentimiento (6.1.a)',
+    s4h2:'4. Plazos de Conservación',
+    s4li1strong:'Datos de cuenta activa:', s4li1text:'durante toda la relación contractual.',
+    s4li2strong:'Datos de pagos y transacciones:', s4li2text:'10 años (obligación contable).',
+    s4li3strong:'Registros de reproducción y descarga:', s4li3text:'2 años.',
+    s4li4strong:'Datos técnicos (logs):', s4li4text:'90 días.',
+    s4li5strong:'Cuenta cancelada:', s4li5text:'anonimizamos los datos en un plazo máximo de 30 días, excepto los que debemos conservar por ley.',
+    s5h2:'5. Destinatarios y Transferencias', s5h3a:'5.1 Proveedores de servicios (encargados del tratamiento)',
+    s5li1:'(EE.&nbsp;UU.) — Hospedaje del servidor. Protección adecuada: Cláusulas Contractuales Tipo CE.',
+    s5li2:'(EE.&nbsp;UU.) — Base de datos PostgreSQL. Cláusulas Contractuales Tipo CE.',
+    s5li3:'— Almacenamiento de archivos de audio. Certificado EU-U.S. Data Privacy Framework.',
+    s5li4:'— Procesador de pagos. Datos mínimos necesarios para la transacción.',
+    s5h3b:'5.2 Transferencias internacionales',
+    s5p1:'Cuando transferimos datos fuera del Espacio Económico Europeo, aplicamos las salvaguardas exigidas por el RGPD (Cláusulas Contractuales Tipo o decisiones de adecuación de la Comisión Europea).',
+    s5p2:'No vendemos datos personales a terceros.',
+    s6h2:'6. Tus Derechos (RGPD arts. 15–22)',
+    s6h41:'Acceso', s6p1:'Solicitar una copia de todos tus datos personales.',
+    s6h42:'Rectificación', s6p2:'Corregir datos inexactos o completar datos incompletos.',
+    s6h43:'Supresión ("derecho al olvido")', s6p3:'Solicitar la eliminación de tus datos cuando ya no sean necesarios.',
+    s6h44:'Limitación', s6p4:'Restringir el tratamiento mientras se verifica una reclamación.',
+    s6h45:'Portabilidad', s6p5:'Recibir tus datos en formato estructurado (JSON/CSV).',
+    s6h46:'Oposición', s6p6:'Oponerte al tratamiento basado en interés legítimo o marketing.',
+    s6h47:'Decisiones automatizadas', s6p7:'No aplicamos decisiones basadas exclusivamente en perfiles automáticos con efectos jurídicos.',
+    s6h48:'Retirar el consentimiento', s6p8:'Si el tratamiento se basa en tu consentimiento, puedes retirarlo en cualquier momento.',
+    s6ppre:'Para ejercer tus derechos, escribe a',
+    s6ppost:'Respondemos en un plazo máximo de <strong>30 días</strong>. Si no estás satisfecho/a, puedes reclamar ante la autoridad de control competente (AEPD en España, o la autoridad del Estado miembro de la UE donde residas).',
+    s7h2:'7. Cookies y Tecnologías Similares',
+    s7th1:'Cookie / Tecnología', s7th2:'Tipo', s7th3:'Finalidad', s7th4:'Duración',
+    s7r1c2:'Funcional', s7r1c3:'Mantener la sesión autenticada', s7r1c4:'30 días',
+    s7r2c2:'Funcional', s7r2c3:'Perfil del usuario en la web', s7r2c4:'30 días',
+    s7r3c1:'Cookies analíticas', s7r3c2:'No se usan actualmente',
+    s7p1:'No usamos cookies de seguimiento de terceros ni publicidad comportamental.',
+    s8h2:'8. Seguridad',
+    s8li1:'Contraseñas almacenadas con hash bcrypt (factor de coste ≥ 10).',
+    s8li2:'Comunicaciones cifradas con TLS 1.2+ (HTTPS obligatorio).',
+    s8li3:'Tokens JWT con expiración de 30 días y validación en cada petición.',
+    s8li4:'Archivos de audio protegidos con cifrado AES-128 CBC en la aplicación móvil.',
+    s8li5:'Acceso a la base de datos restringido por credenciales de entorno, nunca expuestas en el código.',
+    s8li6:'Panel de administración con control de roles (ADMIN, ARTIST, LISTENER).',
+    s8p1:'En caso de violación de seguridad que afecte a tus datos, te notificaremos en el plazo máximo de 72 horas si el riesgo es elevado, conforme al art. 34 RGPD.',
+    s9h2:'9. Menores de Edad',
+    s9ppre:'MbôláMusic no recopila conscientemente datos de menores de 16 años. Si detectamos que un menor se ha registrado sin consentimiento parental verificable, eliminaremos su cuenta. Escríbenos a',
+    s10h2:'10. Derechos Adicionales para Residentes de California (CCPA/CPRA)',
+    s10p1:'Si resides en California (EE.&nbsp;UU.), la California Consumer Privacy Act (CCPA), modificada por la CPRA, te otorga los siguientes derechos:',
+    s10li1strong:'Derecho a saber:', s10li1text:'qué categorías de datos personales recogemos, usamos y divulgamos, y con qué finalidad (ver Secciones 2 y 3).',
+    s10li2strong:'Derecho a eliminar', s10li2text:'tus datos personales, sujeto a las excepciones legales aplicables.',
+    s10li3strong:'Derecho a corregir', s10li3text:'datos personales inexactos.',
+    s10li4strong:'Derecho a no ser discriminado/a', s10li4text:'por ejercer cualquiera de estos derechos.',
+    s10li5strong:'Derecho a optar por no vender ni compartir', s10li5text:'tu información personal con terceros.',
+    s10highlightpre:'<strong>No vendemos ni compartimos información personal</strong> a cambio de contraprestación, ni la usamos con fines de publicidad conductual entre plataformas ("cross-context behavioral advertising"). Para ejercer cualquier derecho CCPA, escribe a',
+    s10highlightpost:'indicando "Solicitud CCPA" en el asunto. Responderemos en un máximo de 45 días.',
+    s11h2:'11. Cambios en esta Política',
+    s11p1:'Te notificaremos con al menos 30 días de antelación cualquier cambio material en esta política, por correo electrónico o mediante aviso en la plataforma. La continuación del uso del servicio tras esa fecha implica la aceptación de los cambios.',
+    s12h2:'12. Contacto y DPO', s12dpoStrong:'Delegado de Protección de Datos (DPO):', s12generalStrong:'Consultas de privacidad generales:',
+    footerLegal:'Esta política se ha redactado conforme al Reglamento (UE) 2016/679 del Parlamento Europeo y del Consejo (RGPD/GDPR), la Directiva 2002/58/CE (ePrivacy) y la normativa local de Guinea Ecuatorial.',
+    footerTerms:'Términos de uso', footerHome:'Volver al inicio',
+  },
+  fr: {
+    back:'← Accueil', badge:'RGPD / GDPR · Conforme CCPA', h1:'Politique de Confidentialité',
+    subtitle:'Dernière mise à jour : 30 juin 2026 · Version 1.1<br>Applicable à la plateforme web et à l\'application mobile MbôláMusic',
+    s1h2:'1. Responsable du Traitement', s1correo:'E-mail', s1dpo:'Délégué à la Protection des Données (DPO)',
+    s2h2:'2. Données Personnelles Collectées',
+    s2th1:'Catégorie', s2th2:'Données spécifiques', s2th3:'Source',
+    s2r1c1:'Identité', s2r1c2:'Nom d\'utilisateur, nom réel (artistes)', s2r1c3:'Inscription',
+    s2r2c1:'Contact', s2r2c2:'Adresse e-mail, numéro de téléphone', s2r2c3:'Inscription',
+    s2r3c1:'Localisation', s2r3c2:'Pays, ville (facultatif)', s2r3c3:'Inscription',
+    s2r4c1:'Financier', s2r4c2:'Historique des paiements, solde du portefeuille', s2r4c3:'Utilisation du service',
+    s2r5c1:'Consommation', s2r5c2:'Chansons écoutées, téléchargements', s2r5c3:'Utilisation du service',
+    s2r6c1:'Technique', s2r6c2:'Adresse IP, navigateur, système d\'exploitation', s2r6c3:'Automatique',
+    s2r7c1:'Artistique', s2r7c2:'Musique mise en ligne, nom artistique, biographie (artistes uniquement)', s2r7c3:'Utilisation du service',
+    s2p1:'Nous ne traitons pas de données de catégories particulières (santé, origine raciale, opinions politiques, etc.).',
+    s3h2:'3. Finalité et Base Légale du Traitement', s3th1:'Finalité', s3th2:'Base légale (RGPD art. 6)',
+    s3r1c1:'Gérer ton compte et l\'authentification', s3r1c2:'Exécution du contrat (6.1.b)',
+    s3r2c1:'Traiter les paiements et abonnements', s3r2c2:'Exécution du contrat (6.1.b)',
+    s3r3c1:'Distribuer les gains aux artistes', s3r3c2:'Exécution du contrat (6.1.b)',
+    s3r4c1:'Améliorer le service et personnaliser les recommandations', s3r4c2:'Intérêt légitime (6.1.f)',
+    s3r5c1:'Respecter les obligations légales et fiscales', s3r5c2:'Obligation légale (6.1.c)',
+    s3r6c1:'Communications marketing (si tu acceptes)', s3r6c2:'Consentement (6.1.a)',
+    s4h2:'4. Durées de Conservation',
+    s4li1strong:'Données de compte actif :', s4li1text:'pendant toute la durée de la relation contractuelle.',
+    s4li2strong:'Données de paiements et transactions :', s4li2text:'10 ans (obligation comptable).',
+    s4li3strong:'Registres d\'écoute et de téléchargement :', s4li3text:'2 ans.',
+    s4li4strong:'Données techniques (logs) :', s4li4text:'90 jours.',
+    s4li5strong:'Compte annulé :', s4li5text:'nous anonymisons les données dans un délai maximum de 30 jours, sauf celles que nous devons conserver par la loi.',
+    s5h2:'5. Destinataires et Transferts', s5h3a:'5.1 Prestataires de services (sous-traitants)',
+    s5li1:'(États-Unis) — Hébergement du serveur. Protection adéquate : Clauses Contractuelles Types CE.',
+    s5li2:'(États-Unis) — Base de données PostgreSQL. Clauses Contractuelles Types CE.',
+    s5li3:'— Stockage des fichiers audio. Certifié EU-U.S. Data Privacy Framework.',
+    s5li4:'— Processeur de paiements. Données minimales nécessaires à la transaction.',
+    s5h3b:'5.2 Transferts internationaux',
+    s5p1:'Lorsque nous transférons des données hors de l\'Espace Économique Européen, nous appliquons les garanties exigées par le RGPD (Clauses Contractuelles Types ou décisions d\'adéquation de la Commission Européenne).',
+    s5p2:'Nous ne vendons pas de données personnelles à des tiers.',
+    s6h2:'6. Tes Droits (RGPD art. 15–22)',
+    s6h41:'Accès', s6p1:'Demander une copie de toutes tes données personnelles.',
+    s6h42:'Rectification', s6p2:'Corriger des données inexactes ou compléter des données incomplètes.',
+    s6h43:'Suppression (« droit à l\'oubli »)', s6p3:'Demander la suppression de tes données lorsqu\'elles ne sont plus nécessaires.',
+    s6h44:'Limitation', s6p4:'Restreindre le traitement pendant la vérification d\'une réclamation.',
+    s6h45:'Portabilité', s6p5:'Recevoir tes données dans un format structuré (JSON/CSV).',
+    s6h46:'Opposition', s6p6:'T\'opposer au traitement fondé sur l\'intérêt légitime ou le marketing.',
+    s6h47:'Décisions automatisées', s6p7:'Nous n\'appliquons pas de décisions fondées exclusivement sur des profils automatisés ayant des effets juridiques.',
+    s6h48:'Retirer le consentement', s6p8:'Si le traitement repose sur ton consentement, tu peux le retirer à tout moment.',
+    s6ppre:'Pour exercer tes droits, écris à',
+    s6ppost:'Nous répondons dans un délai maximum de <strong>30 jours</strong>. Si tu n\'es pas satisfait(e), tu peux déposer une réclamation auprès de l\'autorité de contrôle compétente (AEPD en Espagne, ou l\'autorité de l\'État membre de l\'UE où tu résides).',
+    s7h2:'7. Cookies et Technologies Similaires',
+    s7th1:'Cookie / Technologie', s7th2:'Type', s7th3:'Finalité', s7th4:'Durée',
+    s7r1c2:'Fonctionnel', s7r1c3:'Maintenir la session authentifiée', s7r1c4:'30 jours',
+    s7r2c2:'Fonctionnel', s7r2c3:'Profil utilisateur sur le site web', s7r2c4:'30 jours',
+    s7r3c1:'Cookies analytiques', s7r3c2:'Non utilisés actuellement',
+    s7p1:'Nous n\'utilisons pas de cookies de suivi tiers ni de publicité comportementale.',
+    s8h2:'8. Sécurité',
+    s8li1:'Mots de passe stockés avec hachage bcrypt (facteur de coût ≥ 10).',
+    s8li2:'Communications chiffrées avec TLS 1.2+ (HTTPS obligatoire).',
+    s8li3:'Jetons JWT avec expiration à 30 jours et validation à chaque requête.',
+    s8li4:'Fichiers audio protégés par chiffrement AES-128 CBC dans l\'application mobile.',
+    s8li5:'Accès à la base de données restreint par des identifiants d\'environnement, jamais exposés dans le code.',
+    s8li6:'Panneau d\'administration avec contrôle des rôles (ADMIN, ARTIST, LISTENER).',
+    s8p1:'En cas de violation de sécurité affectant tes données, nous te notifierons dans un délai maximum de 72 heures si le risque est élevé, conformément à l\'art. 34 du RGPD.',
+    s9h2:'9. Mineurs',
+    s9ppre:'MbôláMusic ne collecte pas sciemment de données de mineurs de moins de 16 ans. Si nous détectons qu\'un mineur s\'est inscrit sans consentement parental vérifiable, nous supprimerons son compte. Écris-nous à',
+    s10h2:'10. Droits Supplémentaires pour les Résidents de Californie (CCPA/CPRA)',
+    s10p1:'Si tu résides en Californie (États-Unis), le California Consumer Privacy Act (CCPA), modifié par le CPRA, t\'accorde les droits suivants :',
+    s10li1strong:'Droit de savoir :', s10li1text:'quelles catégories de données personnelles nous collectons, utilisons et divulguons, et dans quel but (voir Sections 2 et 3).',
+    s10li2strong:'Droit de supprimer', s10li2text:'tes données personnelles, sous réserve des exceptions légales applicables.',
+    s10li3strong:'Droit de corriger', s10li3text:'des données personnelles inexactes.',
+    s10li4strong:'Droit de ne pas être discriminé(e)', s10li4text:'pour avoir exercé l\'un de ces droits.',
+    s10li5strong:'Droit de refuser la vente ou le partage', s10li5text:'de tes informations personnelles avec des tiers.',
+    s10highlightpre:'<strong>Nous ne vendons ni ne partageons d\'informations personnelles</strong> en échange d\'une contrepartie, et nous ne les utilisons pas à des fins de publicité comportementale entre plateformes (« cross-context behavioral advertising »). Pour exercer tout droit CCPA, écris à',
+    s10highlightpost:'en indiquant « Demande CCPA » dans l\'objet. Nous répondrons sous 45 jours maximum.',
+    s11h2:'11. Modifications de cette Politique',
+    s11p1:'Nous t\'informerons au moins 30 jours à l\'avance de tout changement important apporté à cette politique, par e-mail ou avis sur la plateforme. La poursuite de l\'utilisation du service après cette date implique l\'acceptation des changements.',
+    s12h2:'12. Contact et DPO', s12dpoStrong:'Délégué à la Protection des Données (DPO) :', s12generalStrong:'Questions générales de confidentialité :',
+    footerLegal:'Cette politique a été rédigée conformément au Règlement (UE) 2016/679 du Parlement Européen et du Conseil (RGPD), à la Directive 2002/58/CE (ePrivacy) et à la réglementation locale de Guinée Équatoriale.',
+    footerTerms:'Conditions d\'utilisation', footerHome:'Retour à l\'accueil',
+  },
+  pt: {
+    back:'← Início', badge:'RGPD / GDPR · Conforme CCPA', h1:'Política de Privacidade',
+    subtitle:'Última atualização: 30 de junho de 2026 · Versão 1.1<br>Aplicável à plataforma web e à aplicação móvel MbôláMusic',
+    s1h2:'1. Responsável pelo Tratamento', s1correo:'E-mail', s1dpo:'Encarregado de Proteção de Dados (DPO)',
+    s2h2:'2. Dados Pessoais que Recolhemos',
+    s2th1:'Categoria', s2th2:'Dados específicos', s2th3:'Fonte',
+    s2r1c1:'Identidade', s2r1c2:'Nome de utilizador, nome real (artistas)', s2r1c3:'Registo',
+    s2r2c1:'Contacto', s2r2c2:'E-mail, número de telefone', s2r2c3:'Registo',
+    s2r3c1:'Localização', s2r3c2:'País, cidade (voluntário)', s2r3c3:'Registo',
+    s2r4c1:'Financeiro', s2r4c2:'Histórico de pagamentos, saldo da carteira', s2r4c3:'Uso do serviço',
+    s2r5c1:'Consumo', s2r5c2:'Músicas reproduzidas, downloads', s2r5c3:'Uso do serviço',
+    s2r6c1:'Técnico', s2r6c2:'Endereço IP, navegador, sistema operativo', s2r6c3:'Automático',
+    s2r7c1:'Artístico', s2r7c2:'Música carregada, nome artístico, biografia (apenas artistas)', s2r7c3:'Uso do serviço',
+    s2p1:'Não tratamos dados de categorias especiais (saúde, origem racial, opiniões políticas, etc.).',
+    s3h2:'3. Finalidade e Base Legal do Tratamento', s3th1:'Finalidade', s3th2:'Base legal (RGPD art. 6)',
+    s3r1c1:'Gerir a tua conta e autenticação', s3r1c2:'Execução de contrato (6.1.b)',
+    s3r2c1:'Processar pagamentos e subscrições', s3r2c2:'Execução de contrato (6.1.b)',
+    s3r3c1:'Distribuir ganhos aos artistas', s3r3c2:'Execução de contrato (6.1.b)',
+    s3r4c1:'Melhorar o serviço e personalizar recomendações', s3r4c2:'Interesse legítimo (6.1.f)',
+    s3r5c1:'Cumprir obrigações legais e fiscais', s3r5c2:'Obrigação legal (6.1.c)',
+    s3r6c1:'Comunicações de marketing (se aceitares)', s3r6c2:'Consentimento (6.1.a)',
+    s4h2:'4. Prazos de Conservação',
+    s4li1strong:'Dados de conta ativa:', s4li1text:'durante toda a relação contratual.',
+    s4li2strong:'Dados de pagamentos e transações:', s4li2text:'10 anos (obrigação contabilística).',
+    s4li3strong:'Registos de reprodução e download:', s4li3text:'2 anos.',
+    s4li4strong:'Dados técnicos (logs):', s4li4text:'90 dias.',
+    s4li5strong:'Conta cancelada:', s4li5text:'anonimizamos os dados num prazo máximo de 30 dias, exceto os que devemos conservar por lei.',
+    s5h2:'5. Destinatários e Transferências', s5h3a:'5.1 Prestadores de serviços (subcontratantes)',
+    s5li1:'(EUA) — Alojamento do servidor. Proteção adequada: Cláusulas Contratuais-Tipo CE.',
+    s5li2:'(EUA) — Base de dados PostgreSQL. Cláusulas Contratuais-Tipo CE.',
+    s5li3:'— Armazenamento de ficheiros de áudio. Certificado EU-U.S. Data Privacy Framework.',
+    s5li4:'— Processador de pagamentos. Dados mínimos necessários para a transação.',
+    s5h3b:'5.2 Transferências internacionais',
+    s5p1:'Quando transferimos dados para fora do Espaço Económico Europeu, aplicamos as salvaguardas exigidas pelo RGPD (Cláusulas Contratuais-Tipo ou decisões de adequação da Comissão Europeia).',
+    s5p2:'Não vendemos dados pessoais a terceiros.',
+    s6h2:'6. Os Teus Direitos (RGPD arts. 15–22)',
+    s6h41:'Acesso', s6p1:'Solicitar uma cópia de todos os teus dados pessoais.',
+    s6h42:'Retificação', s6p2:'Corrigir dados inexatos ou completar dados incompletos.',
+    s6h43:'Apagamento ("direito ao esquecimento")', s6p3:'Solicitar a eliminação dos teus dados quando já não forem necessários.',
+    s6h44:'Limitação', s6p4:'Restringir o tratamento enquanto se verifica uma reclamação.',
+    s6h45:'Portabilidade', s6p5:'Receber os teus dados em formato estruturado (JSON/CSV).',
+    s6h46:'Oposição', s6p6:'Opor-te ao tratamento baseado em interesse legítimo ou marketing.',
+    s6h47:'Decisões automatizadas', s6p7:'Não aplicamos decisões baseadas exclusivamente em perfis automáticos com efeitos jurídicos.',
+    s6h48:'Retirar o consentimento', s6p8:'Se o tratamento se basear no teu consentimento, podes retirá-lo a qualquer momento.',
+    s6ppre:'Para exercer os teus direitos, escreve para',
+    s6ppost:'Respondemos num prazo máximo de <strong>30 dias</strong>. Se não ficares satisfeito(a), podes reclamar junto da autoridade de controlo competente (AEPD em Espanha, ou a autoridade do Estado-Membro da UE onde residires).',
+    s7h2:'7. Cookies e Tecnologias Semelhantes',
+    s7th1:'Cookie / Tecnologia', s7th2:'Tipo', s7th3:'Finalidade', s7th4:'Duração',
+    s7r1c2:'Funcional', s7r1c3:'Manter a sessão autenticada', s7r1c4:'30 dias',
+    s7r2c2:'Funcional', s7r2c3:'Perfil do utilizador no site', s7r2c4:'30 dias',
+    s7r3c1:'Cookies analíticos', s7r3c2:'Não são usados atualmente',
+    s7p1:'Não usamos cookies de rastreamento de terceiros nem publicidade comportamental.',
+    s8h2:'8. Segurança',
+    s8li1:'Palavras-passe armazenadas com hash bcrypt (fator de custo ≥ 10).',
+    s8li2:'Comunicações cifradas com TLS 1.2+ (HTTPS obrigatório).',
+    s8li3:'Tokens JWT com expiração de 30 dias e validação em cada pedido.',
+    s8li4:'Ficheiros de áudio protegidos com cifra AES-128 CBC na aplicação móvel.',
+    s8li5:'Acesso à base de dados restrito por credenciais de ambiente, nunca expostas no código.',
+    s8li6:'Painel de administração com controlo de funções (ADMIN, ARTIST, LISTENER).',
+    s8p1:'Em caso de violação de segurança que afete os teus dados, notificar-te-emos num prazo máximo de 72 horas se o risco for elevado, nos termos do art. 34 do RGPD.',
+    s9h2:'9. Menores de Idade',
+    s9ppre:'A MbôláMusic não recolhe conscientemente dados de menores de 16 anos. Se detetarmos que um menor se registou sem consentimento parental verificável, eliminaremos a sua conta. Escreve-nos para',
+    s10h2:'10. Direitos Adicionais para Residentes da Califórnia (CCPA/CPRA)',
+    s10p1:'Se resides na Califórnia (EUA), a California Consumer Privacy Act (CCPA), alterada pela CPRA, concede-te os seguintes direitos:',
+    s10li1strong:'Direito a saber:', s10li1text:'que categorias de dados pessoais recolhemos, usamos e divulgamos, e com que finalidade (ver Secções 2 e 3).',
+    s10li2strong:'Direito a eliminar', s10li2text:'os teus dados pessoais, sujeito às exceções legais aplicáveis.',
+    s10li3strong:'Direito a corrigir', s10li3text:'dados pessoais inexatos.',
+    s10li4strong:'Direito a não ser discriminado(a)', s10li4text:'por exercer qualquer um destes direitos.',
+    s10li5strong:'Direito a optar por não vender nem partilhar', s10li5text:'a tua informação pessoal com terceiros.',
+    s10highlightpre:'<strong>Não vendemos nem partilhamos informação pessoal</strong> em troca de contrapartida, nem a usamos para fins de publicidade comportamental entre plataformas ("cross-context behavioral advertising"). Para exercer qualquer direito CCPA, escreve para',
+    s10highlightpost:'indicando "Pedido CCPA" no assunto. Responderemos num máximo de 45 dias.',
+    s11h2:'11. Alterações a esta Política',
+    s11p1:'Notificar-te-emos com pelo menos 30 dias de antecedência sobre qualquer alteração material a esta política, por e-mail ou mediante aviso na plataforma. A continuação do uso do serviço após essa data implica a aceitação das alterações.',
+    s12h2:'12. Contacto e DPO', s12dpoStrong:'Encarregado de Proteção de Dados (DPO):', s12generalStrong:'Questões gerais de privacidade:',
+    footerLegal:'Esta política foi redigida em conformidade com o Regulamento (UE) 2016/679 do Parlamento Europeu e do Conselho (RGPD/GDPR), a Diretiva 2002/58/CE (ePrivacy) e a legislação local da Guiné Equatorial.',
+    footerTerms:'Termos de uso', footerHome:'Voltar ao início',
+  },
+  en: {
+    back:'← Home', badge:'GDPR · CCPA Compliant', h1:'Privacy Policy',
+    subtitle:'Last updated: June 30, 2026 · Version 1.1<br>Applicable to the MbôláMusic web platform and mobile app',
+    s1h2:'1. Data Controller', s1correo:'Email', s1dpo:'Data Protection Officer (DPO)',
+    s2h2:'2. Personal Data We Collect',
+    s2th1:'Category', s2th2:'Specific data', s2th3:'Source',
+    s2r1c1:'Identity', s2r1c2:'Username, real name (artists)', s2r1c3:'Registration',
+    s2r2c1:'Contact', s2r2c2:'Email address, phone number', s2r2c3:'Registration',
+    s2r3c1:'Location', s2r3c2:'Country, city (voluntary)', s2r3c3:'Registration',
+    s2r4c1:'Financial', s2r4c2:'Payment history, wallet balance', s2r4c3:'Service use',
+    s2r5c1:'Consumption', s2r5c2:'Songs played, downloads', s2r5c3:'Service use',
+    s2r6c1:'Technical', s2r6c2:'IP address, browser, operating system', s2r6c3:'Automatic',
+    s2r7c1:'Artistic', s2r7c2:'Uploaded music, artist name, biography (artists only)', s2r7c3:'Service use',
+    s2p1:'We do not process special-category data (health, racial origin, political opinions, etc.).',
+    s3h2:'3. Purpose and Legal Basis for Processing', s3th1:'Purpose', s3th2:'Legal basis (GDPR art. 6)',
+    s3r1c1:'Manage your account and authentication', s3r1c2:'Contract performance (6.1.b)',
+    s3r2c1:'Process payments and subscriptions', s3r2c2:'Contract performance (6.1.b)',
+    s3r3c1:'Distribute earnings to artists', s3r3c2:'Contract performance (6.1.b)',
+    s3r4c1:'Improve the service and personalize recommendations', s3r4c2:'Legitimate interest (6.1.f)',
+    s3r5c1:'Comply with legal and tax obligations', s3r5c2:'Legal obligation (6.1.c)',
+    s3r6c1:'Marketing communications (if you consent)', s3r6c2:'Consent (6.1.a)',
+    s4h2:'4. Retention Periods',
+    s4li1strong:'Active account data:', s4li1text:'for the duration of the contractual relationship.',
+    s4li2strong:'Payment and transaction data:', s4li2text:'10 years (accounting obligation).',
+    s4li3strong:'Play and download records:', s4li3text:'2 years.',
+    s4li4strong:'Technical data (logs):', s4li4text:'90 days.',
+    s4li5strong:'Cancelled account:', s4li5text:'we anonymize the data within a maximum of 30 days, except what we must retain by law.',
+    s5h2:'5. Recipients and Transfers', s5h3a:'5.1 Service providers (processors)',
+    s5li1:'(U.S.) — Server hosting. Adequate protection: EU Standard Contractual Clauses.',
+    s5li2:'(U.S.) — PostgreSQL database. EU Standard Contractual Clauses.',
+    s5li3:'— Audio file storage. EU-U.S. Data Privacy Framework certified.',
+    s5li4:'— Payment processor. Minimum data necessary for the transaction.',
+    s5h3b:'5.2 International transfers',
+    s5p1:'When we transfer data outside the European Economic Area, we apply the safeguards required by the GDPR (Standard Contractual Clauses or European Commission adequacy decisions).',
+    s5p2:'We do not sell personal data to third parties.',
+    s6h2:'6. Your Rights (GDPR arts. 15–22)',
+    s6h41:'Access', s6p1:'Request a copy of all your personal data.',
+    s6h42:'Rectification', s6p2:'Correct inaccurate data or complete incomplete data.',
+    s6h43:'Erasure ("right to be forgotten")', s6p3:'Request deletion of your data when it is no longer necessary.',
+    s6h44:'Restriction', s6p4:'Restrict processing while a claim is being verified.',
+    s6h45:'Portability', s6p5:'Receive your data in a structured format (JSON/CSV).',
+    s6h46:'Objection', s6p6:'Object to processing based on legitimate interest or marketing.',
+    s6h47:'Automated decisions', s6p7:'We do not apply decisions based solely on automated profiling with legal effects.',
+    s6h48:'Withdraw consent', s6p8:'If processing is based on your consent, you can withdraw it at any time.',
+    s6ppre:'To exercise your rights, write to',
+    s6ppost:'We respond within a maximum of <strong>30 days</strong>. If you are not satisfied, you can file a complaint with the competent supervisory authority (AEPD in Spain, or the authority of the EU member state where you reside).',
+    s7h2:'7. Cookies and Similar Technologies',
+    s7th1:'Cookie / Technology', s7th2:'Type', s7th3:'Purpose', s7th4:'Duration',
+    s7r1c2:'Functional', s7r1c3:'Keep the authenticated session', s7r1c4:'30 days',
+    s7r2c2:'Functional', s7r2c3:'User profile on the website', s7r2c4:'30 days',
+    s7r3c1:'Analytics cookies', s7r3c2:'Not currently used',
+    s7p1:'We do not use third-party tracking cookies or behavioral advertising.',
+    s8h2:'8. Security',
+    s8li1:'Passwords stored with bcrypt hashing (cost factor ≥ 10).',
+    s8li2:'Communications encrypted with TLS 1.2+ (HTTPS mandatory).',
+    s8li3:'JWT tokens with 30-day expiration and validation on every request.',
+    s8li4:'Audio files protected with AES-128 CBC encryption in the mobile app.',
+    s8li5:'Database access restricted by environment credentials, never exposed in code.',
+    s8li6:'Admin panel with role-based access control (ADMIN, ARTIST, LISTENER).',
+    s8p1:'In the event of a security breach affecting your data, we will notify you within a maximum of 72 hours if the risk is high, in accordance with GDPR art. 34.',
+    s9h2:'9. Minors',
+    s9ppre:'MbôláMusic does not knowingly collect data from children under 16. If we detect that a minor has registered without verifiable parental consent, we will delete their account. Write to us at',
+    s10h2:'10. Additional Rights for California Residents (CCPA/CPRA)',
+    s10p1:'If you reside in California (U.S.), the California Consumer Privacy Act (CCPA), as amended by the CPRA, grants you the following rights:',
+    s10li1strong:'Right to know:', s10li1text:'what categories of personal data we collect, use, and disclose, and for what purpose (see Sections 2 and 3).',
+    s10li2strong:'Right to delete', s10li2text:'your personal data, subject to applicable legal exceptions.',
+    s10li3strong:'Right to correct', s10li3text:'inaccurate personal data.',
+    s10li4strong:'Right not to be discriminated against', s10li4text:'for exercising any of these rights.',
+    s10li5strong:'Right to opt out of selling or sharing', s10li5text:'your personal information with third parties.',
+    s10highlightpre:'<strong>We do not sell or share personal information</strong> in exchange for consideration, nor do we use it for cross-context behavioral advertising. To exercise any CCPA right, write to',
+    s10highlightpost:'indicating "CCPA Request" in the subject line. We will respond within a maximum of 45 days.',
+    s11h2:'11. Changes to This Policy',
+    s11p1:'We will notify you at least 30 days in advance of any material change to this policy, by email or notice on the platform. Continued use of the service after that date implies acceptance of the changes.',
+    s12h2:'12. Contact and DPO', s12dpoStrong:'Data Protection Officer (DPO):', s12generalStrong:'General privacy inquiries:',
+    footerLegal:'This policy has been drafted in accordance with Regulation (EU) 2016/679 of the European Parliament and of the Council (GDPR), Directive 2002/58/EC (ePrivacy), and local Equatorial Guinea regulations.',
+    footerTerms:'Terms of use', footerHome:'Back to home',
+  },
+};
+
+function setText(id, val) { const el = document.getElementById(id); if (el && val != null) el.textContent = val; }
+function setHTML(id, val) { const el = document.getElementById(id); if (el && val != null) el.innerHTML = val; }
+
+function setLang(code, save = true) {
+  const t = T[code] || T['es'];
+  if (save) localStorage.setItem('mbola_lang', code);
+  document.documentElement.lang = code;
+  const l = LANGS[code];
+  document.getElementById('lang-current').textContent = `${l.flag} ${l.code}`;
+  document.querySelectorAll('.lang-opt').forEach((el, i) => {
+    const codes = ['es','fr','pt','en'];
+    el.classList.toggle('active', codes[i] === code);
+  });
+  setText('l-back', t.back);
+  setText('l-badge', t.badge);
+  setText('l-h1', t.h1);
+  setHTML('l-subtitle', t.subtitle);
+  setText('l-s1-h2', t.s1h2); setText('l-s1-correo', t.s1correo); setText('l-s1-dpo', t.s1dpo);
+  setText('l-s2-h2', t.s2h2);
+  setText('l-s2-th1', t.s2th1); setText('l-s2-th2', t.s2th2); setText('l-s2-th3', t.s2th3);
+  setText('l-s2-r1c1', t.s2r1c1); setText('l-s2-r1c2', t.s2r1c2); setText('l-s2-r1c3', t.s2r1c3);
+  setText('l-s2-r2c1', t.s2r2c1); setText('l-s2-r2c2', t.s2r2c2); setText('l-s2-r2c3', t.s2r2c3);
+  setText('l-s2-r3c1', t.s2r3c1); setText('l-s2-r3c2', t.s2r3c2); setText('l-s2-r3c3', t.s2r3c3);
+  setText('l-s2-r4c1', t.s2r4c1); setText('l-s2-r4c2', t.s2r4c2); setText('l-s2-r4c3', t.s2r4c3);
+  setText('l-s2-r5c1', t.s2r5c1); setText('l-s2-r5c2', t.s2r5c2); setText('l-s2-r5c3', t.s2r5c3);
+  setText('l-s2-r6c1', t.s2r6c1); setText('l-s2-r6c2', t.s2r6c2); setText('l-s2-r6c3', t.s2r6c3);
+  setText('l-s2-r7c1', t.s2r7c1); setText('l-s2-r7c2', t.s2r7c2); setText('l-s2-r7c3', t.s2r7c3);
+  setText('l-s2-p1', t.s2p1);
+  setText('l-s3-h2', t.s3h2); setText('l-s3-th1', t.s3th1); setText('l-s3-th2', t.s3th2);
+  setText('l-s3-r1c1', t.s3r1c1); setText('l-s3-r1c2', t.s3r1c2);
+  setText('l-s3-r2c1', t.s3r2c1); setText('l-s3-r2c2', t.s3r2c2);
+  setText('l-s3-r3c1', t.s3r3c1); setText('l-s3-r3c2', t.s3r3c2);
+  setText('l-s3-r4c1', t.s3r4c1); setText('l-s3-r4c2', t.s3r4c2);
+  setText('l-s3-r5c1', t.s3r5c1); setText('l-s3-r5c2', t.s3r5c2);
+  setText('l-s3-r6c1', t.s3r6c1); setText('l-s3-r6c2', t.s3r6c2);
+  setText('l-s4-h2', t.s4h2);
+  setText('l-s4-li1-strong', t.s4li1strong); setText('l-s4-li1-text', t.s4li1text);
+  setText('l-s4-li2-strong', t.s4li2strong); setText('l-s4-li2-text', t.s4li2text);
+  setText('l-s4-li3-strong', t.s4li3strong); setText('l-s4-li3-text', t.s4li3text);
+  setText('l-s4-li4-strong', t.s4li4strong); setText('l-s4-li4-text', t.s4li4text);
+  setText('l-s4-li5-strong', t.s4li5strong); setText('l-s4-li5-text', t.s4li5text);
+  setText('l-s5-h2', t.s5h2); setText('l-s5-h3a', t.s5h3a);
+  setHTML('l-s5-li1', t.s5li1); setHTML('l-s5-li2', t.s5li2); setHTML('l-s5-li3', t.s5li3); setHTML('l-s5-li4', t.s5li4);
+  setText('l-s5-h3b', t.s5h3b); setText('l-s5-p1', t.s5p1); setText('l-s5-p2', t.s5p2);
+  setText('l-s6-h2', t.s6h2);
+  setText('l-s6-h4-1', t.s6h41); setText('l-s6-p-1', t.s6p1);
+  setText('l-s6-h4-2', t.s6h42); setText('l-s6-p-2', t.s6p2);
+  setText('l-s6-h4-3', t.s6h43); setText('l-s6-p-3', t.s6p3);
+  setText('l-s6-h4-4', t.s6h44); setText('l-s6-p-4', t.s6p4);
+  setText('l-s6-h4-5', t.s6h45); setText('l-s6-p-5', t.s6p5);
+  setText('l-s6-h4-6', t.s6h46); setText('l-s6-p-6', t.s6p6);
+  setText('l-s6-h4-7', t.s6h47); setText('l-s6-p-7', t.s6p7);
+  setText('l-s6-h4-8', t.s6h48); setText('l-s6-p-8', t.s6p8);
+  setText('l-s6-p-pre', t.s6ppre + ' '); setHTML('l-s6-p-post', t.s6ppost);
+  setText('l-s7-h2', t.s7h2);
+  setText('l-s7-th1', t.s7th1); setText('l-s7-th2', t.s7th2); setText('l-s7-th3', t.s7th3); setText('l-s7-th4', t.s7th4);
+  setText('l-s7-r1c2', t.s7r1c2); setText('l-s7-r1c3', t.s7r1c3); setText('l-s7-r1c4', t.s7r1c4);
+  setText('l-s7-r2c2', t.s7r2c2); setText('l-s7-r2c3', t.s7r2c3); setText('l-s7-r2c4', t.s7r2c4);
+  setText('l-s7-r3c1', t.s7r3c1); setText('l-s7-r3c2', t.s7r3c2);
+  setText('l-s7-p1', t.s7p1);
+  setText('l-s8-h2', t.s8h2);
+  setText('l-s8-li1', t.s8li1); setText('l-s8-li2', t.s8li2); setText('l-s8-li3', t.s8li3);
+  setText('l-s8-li4', t.s8li4); setText('l-s8-li5', t.s8li5); setText('l-s8-li6', t.s8li6);
+  setText('l-s8-p1', t.s8p1);
+  setText('l-s9-h2', t.s9h2); setText('l-s9-p-pre', t.s9ppre + ' ');
+  setText('l-s10-h2', t.s10h2); setHTML('l-s10-p1', t.s10p1);
+  setText('l-s10-li1-strong', t.s10li1strong); setText('l-s10-li1-text', t.s10li1text);
+  setText('l-s10-li2-strong', t.s10li2strong); setText('l-s10-li2-text', t.s10li2text);
+  setText('l-s10-li3-strong', t.s10li3strong); setText('l-s10-li3-text', t.s10li3text);
+  setText('l-s10-li4-strong', t.s10li4strong); setText('l-s10-li4-text', t.s10li4text);
+  setText('l-s10-li5-strong', t.s10li5strong); setText('l-s10-li5-text', t.s10li5text);
+  setHTML('l-s10-highlight-pre', t.s10highlightpre + ' '); setText('l-s10-highlight-post', t.s10highlightpost);
+  setText('l-s11-h2', t.s11h2); setText('l-s11-p1', t.s11p1);
+  setText('l-s12-h2', t.s12h2); setText('l-s12-dpo-strong', t.s12dpoStrong); setText('l-s12-general-strong', t.s12generalStrong);
+  setText('l-footer-legal', t.footerLegal);
+  setText('l-footer-terms', t.footerTerms); setText('l-footer-home', t.footerHome);
+}
+
+setLang(localStorage.getItem('mbola_lang') || 'es', false);
+</script>
 </body>
 </html>

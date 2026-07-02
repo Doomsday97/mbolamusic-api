@@ -29,176 +29,641 @@
   th { background: var(--bg2); color: var(--amber); font-weight: 600; }
   td { color: #d0d0d0; }
   a { color: var(--amber); }
+  .lang-switcher { position:relative; margin-left:auto; }
+  .lang-btn { display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:0.35rem 0.7rem;cursor:pointer;color:var(--text);font-size:0.82rem;font-weight:600; }
+  .lang-btn:hover { border-color:var(--amber); }
+  .lang-dropdown { position:absolute;top:calc(100% + 6px);right:0;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:6px;min-width:130px;display:none;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,0.5); }
+  .lang-switcher:hover .lang-dropdown,.lang-switcher:focus-within .lang-dropdown { display:block; }
+  .lang-opt { display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:0.85rem;color:var(--text2);transition:background .15s; }
+  .lang-opt:hover,.lang-opt.active { background:rgba(245,158,11,0.12);color:var(--amber); }
 </style>
 </head>
 <body>
 <nav>
   <div class="nav-inner">
-    <a class="back" href="/">← Inicio</a>
+    <a class="back" href="/" id="l-back">← Inicio</a>
     <a class="logo" href="/"><div class="logo-icon">🎵</div> MbôláMusic</a>
+    <div class="lang-switcher">
+      <button class="lang-btn" id="lang-current">🌐 ES</button>
+      <div class="lang-dropdown">
+        <div class="lang-opt active" onclick="setLang('es')">🇪🇸 Español</div>
+        <div class="lang-opt" onclick="setLang('fr')">🇫🇷 Français</div>
+        <div class="lang-opt" onclick="setLang('pt')">🇵🇹 Português</div>
+        <div class="lang-opt" onclick="setLang('en')">🇬🇧 English</div>
+      </div>
+    </div>
   </div>
 </nav>
 
 <div class="page">
-  <span class="badge">Versión 1.1 — Junio 2026</span>
-  <h1>Términos de Uso</h1>
-  <p class="subtitle">
+  <span class="badge" id="l-badge">Versión 1.1 — Junio 2026</span>
+  <h1 id="l-h1">Términos de Uso</h1>
+  <p class="subtitle" id="l-subtitle">
     Última actualización: 30 de junio de 2026 · Aplicable a todos los usuarios de la plataforma MbôláMusic
     (web y aplicación móvil).
   </p>
 
-  <h2>1. Partes del Contrato</h2>
-  <p>Estos Términos de Uso ("Términos") constituyen un contrato vinculante entre <strong>MbôláMusic SARL</strong> ("MbôláMusic", "nosotros", "la plataforma") y cualquier persona que acceda o utilice los servicios ("Usuario", "tú").</p>
-  <p>Al crear una cuenta, descargar la aplicación o usar la web, aceptas estos Términos en su totalidad. Si no estás de acuerdo, no utilices el servicio.</p>
+  <h2 id="l-s1-h2">1. Partes del Contrato</h2>
+  <p id="l-s1-p1">Estos Términos de Uso ("Términos") constituyen un contrato vinculante entre <strong>MbôláMusic SARL</strong> ("MbôláMusic", "nosotros", "la plataforma") y cualquier persona que acceda o utilice los servicios ("Usuario", "tú").</p>
+  <p id="l-s1-p2">Al crear una cuenta, descargar la aplicación o usar la web, aceptas estos Términos en su totalidad. Si no estás de acuerdo, no utilices el servicio.</p>
 
-  <h2>2. Descripción del Servicio</h2>
-  <p>MbôláMusic es una plataforma de streaming y descarga de música dirigida principalmente al público de Guinea Ecuatorial. Ofrece:</p>
+  <h2 id="l-s2-h2">2. Descripción del Servicio</h2>
+  <p id="l-s2-p1">MbôláMusic es una plataforma de streaming y descarga de música dirigida principalmente al público de Guinea Ecuatorial. Ofrece:</p>
   <ul>
-    <li>Reproducción de música en línea y descarga cifrada para uso offline.</li>
-    <li>Portal para artistas: subida de música, estadísticas y cobro de regalías.</li>
-    <li>Sistema de pagos con monedero virtual en FCFA.</li>
-    <li>Funciones sociales: seguir artistas, feed personalizado, charts.</li>
+    <li id="l-s2-li1">Reproducción de música en línea y descarga cifrada para uso offline.</li>
+    <li id="l-s2-li2">Portal para artistas: subida de música, estadísticas y cobro de regalías.</li>
+    <li id="l-s2-li3">Sistema de pagos con monedero virtual en FCFA.</li>
+    <li id="l-s2-li4">Funciones sociales: seguir artistas, feed personalizado, charts.</li>
   </ul>
 
-  <h2>3. Registro y Cuenta</h2>
-  <h3>3.1 Requisitos</h3>
+  <h2 id="l-s3-h2">3. Registro y Cuenta</h2>
+  <h3 id="l-s3-h3a">3.1 Requisitos</h3>
   <ul>
-    <li>Debes tener al menos 16 años para registrarte.</li>
-    <li>Los datos de registro deben ser verídicos. Proporcionar información falsa puede resultar en la cancelación de la cuenta.</li>
-    <li>Eres responsable de mantener la confidencialidad de tu contraseña.</li>
+    <li id="l-s3-li1">Debes tener al menos 16 años para registrarte.</li>
+    <li id="l-s3-li2">Los datos de registro deben ser verídicos. Proporcionar información falsa puede resultar en la cancelación de la cuenta.</li>
+    <li id="l-s3-li3">Eres responsable de mantener la confidencialidad de tu contraseña.</li>
   </ul>
-  <h3>3.2 Tipos de cuenta</h3>
+  <h3 id="l-s3-h3b">3.2 Tipos de cuenta</h3>
   <table>
-    <thead><tr><th>Tipo</th><th>Descripción</th><th>Requisitos adicionales</th></tr></thead>
+    <thead><tr><th id="l-s3-th1">Tipo</th><th id="l-s3-th2">Descripción</th><th id="l-s3-th3">Requisitos adicionales</th></tr></thead>
     <tbody>
-      <tr><td>Oyente</td><td>Acceso al catálogo de música</td><td>Ninguno</td></tr>
-      <tr><td>Artista</td><td>Sube y publica música, recibe regalías</td><td>Nombre artístico, suscripción mensual activa</td></tr>
-      <tr><td>Administrador</td><td>Gestión completa de la plataforma</td><td>Designado por MbôláMusic</td></tr>
+      <tr><td id="l-s3-r1c1">Oyente</td><td id="l-s3-r1c2">Acceso al catálogo de música</td><td id="l-s3-r1c3">Ninguno</td></tr>
+      <tr><td id="l-s3-r2c1">Artista</td><td id="l-s3-r2c2">Sube y publica música, recibe regalías</td><td id="l-s3-r2c3">Nombre artístico, suscripción mensual activa</td></tr>
+      <tr><td id="l-s3-r3c1">Administrador</td><td id="l-s3-r3c2">Gestión completa de la plataforma</td><td id="l-s3-r3c3">Designado por MbôláMusic</td></tr>
     </tbody>
   </table>
 
-  <h2>4. Precios, Pagos y Reembolsos</h2>
-  <h3>4.1 Tarifas vigentes</h3>
+  <h2 id="l-s4-h2">4. Precios, Pagos y Reembolsos</h2>
+  <h3 id="l-s4-h3a">4.1 Tarifas vigentes</h3>
   <table>
-    <thead><tr><th>Concepto</th><th>Importe</th><th>Notas</th></tr></thead>
+    <thead><tr><th id="l-s4-th1">Concepto</th><th id="l-s4-th2">Importe</th><th id="l-s4-th3">Notas</th></tr></thead>
     <tbody>
-      <tr><td>Periodo gratuito inicial (oyentes)</td><td>0 FCFA</td><td>1 mes desde el registro</td></tr>
-      <tr><td>Suscripción mensual (oyente)</td><td>2.000 FCFA/mes</td><td>Renovación automática</td></tr>
-      <tr><td>Reproducción por uso (sin suscripción)</td><td>50 FCFA/canción</td><td>Descontado del monedero</td></tr>
-      <tr><td>Descarga para uso offline</td><td>200 FCFA/canción</td><td>Solo desde la app</td></tr>
-      <tr><td>Suscripción mensual (artista)</td><td>10.000 FCFA/mes</td><td>Necesaria para publicar música</td></tr>
+      <tr><td id="l-s4-r1c1">Periodo gratuito inicial (oyentes)</td><td>0 FCFA</td><td id="l-s4-r1c3">1 mes desde el registro</td></tr>
+      <tr><td id="l-s4-r2c1">Suscripción mensual (oyente)</td><td>2.000 FCFA/mes</td><td id="l-s4-r2c3">Renovación automática</td></tr>
+      <tr><td id="l-s4-r3c1">Reproducción por uso (sin suscripción)</td><td>50 FCFA/canción</td><td id="l-s4-r3c3">Descontado del monedero</td></tr>
+      <tr><td id="l-s4-r4c1">Descarga para uso offline</td><td>200 FCFA/canción</td><td id="l-s4-r4c3">Solo desde la app</td></tr>
+      <tr><td id="l-s4-r5c1">Suscripción mensual (artista)</td><td>10.000 FCFA/mes</td><td id="l-s4-r5c3">Necesaria para publicar música</td></tr>
     </tbody>
   </table>
-  <h3>4.2 Regalías de artistas</h3>
-  <p>El artista recibe el <strong>70 % del importe de cada reproducción de pago o descarga</strong>; el 30 % restante corresponde a la comisión de la plataforma. Las ganancias se acreditan al perfil del artista y pueden retirarse mediante solicitud al administrador.</p>
-  <h3>4.3 Política de reembolsos</h3>
+  <h3 id="l-s4-h3b">4.2 Regalías de artistas</h3>
+  <p id="l-s4-p1">El artista recibe el <strong>70&nbsp;% del importe de cada reproducción de pago o descarga</strong>; el 30&nbsp;% restante corresponde a la comisión de la plataforma. Las ganancias se acreditan al perfil del artista y pueden retirarse mediante solicitud al administrador.</p>
+  <h3 id="l-s4-h3c">4.3 Política de reembolsos</h3>
   <div class="warn">
-    <p>Los pagos de suscripción no son reembolsables una vez activados, salvo error técnico imputable a MbôláMusic demostrable. Los recargas de monedero no utilizadas pueden solicitarse como reembolso dentro de los 14 días naturales siguientes a la recarga, conforme al derecho de desistimiento europeo (Directiva 2011/83/UE) cuando aplique.</p>
+    <p id="l-s4-warn">Los pagos de suscripción no son reembolsables una vez activados, salvo error técnico imputable a MbôláMusic demostrable. Los recargas de monedero no utilizadas pueden solicitarse como reembolso dentro de los 14 días naturales siguientes a la recarga, conforme al derecho de desistimiento europeo (Directiva 2011/83/UE) cuando aplique.</p>
   </div>
 
-  <h2>5. Obligaciones del Usuario Oyente</h2>
+  <h2 id="l-s5-h2">5. Obligaciones del Usuario Oyente</h2>
   <ul>
-    <li>Usar el servicio exclusivamente para uso personal, no comercial.</li>
-    <li>No redistribuir, retransmitir ni compartir públicamente el contenido descargado.</li>
-    <li>No intentar eludir los sistemas de protección DRM/cifrado.</li>
-    <li>No usar la plataforma para actividades ilegales.</li>
+    <li id="l-s5-li1">Usar el servicio exclusivamente para uso personal, no comercial.</li>
+    <li id="l-s5-li2">No redistribuir, retransmitir ni compartir públicamente el contenido descargado.</li>
+    <li id="l-s5-li3">No intentar eludir los sistemas de protección DRM/cifrado.</li>
+    <li id="l-s5-li4">No usar la plataforma para actividades ilegales.</li>
   </ul>
 
-  <h2>6. Obligaciones del Usuario Artista</h2>
+  <h2 id="l-s6-h2">6. Obligaciones del Usuario Artista</h2>
   <ul>
-    <li>Garantizar que posees todos los derechos (de autor, de interpretación, de fonograma) sobre la música que subes, o que cuentas con la autorización correspondiente.</li>
-    <li>No subir música de terceros sin licencia, contenido ofensivo, violento, de odio o que viole derechos de menores.</li>
-    <li>Mantener la suscripción activa para que tu música permanezca visible. Si caduca, la música se oculta temporalmente, no se elimina.</li>
-    <li>Proporcionar datos bancarios válidos para recibir regalías.</li>
+    <li id="l-s6-li1">Garantizar que posees todos los derechos (de autor, de interpretación, de fonograma) sobre la música que subes, o que cuentas con la autorización correspondiente.</li>
+    <li id="l-s6-li2">No subir música de terceros sin licencia, contenido ofensivo, violento, de odio o que viole derechos de menores.</li>
+    <li id="l-s6-li3">Mantener la suscripción activa para que tu música permanezca visible. Si caduca, la música se oculta temporalmente, no se elimina.</li>
+    <li id="l-s6-li4">Proporcionar datos bancarios válidos para recibir regalías.</li>
   </ul>
   <div class="highlight">
-    <p><strong>Propiedad intelectual:</strong> MbôláMusic actúa como plataforma de distribución. No adquiere ningún derecho de propiedad sobre tu música. Concedes a MbôláMusic una licencia limitada, no exclusiva y revocable para reproducir, transmitir y almacenar tu música dentro del servicio.</p>
+    <p id="l-s6-highlight"><strong>Propiedad intelectual:</strong> MbôláMusic actúa como plataforma de distribución. No adquiere ningún derecho de propiedad sobre tu música. Concedes a MbôláMusic una licencia limitada, no exclusiva y revocable para reproducir, transmitir y almacenar tu música dentro del servicio.</p>
   </div>
 
-  <h2>7. Contenido Prohibido</h2>
-  <p>Queda expresamente prohibido publicar o compartir contenido que:</p>
+  <h2 id="l-s7-h2">7. Contenido Prohibido</h2>
+  <p id="l-s7-p1">Queda expresamente prohibido publicar o compartir contenido que:</p>
   <ul>
-    <li>Infrinja derechos de propiedad intelectual de terceros.</li>
-    <li>Incite al odio por razón de raza, etnia, género, religión, orientación sexual, discapacidad u otras características protegidas.</li>
-    <li>Contenga material sexualmente explícito que involucre a menores.</li>
-    <li>Promueva actividades ilegales, violencia o terrorismo.</li>
-    <li>Difunda información falsa que cause daño a personas u organizaciones.</li>
+    <li id="l-s7-li1">Infrinja derechos de propiedad intelectual de terceros.</li>
+    <li id="l-s7-li2">Incite al odio por razón de raza, etnia, género, religión, orientación sexual, discapacidad u otras características protegidas.</li>
+    <li id="l-s7-li3">Contenga material sexualmente explícito que involucre a menores.</li>
+    <li id="l-s7-li4">Promueva actividades ilegales, violencia o terrorismo.</li>
+    <li id="l-s7-li5">Difunda información falsa que cause daño a personas u organizaciones.</li>
   </ul>
 
-  <h2>8. Notificación y Retirada de Contenido (Procedimiento DMCA)</h2>
-  <p>MbôláMusic respeta los derechos de propiedad intelectual de terceros y responde a notificaciones válidas de infracción de derechos de autor conforme a la Digital Millennium Copyright Act (DMCA, 17 U.S.C. § 512) y a la legislación aplicable en cada jurisdicción.</p>
-  <h3>8.1 Agente designado</h3>
+  <h2 id="l-s8-h2">8. Notificación y Retirada de Contenido (Procedimiento DMCA)</h2>
+  <p id="l-s8-p1">MbôláMusic respeta los derechos de propiedad intelectual de terceros y responde a notificaciones válidas de infracción de derechos de autor conforme a la Digital Millennium Copyright Act (DMCA, 17 U.S.C. § 512) y a la legislación aplicable en cada jurisdicción.</p>
+  <h3 id="l-s8-h3a">8.1 Agente designado</h3>
   <div class="highlight">
-    <p>
+    <p id="l-s8-highlight">
       <strong>Agente DMCA de MbôláMusic SARL</strong><br>
-      Correo: <a href="mailto:dmca@mbolamusic.com">dmca@mbolamusic.com</a><br>
-      Registrado en el U.S. Copyright Office conforme al 17 U.S.C. § 512(c)(2).
+      <span id="l-s8-correo-label">Correo</span>: <a href="mailto:dmca@mbolamusic.com">dmca@mbolamusic.com</a><br>
+      <span id="l-s8-registrado">Registrado en el U.S. Copyright Office conforme al 17 U.S.C. § 512(c)(2).</span>
     </p>
   </div>
-  <h3>8.2 Cómo enviar una notificación de infracción</h3>
-  <p>Si consideras que tu obra protegida por derechos de autor ha sido copiada o distribuida en la plataforma de forma que constituye una infracción, envía una notificación por escrito a nuestro agente designado que incluya:</p>
+  <h3 id="l-s8-h3b">8.2 Cómo enviar una notificación de infracción</h3>
+  <p id="l-s8-p2">Si consideras que tu obra protegida por derechos de autor ha sido copiada o distribuida en la plataforma de forma que constituye una infracción, envía una notificación por escrito a nuestro agente designado que incluya:</p>
   <ul>
-    <li>Firma física o electrónica del titular del derecho o de su representante autorizado.</li>
-    <li>Identificación de la obra protegida que reclamas infringida.</li>
-    <li>Identificación del contenido infractor y su ubicación en la plataforma (enlace o ID de la pista).</li>
-    <li>Tus datos de contacto: nombre, dirección, teléfono y correo electrónico.</li>
-    <li>Declaración de buena fe de que el uso denunciado no está autorizado por el titular, su representante o la ley.</li>
-    <li>Declaración, bajo pena de perjurio, de que la información de la notificación es exacta y de que eres el titular del derecho o estás autorizado a actuar en su nombre.</li>
+    <li id="l-s8-li1">Firma física o electrónica del titular del derecho o de su representante autorizado.</li>
+    <li id="l-s8-li2">Identificación de la obra protegida que reclamas infringida.</li>
+    <li id="l-s8-li3">Identificación del contenido infractor y su ubicación en la plataforma (enlace o ID de la pista).</li>
+    <li id="l-s8-li4">Tus datos de contacto: nombre, dirección, teléfono y correo electrónico.</li>
+    <li id="l-s8-li5">Declaración de buena fe de que el uso denunciado no está autorizado por el titular, su representante o la ley.</li>
+    <li id="l-s8-li6">Declaración, bajo pena de perjurio, de que la información de la notificación es exacta y de que eres el titular del derecho o estás autorizado a actuar en su nombre.</li>
   </ul>
-  <h3>8.3 Retirada y contranotificación</h3>
-  <p>Tras recibir una notificación válida, retiraremos o deshabilitaremos el acceso al contenido denunciado con prontitud y notificaremos al artista que lo subió. El artista puede presentar una contranotificación con los mismos requisitos formales si considera que la retirada fue errónea o el contenido fue identificado incorrectamente; en tal caso, podremos restaurar el contenido en un plazo de 10 a 14 días hábiles, salvo que el reclamante inicie una acción judicial antes de ese plazo.</p>
-  <h3>8.4 Infractores reiterados</h3>
-  <p>MbôláMusic cancelará, en circunstancias apropiadas, las cuentas de artistas que sean infractores reiterados de derechos de autor.</p>
+  <h3 id="l-s8-h3c">8.3 Retirada y contranotificación</h3>
+  <p id="l-s8-p3">Tras recibir una notificación válida, retiraremos o deshabilitaremos el acceso al contenido denunciado con prontitud y notificaremos al artista que lo subió. El artista puede presentar una contranotificación con los mismos requisitos formales si considera que la retirada fue errónea o el contenido fue identificado incorrectamente; en tal caso, podremos restaurar el contenido en un plazo de 10 a 14 días hábiles, salvo que el reclamante inicie una acción judicial antes de ese plazo.</p>
+  <h3 id="l-s8-h3d">8.4 Infractores reiterados</h3>
+  <p id="l-s8-p4">MbôláMusic cancelará, en circunstancias apropiadas, las cuentas de artistas que sean infractores reiterados de derechos de autor.</p>
 
-  <h2>9. Propiedad Intelectual de la Plataforma</h2>
-  <p>Todos los derechos sobre el software, diseño, marcas, logotipos, nombre comercial "MbôláMusic" y contenido propio (excluida la música de los artistas) pertenecen a MbôláMusic SARL. Queda prohibida su reproducción, modificación o distribución sin autorización escrita.</p>
+  <h2 id="l-s9-h2">9. Propiedad Intelectual de la Plataforma</h2>
+  <p id="l-s9-p1">Todos los derechos sobre el software, diseño, marcas, logotipos, nombre comercial "MbôláMusic" y contenido propio (excluida la música de los artistas) pertenecen a MbôláMusic SARL. Queda prohibida su reproducción, modificación o distribución sin autorización escrita.</p>
 
-  <h2>10. Limitación de Responsabilidad</h2>
+  <h2 id="l-s10-h2">10. Limitación de Responsabilidad</h2>
   <ul>
-    <li>MbôláMusic no garantiza la disponibilidad ininterrumpida del servicio (fuerza mayor, mantenimiento, etc.).</li>
-    <li>No nos hacemos responsables del contenido subido por los artistas. Sin embargo, retiraremos contenido ilícito en cuanto tengamos conocimiento efectivo.</li>
-    <li>En ningún caso nuestra responsabilidad total excederá el importe pagado por el usuario en los 3 meses anteriores al evento.</li>
-    <li>Estas limitaciones se aplican en la máxima medida permitida por la ley aplicable.</li>
-  </ul>
-
-  <h2>11. Suspensión y Cancelación</h2>
-  <ul>
-    <li><strong>Por el usuario:</strong> puedes cancelar tu cuenta en cualquier momento escribiendo a <a href="mailto:privacidad@mbolamusic.com">privacidad@mbolamusic.com</a>.</li>
-    <li><strong>Por MbôláMusic:</strong> podemos suspender o cancelar cuentas que incumplan estos Términos, sin reembolso, tras un aviso previo (salvo en casos de infracción grave).</li>
-    <li>Tras la cancelación, los datos se tratan conforme a la <a href="/privacidad.html">Política de Privacidad</a>.</li>
+    <li id="l-s10-li1">MbôláMusic no garantiza la disponibilidad ininterrumpida del servicio (fuerza mayor, mantenimiento, etc.).</li>
+    <li id="l-s10-li2">No nos hacemos responsables del contenido subido por los artistas. Sin embargo, retiraremos contenido ilícito en cuanto tengamos conocimiento efectivo.</li>
+    <li id="l-s10-li3">En ningún caso nuestra responsabilidad total excederá el importe pagado por el usuario en los 3 meses anteriores al evento.</li>
+    <li id="l-s10-li4">Estas limitaciones se aplican en la máxima medida permitida por la ley aplicable.</li>
   </ul>
 
-  <h2>12. Modificación de los Términos</h2>
-  <p>Nos reservamos el derecho de modificar estos Términos. Te notificaremos con al menos <strong>30 días de antelación</strong> por correo electrónico o aviso en la plataforma. Si continúas usando el servicio tras esa fecha, aceptas los nuevos Términos. Si no estás de acuerdo, puedes cancelar tu cuenta antes de la fecha de entrada en vigor.</p>
+  <h2 id="l-s11-h2">11. Suspensión y Cancelación</h2>
+  <ul>
+    <li id="l-s11-li1"><strong id="l-s11-li1-strong">Por el usuario:</strong> <span id="l-s11-li1-text">puedes cancelar tu cuenta en cualquier momento escribiendo a</span> <a href="mailto:privacidad@mbolamusic.com">privacidad@mbolamusic.com</a>.</li>
+    <li id="l-s11-li2"><strong id="l-s11-li2-strong">Por MbôláMusic:</strong> <span id="l-s11-li2-text">podemos suspender o cancelar cuentas que incumplan estos Términos, sin reembolso, tras un aviso previo (salvo en casos de infracción grave).</span></li>
+    <li id="l-s11-li3"><span id="l-s11-li3-pre">Tras la cancelación, los datos se tratan conforme a la</span> <a href="/privacidad.html" id="l-s11-li3-link">Política de Privacidad</a>.</li>
+  </ul>
 
-  <h2>13. Ley Aplicable, Arbitraje y Resolución de Disputas</h2>
-  <p>Estos Términos se rigen por la legislación de <strong>Guinea Ecuatorial</strong>. En materia de protección de datos y derechos de los consumidores de la Unión Europea, se aplica adicionalmente la legislación europea correspondiente, en lo que no pueda excluirse por contrato.</p>
-  <h3>13.1 Arbitraje vinculante y renuncia a acciones colectivas</h3>
+  <h2 id="l-s12-h2">12. Modificación de los Términos</h2>
+  <p id="l-s12-p1">Nos reservamos el derecho de modificar estos Términos. Te notificaremos con al menos <strong>30 días de antelación</strong> por correo electrónico o aviso en la plataforma. Si continúas usando el servicio tras esa fecha, aceptas los nuevos Términos. Si no estás de acuerdo, puedes cancelar tu cuenta antes de la fecha de entrada en vigor.</p>
+
+  <h2 id="l-s13-h2">13. Ley Aplicable, Arbitraje y Resolución de Disputas</h2>
+  <p id="l-s13-p1">Estos Términos se rigen por la legislación de <strong>Guinea Ecuatorial</strong>. En materia de protección de datos y derechos de los consumidores de la Unión Europea, se aplica adicionalmente la legislación europea correspondiente, en lo que no pueda excluirse por contrato.</p>
+  <h3 id="l-s13-h3a">13.1 Arbitraje vinculante y renuncia a acciones colectivas</h3>
   <div class="highlight">
-    <p>Salvo que la legislación imperativa aplicable a tu favor disponga lo contrario (p. ej. derechos irrenunciables de consumidores de la UE), tú y MbôláMusic acordáis resolver cualquier disputa, reclamación o controversia derivada de estos Términos o del uso del servicio mediante <strong>arbitraje individual y vinculante</strong>, y renunciáis expresamente al derecho a iniciar o participar en una <strong>demanda colectiva, acción de clase o procedimiento representativo</strong>, así como al derecho a un juicio con jurado.</p>
+    <p id="l-s13-highlight">Salvo que la legislación imperativa aplicable a tu favor disponga lo contrario (p. ej. derechos irrenunciables de consumidores de la UE), tú y MbôláMusic acordáis resolver cualquier disputa, reclamación o controversia derivada de estos Términos o del uso del servicio mediante <strong>arbitraje individual y vinculante</strong>, y renunciáis expresamente al derecho a iniciar o participar en una <strong>demanda colectiva, acción de clase o procedimiento representativo</strong>, así como al derecho a un juicio con jurado.</p>
   </div>
   <ul>
-    <li>El arbitraje se administrará por una institución arbitral reconocida y mutuamente acordada (p. ej. AAA o JAMS para usuarios en EE. UU., o el centro de arbitraje comercial competente según tu país de residencia).</li>
-    <li>Antes de iniciar un arbitraje, ambas partes intentarán resolver la disputa de forma informal escribiendo a <a href="mailto:legal@mbolamusic.com">legal@mbolamusic.com</a>. Si no se alcanza acuerdo en 30 días, cualquiera de las partes puede iniciar el arbitraje.</li>
-    <li>Cada parte asume sus propios costes de representación legal; los costes administrativos del arbitraje se asignan conforme a las reglas de la institución arbitral elegida.</li>
-    <li>Esta cláusula no se aplica a: (a) reclamaciones que puedan presentarse ante un juzgado de menor cuantía; (b) usuarios de la UE en la medida en que la normativa de protección al consumidor les garantice el derecho a acudir a los tribunales o a la plataforma ODR; (c) acciones por infracción de propiedad intelectual, incluido el procedimiento DMCA de la Sección 8.</li>
+    <li id="l-s13-li1">El arbitraje se administrará por una institución arbitral reconocida y mutuamente acordada (p. ej. AAA o JAMS para usuarios en EE.&nbsp;UU., o el centro de arbitraje comercial competente según tu país de residencia).</li>
+    <li id="l-s13-li2"><span id="l-s13-li2-pre">Antes de iniciar un arbitraje, ambas partes intentarán resolver la disputa de forma informal escribiendo a</span> <a href="mailto:legal@mbolamusic.com">legal@mbolamusic.com</a><span id="l-s13-li2-post">. Si no se alcanza acuerdo en 30 días, cualquiera de las partes puede iniciar el arbitraje.</span></li>
+    <li id="l-s13-li3">Cada parte asume sus propios costes de representación legal; los costes administrativos del arbitraje se asignan conforme a las reglas de la institución arbitral elegida.</li>
+    <li id="l-s13-li4">Esta cláusula no se aplica a: (a) reclamaciones que puedan presentarse ante un juzgado de menor cuantía; (b) usuarios de la UE en la medida en que la normativa de protección al consumidor les garantice el derecho a acudir a los tribunales o a la plataforma ODR; (c) acciones por infracción de propiedad intelectual, incluido el procedimiento DMCA de la Sección 8.</li>
   </ul>
-  <h3>13.2 Usuarios no sujetos a arbitraje (p. ej. consumidores de la UE)</h3>
-  <p>Fomentamos el contacto directo en primera instancia: <a href="mailto:soporte@mbolamusic.com">soporte@mbolamusic.com</a>. Si no se alcanza un acuerdo, las partes podrán acudir a mediación o a los tribunales competentes de Malabo, Guinea Ecuatorial. Los consumidores de la UE pueden también acudir a la plataforma de resolución en línea de litigios de la Comisión Europea (ODR): <a href="https://ec.europa.eu/odr" target="_blank">ec.europa.eu/odr</a>.</p>
+  <h3 id="l-s13-h3b">13.2 Usuarios no sujetos a arbitraje (p. ej. consumidores de la UE)</h3>
+  <p><span id="l-s13-p2-pre">Fomentamos el contacto directo en primera instancia:</span> <a href="mailto:soporte@mbolamusic.com">soporte@mbolamusic.com</a>. <span id="l-s13-p2-post">Si no se alcanza un acuerdo, las partes podrán acudir a mediación o a los tribunales competentes de Malabo, Guinea Ecuatorial. Los consumidores de la UE pueden también acudir a la plataforma de resolución en línea de litigios de la Comisión Europea (ODR):</span> <a href="https://ec.europa.eu/odr" target="_blank">ec.europa.eu/odr</a>.</p>
 
-  <h2>14. Contacto</h2>
+  <h2 id="l-s14-h2">14. Contacto</h2>
   <div class="highlight">
     <p>
       <strong>MbôláMusic SARL</strong><br>
       Malabo, Guinea Ecuatorial<br>
-      Soporte: <a href="mailto:soporte@mbolamusic.com">soporte@mbolamusic.com</a><br>
-      Legal: <a href="mailto:legal@mbolamusic.com">legal@mbolamusic.com</a>
+      <span id="l-s14-soporte">Soporte</span>: <a href="mailto:soporte@mbolamusic.com">soporte@mbolamusic.com</a><br>
+      <span id="l-s14-legal">Legal</span>: <a href="mailto:legal@mbolamusic.com">legal@mbolamusic.com</a>
     </p>
   </div>
 
   <p style="margin-top:2rem;color:var(--text2);font-size:0.82rem;border-top:1px solid var(--border);padding-top:1.5rem;">
-    · <a href="/privacidad.html">Política de Privacidad</a> · <a href="/">Volver al inicio</a>
+    · <a href="/privacidad.html" id="l-footer-privacy">Política de Privacidad</a> · <a href="/" id="l-footer-home">Volver al inicio</a>
   </p>
 </div>
+
+<script>
+const LANGS = {
+  es: { flag:'🇪🇸', code:'ES' }, fr: { flag:'🇫🇷', code:'FR' },
+  pt: { flag:'🇵🇹', code:'PT' }, en: { flag:'🇬🇧', code:'EN' },
+};
+
+const T = {
+  es: {
+    back:'← Inicio', badge:'Versión 1.1 — Junio 2026', h1:'Términos de Uso',
+    subtitle:'Última actualización: 30 de junio de 2026 · Aplicable a todos los usuarios de la plataforma MbôláMusic (web y aplicación móvil).',
+    s1h2:'1. Partes del Contrato',
+    s1p1:'Estos Términos de Uso ("Términos") constituyen un contrato vinculante entre <strong>MbôláMusic SARL</strong> ("MbôláMusic", "nosotros", "la plataforma") y cualquier persona que acceda o utilice los servicios ("Usuario", "tú").',
+    s1p2:'Al crear una cuenta, descargar la aplicación o usar la web, aceptas estos Términos en su totalidad. Si no estás de acuerdo, no utilices el servicio.',
+    s2h2:'2. Descripción del Servicio',
+    s2p1:'MbôláMusic es una plataforma de streaming y descarga de música dirigida principalmente al público de Guinea Ecuatorial. Ofrece:',
+    s2li1:'Reproducción de música en línea y descarga cifrada para uso offline.',
+    s2li2:'Portal para artistas: subida de música, estadísticas y cobro de regalías.',
+    s2li3:'Sistema de pagos con monedero virtual en FCFA.',
+    s2li4:'Funciones sociales: seguir artistas, feed personalizado, charts.',
+    s3h2:'3. Registro y Cuenta', s3h3a:'3.1 Requisitos',
+    s3li1:'Debes tener al menos 16 años para registrarte.',
+    s3li2:'Los datos de registro deben ser verídicos. Proporcionar información falsa puede resultar en la cancelación de la cuenta.',
+    s3li3:'Eres responsable de mantener la confidencialidad de tu contraseña.',
+    s3h3b:'3.2 Tipos de cuenta', s3th1:'Tipo', s3th2:'Descripción', s3th3:'Requisitos adicionales',
+    s3r1c1:'Oyente', s3r1c2:'Acceso al catálogo de música', s3r1c3:'Ninguno',
+    s3r2c1:'Artista', s3r2c2:'Sube y publica música, recibe regalías', s3r2c3:'Nombre artístico, suscripción mensual activa',
+    s3r3c1:'Administrador', s3r3c2:'Gestión completa de la plataforma', s3r3c3:'Designado por MbôláMusic',
+    s4h2:'4. Precios, Pagos y Reembolsos', s4h3a:'4.1 Tarifas vigentes',
+    s4th1:'Concepto', s4th2:'Importe', s4th3:'Notas',
+    s4r1c1:'Periodo gratuito inicial (oyentes)', s4r1c3:'1 mes desde el registro',
+    s4r2c1:'Suscripción mensual (oyente)', s4r2c3:'Renovación automática',
+    s4r3c1:'Reproducción por uso (sin suscripción)', s4r3c3:'Descontado del monedero',
+    s4r4c1:'Descarga para uso offline', s4r4c3:'Solo desde la app',
+    s4r5c1:'Suscripción mensual (artista)', s4r5c3:'Necesaria para publicar música',
+    s4h3b:'4.2 Regalías de artistas',
+    s4p1:'El artista recibe el <strong>70&nbsp;% del importe de cada reproducción de pago o descarga</strong>; el 30&nbsp;% restante corresponde a la comisión de la plataforma. Las ganancias se acreditan al perfil del artista y pueden retirarse mediante solicitud al administrador.',
+    s4h3c:'4.3 Política de reembolsos',
+    s4warn:'Los pagos de suscripción no son reembolsables una vez activados, salvo error técnico imputable a MbôláMusic demostrable. Los recargas de monedero no utilizadas pueden solicitarse como reembolso dentro de los 14 días naturales siguientes a la recarga, conforme al derecho de desistimiento europeo (Directiva 2011/83/UE) cuando aplique.',
+    s5h2:'5. Obligaciones del Usuario Oyente',
+    s5li1:'Usar el servicio exclusivamente para uso personal, no comercial.',
+    s5li2:'No redistribuir, retransmitir ni compartir públicamente el contenido descargado.',
+    s5li3:'No intentar eludir los sistemas de protección DRM/cifrado.',
+    s5li4:'No usar la plataforma para actividades ilegales.',
+    s6h2:'6. Obligaciones del Usuario Artista',
+    s6li1:'Garantizar que posees todos los derechos (de autor, de interpretación, de fonograma) sobre la música que subes, o que cuentas con la autorización correspondiente.',
+    s6li2:'No subir música de terceros sin licencia, contenido ofensivo, violento, de odio o que viole derechos de menores.',
+    s6li3:'Mantener la suscripción activa para que tu música permanezca visible. Si caduca, la música se oculta temporalmente, no se elimina.',
+    s6li4:'Proporcionar datos bancarios válidos para recibir regalías.',
+    s6highlight:'<strong>Propiedad intelectual:</strong> MbôláMusic actúa como plataforma de distribución. No adquiere ningún derecho de propiedad sobre tu música. Concedes a MbôláMusic una licencia limitada, no exclusiva y revocable para reproducir, transmitir y almacenar tu música dentro del servicio.',
+    s7h2:'7. Contenido Prohibido', s7p1:'Queda expresamente prohibido publicar o compartir contenido que:',
+    s7li1:'Infrinja derechos de propiedad intelectual de terceros.',
+    s7li2:'Incite al odio por razón de raza, etnia, género, religión, orientación sexual, discapacidad u otras características protegidas.',
+    s7li3:'Contenga material sexualmente explícito que involucre a menores.',
+    s7li4:'Promueva actividades ilegales, violencia o terrorismo.',
+    s7li5:'Difunda información falsa que cause daño a personas u organizaciones.',
+    s8h2:'8. Notificación y Retirada de Contenido (Procedimiento DMCA)',
+    s8p1:'MbôláMusic respeta los derechos de propiedad intelectual de terceros y responde a notificaciones válidas de infracción de derechos de autor conforme a la Digital Millennium Copyright Act (DMCA, 17 U.S.C. § 512) y a la legislación aplicable en cada jurisdicción.',
+    s8h3a:'8.1 Agente designado', s8correoLabel:'Correo',
+    s8registrado:'Registrado en el U.S. Copyright Office conforme al 17 U.S.C. § 512(c)(2).',
+    s8h3b:'8.2 Cómo enviar una notificación de infracción',
+    s8p2:'Si consideras que tu obra protegida por derechos de autor ha sido copiada o distribuida en la plataforma de forma que constituye una infracción, envía una notificación por escrito a nuestro agente designado que incluya:',
+    s8li1:'Firma física o electrónica del titular del derecho o de su representante autorizado.',
+    s8li2:'Identificación de la obra protegida que reclamas infringida.',
+    s8li3:'Identificación del contenido infractor y su ubicación en la plataforma (enlace o ID de la pista).',
+    s8li4:'Tus datos de contacto: nombre, dirección, teléfono y correo electrónico.',
+    s8li5:'Declaración de buena fe de que el uso denunciado no está autorizado por el titular, su representante o la ley.',
+    s8li6:'Declaración, bajo pena de perjurio, de que la información de la notificación es exacta y de que eres el titular del derecho o estás autorizado a actuar en su nombre.',
+    s8h3c:'8.3 Retirada y contranotificación',
+    s8p3:'Tras recibir una notificación válida, retiraremos o deshabilitaremos el acceso al contenido denunciado con prontitud y notificaremos al artista que lo subió. El artista puede presentar una contranotificación con los mismos requisitos formales si considera que la retirada fue errónea o el contenido fue identificado incorrectamente; en tal caso, podremos restaurar el contenido en un plazo de 10 a 14 días hábiles, salvo que el reclamante inicie una acción judicial antes de ese plazo.',
+    s8h3d:'8.4 Infractores reiterados',
+    s8p4:'MbôláMusic cancelará, en circunstancias apropiadas, las cuentas de artistas que sean infractores reiterados de derechos de autor.',
+    s9h2:'9. Propiedad Intelectual de la Plataforma',
+    s9p1:'Todos los derechos sobre el software, diseño, marcas, logotipos, nombre comercial "MbôláMusic" y contenido propio (excluida la música de los artistas) pertenecen a MbôláMusic SARL. Queda prohibida su reproducción, modificación o distribución sin autorización escrita.',
+    s10h2:'10. Limitación de Responsabilidad',
+    s10li1:'MbôláMusic no garantiza la disponibilidad ininterrumpida del servicio (fuerza mayor, mantenimiento, etc.).',
+    s10li2:'No nos hacemos responsables del contenido subido por los artistas. Sin embargo, retiraremos contenido ilícito en cuanto tengamos conocimiento efectivo.',
+    s10li3:'En ningún caso nuestra responsabilidad total excederá el importe pagado por el usuario en los 3 meses anteriores al evento.',
+    s10li4:'Estas limitaciones se aplican en la máxima medida permitida por la ley aplicable.',
+    s11h2:'11. Suspensión y Cancelación',
+    s11li1strong:'Por el usuario:', s11li1text:'puedes cancelar tu cuenta en cualquier momento escribiendo a',
+    s11li2strong:'Por MbôláMusic:', s11li2text:'podemos suspender o cancelar cuentas que incumplan estos Términos, sin reembolso, tras un aviso previo (salvo en casos de infracción grave).',
+    s11li3pre:'Tras la cancelación, los datos se tratan conforme a la', s11li3link:'Política de Privacidad',
+    s12h2:'12. Modificación de los Términos',
+    s12p1:'Nos reservamos el derecho de modificar estos Términos. Te notificaremos con al menos <strong>30 días de antelación</strong> por correo electrónico o aviso en la plataforma. Si continúas usando el servicio tras esa fecha, aceptas los nuevos Términos. Si no estás de acuerdo, puedes cancelar tu cuenta antes de la fecha de entrada en vigor.',
+    s13h2:'13. Ley Aplicable, Arbitraje y Resolución de Disputas',
+    s13p1:'Estos Términos se rigen por la legislación de <strong>Guinea Ecuatorial</strong>. En materia de protección de datos y derechos de los consumidores de la Unión Europea, se aplica adicionalmente la legislación europea correspondiente, en lo que no pueda excluirse por contrato.',
+    s13h3a:'13.1 Arbitraje vinculante y renuncia a acciones colectivas',
+    s13highlight:'Salvo que la legislación imperativa aplicable a tu favor disponga lo contrario (p. ej. derechos irrenunciables de consumidores de la UE), tú y MbôláMusic acordáis resolver cualquier disputa, reclamación o controversia derivada de estos Términos o del uso del servicio mediante <strong>arbitraje individual y vinculante</strong>, y renunciáis expresamente al derecho a iniciar o participar en una <strong>demanda colectiva, acción de clase o procedimiento representativo</strong>, así como al derecho a un juicio con jurado.',
+    s13li1:'El arbitraje se administrará por una institución arbitral reconocida y mutuamente acordada (p. ej. AAA o JAMS para usuarios en EE.&nbsp;UU., o el centro de arbitraje comercial competente según tu país de residencia).',
+    s13li2pre:'Antes de iniciar un arbitraje, ambas partes intentarán resolver la disputa de forma informal escribiendo a',
+    s13li2post:'. Si no se alcanza acuerdo en 30 días, cualquiera de las partes puede iniciar el arbitraje.',
+    s13li3:'Cada parte asume sus propios costes de representación legal; los costes administrativos del arbitraje se asignan conforme a las reglas de la institución arbitral elegida.',
+    s13li4:'Esta cláusula no se aplica a: (a) reclamaciones que puedan presentarse ante un juzgado de menor cuantía; (b) usuarios de la UE en la medida en que la normativa de protección al consumidor les garantice el derecho a acudir a los tribunales o a la plataforma ODR; (c) acciones por infracción de propiedad intelectual, incluido el procedimiento DMCA de la Sección 8.',
+    s13h3b:'13.2 Usuarios no sujetos a arbitraje (p. ej. consumidores de la UE)',
+    s13p2pre:'Fomentamos el contacto directo en primera instancia:',
+    s13p2post:'Si no se alcanza un acuerdo, las partes podrán acudir a mediación o a los tribunales competentes de Malabo, Guinea Ecuatorial. Los consumidores de la UE pueden también acudir a la plataforma de resolución en línea de litigios de la Comisión Europea (ODR):',
+    s14h2:'14. Contacto', s14soporte:'Soporte', s14legal:'Legal',
+    footerPrivacy:'Política de Privacidad', footerHome:'Volver al inicio',
+  },
+  fr: {
+    back:"← Accueil", badge:'Version 1.1 — Juin 2026', h1:"Conditions d'utilisation",
+    subtitle:"Dernière mise à jour : 30 juin 2026 · Applicable à tous les utilisateurs de la plateforme MbôláMusic (web et application mobile).",
+    s1h2:'1. Parties au contrat',
+    s1p1:'Les présentes Conditions d\'utilisation (« Conditions ») constituent un contrat contraignant entre <strong>MbôláMusic SARL</strong> (« MbôláMusic », « nous », « la plateforme ») et toute personne accédant aux services ou les utilisant (« Utilisateur », « toi »).',
+    s1p2:"En créant un compte, en téléchargeant l'application ou en utilisant le site web, tu acceptes ces Conditions dans leur intégralité. Si tu n'es pas d'accord, n'utilise pas le service.",
+    s2h2:'2. Description du service',
+    s2p1:'MbôláMusic est une plateforme de streaming et de téléchargement de musique destinée principalement au public de Guinée Équatoriale. Elle propose :',
+    s2li1:'Écoute de musique en ligne et téléchargement chiffré pour une utilisation hors ligne.',
+    s2li2:'Portail pour les artistes : mise en ligne de musique, statistiques et perception des redevances.',
+    s2li3:'Système de paiement avec portefeuille virtuel en FCFA.',
+    s2li4:'Fonctions sociales : suivre des artistes, fil personnalisé, classements.',
+    s3h2:'3. Inscription et compte', s3h3a:'3.1 Conditions requises',
+    s3li1:"Tu dois avoir au moins 16 ans pour t'inscrire.",
+    s3li2:"Les données d'inscription doivent être exactes. Fournir de fausses informations peut entraîner l'annulation du compte.",
+    s3li3:'Tu es responsable de la confidentialité de ton mot de passe.',
+    s3h3b:'3.2 Types de compte', s3th1:'Type', s3th2:'Description', s3th3:'Conditions supplémentaires',
+    s3r1c1:'Auditeur', s3r1c2:'Accès au catalogue musical', s3r1c3:'Aucune',
+    s3r2c1:'Artiste', s3r2c2:'Met en ligne et publie de la musique, perçoit des redevances', s3r2c3:'Nom artistique, abonnement mensuel actif',
+    s3r3c1:'Administrateur', s3r3c2:'Gestion complète de la plateforme', s3r3c3:'Désigné par MbôláMusic',
+    s4h2:'4. Tarifs, paiements et remboursements', s4h3a:'4.1 Tarifs en vigueur',
+    s4th1:'Concept', s4th2:'Montant', s4th3:'Notes',
+    s4r1c1:'Période gratuite initiale (auditeurs)', s4r1c3:"1 mois à partir de l'inscription",
+    s4r2c1:'Abonnement mensuel (auditeur)', s4r2c3:'Renouvellement automatique',
+    s4r3c1:'Écoute à la demande (sans abonnement)', s4r3c3:'Débité du portefeuille',
+    s4r4c1:'Téléchargement pour usage hors ligne', s4r4c3:"Uniquement depuis l'application",
+    s4r5c1:'Abonnement mensuel (artiste)', s4r5c3:'Nécessaire pour publier de la musique',
+    s4h3b:'4.2 Redevances des artistes',
+    s4p1:"L'artiste reçoit <strong>70&nbsp;% du montant de chaque écoute payante ou téléchargement</strong> ; les 30&nbsp;% restants correspondent à la commission de la plateforme. Les gains sont crédités sur le profil de l'artiste et peuvent être retirés sur demande auprès de l'administrateur.",
+    s4h3c:'4.3 Politique de remboursement',
+    s4warn:"Les paiements d'abonnement ne sont pas remboursables une fois activés, sauf erreur technique imputable et démontrable à MbôláMusic. Les recharges de portefeuille non utilisées peuvent faire l'objet d'une demande de remboursement dans les 14 jours calendaires suivant la recharge, conformément au droit de rétractation européen (Directive 2011/83/UE) le cas échéant.",
+    s5h2:"5. Obligations de l'utilisateur auditeur",
+    s5li1:'Utiliser le service exclusivement à des fins personnelles, non commerciales.',
+    s5li2:'Ne pas redistribuer, retransmettre ni partager publiquement le contenu téléchargé.',
+    s5li3:'Ne pas tenter de contourner les systèmes de protection DRM/chiffrement.',
+    s5li4:'Ne pas utiliser la plateforme à des fins illégales.',
+    s6h2:"6. Obligations de l'utilisateur artiste",
+    s6li1:"Garantir que tu possèdes tous les droits (d'auteur, d'interprétation, de phonogramme) sur la musique que tu mets en ligne, ou que tu disposes de l'autorisation correspondante.",
+    s6li2:"Ne pas mettre en ligne de musique de tiers sans licence, de contenu offensant, violent, haineux, ou portant atteinte aux droits des mineurs.",
+    s6li3:'Maintenir ton abonnement actif pour que ta musique reste visible. En cas d\'expiration, la musique est masquée temporairement, pas supprimée.',
+    s6li4:'Fournir des coordonnées bancaires valides pour recevoir les redevances.',
+    s6highlight:"<strong>Propriété intellectuelle :</strong> MbôláMusic agit en tant que plateforme de distribution. Elle n'acquiert aucun droit de propriété sur ta musique. Tu accordes à MbôláMusic une licence limitée, non exclusive et révocable pour reproduire, transmettre et stocker ta musique au sein du service.",
+    s7h2:'7. Contenu interdit', s7p1:'Il est expressément interdit de publier ou de partager un contenu qui :',
+    s7li1:"Enfreint des droits de propriété intellectuelle de tiers.",
+    s7li2:"Incite à la haine en raison de la race, de l'origine ethnique, du genre, de la religion, de l'orientation sexuelle, du handicap ou d'autres caractéristiques protégées.",
+    s7li3:'Contient du matériel sexuellement explicite impliquant des mineurs.',
+    s7li4:'Fait la promotion d\'activités illégales, de violence ou de terrorisme.',
+    s7li5:'Diffuse de fausses informations causant un préjudice à des personnes ou organisations.',
+    s8h2:'8. Notification et retrait de contenu (procédure DMCA)',
+    s8p1:"MbôláMusic respecte les droits de propriété intellectuelle des tiers et répond aux notifications valides d'infraction au droit d'auteur conformément au Digital Millennium Copyright Act (DMCA, 17 U.S.C. § 512) et à la législation applicable dans chaque juridiction.",
+    s8h3a:'8.1 Agent désigné', s8correoLabel:'E-mail',
+    s8registrado:"Enregistré auprès du U.S. Copyright Office conformément au 17 U.S.C. § 512(c)(2).",
+    s8h3b:"8.2 Comment envoyer une notification d'infraction",
+    s8p2:"Si tu estimes que ton œuvre protégée par le droit d'auteur a été copiée ou distribuée sur la plateforme d'une manière constituant une infraction, envoie une notification écrite à notre agent désigné comprenant :",
+    s8li1:"Signature physique ou électronique du titulaire du droit ou de son représentant autorisé.",
+    s8li2:"Identification de l'œuvre protégée dont tu revendiques l'infraction.",
+    s8li3:'Identification du contenu contrefaisant et de son emplacement sur la plateforme (lien ou ID de la piste).',
+    s8li4:'Tes coordonnées : nom, adresse, téléphone et adresse e-mail.',
+    s8li5:"Déclaration de bonne foi selon laquelle l'utilisation dénoncée n'est pas autorisée par le titulaire, son représentant ou la loi.",
+    s8li6:'Déclaration, sous peine de parjure, que les informations de la notification sont exactes et que tu es le titulaire du droit ou autorisé à agir en son nom.',
+    s8h3c:'8.3 Retrait et contre-notification',
+    s8p3:"Après réception d'une notification valide, nous retirerons ou désactiverons rapidement l'accès au contenu signalé et informerons l'artiste qui l'a mis en ligne. L'artiste peut soumettre une contre-notification respectant les mêmes exigences formelles s'il estime que le retrait était erroné ou le contenu mal identifié ; dans ce cas, nous pourrons restaurer le contenu sous 10 à 14 jours ouvrables, sauf si le plaignant engage une action en justice avant ce délai.",
+    s8h3d:'8.4 Infracteurs récidivistes',
+    s8p4:"MbôláMusic résiliera, dans les circonstances appropriées, les comptes des artistes récidivistes en matière de violation du droit d'auteur.",
+    s9h2:'9. Propriété intellectuelle de la plateforme',
+    s9p1:'Tous les droits sur le logiciel, le design, les marques, les logos, le nom commercial « MbôláMusic » et le contenu propre (à l\'exclusion de la musique des artistes) appartiennent à MbôláMusic SARL. Leur reproduction, modification ou distribution sans autorisation écrite est interdite.',
+    s10h2:'10. Limitation de responsabilité',
+    s10li1:"MbôláMusic ne garantit pas la disponibilité ininterrompue du service (force majeure, maintenance, etc.).",
+    s10li2:"Nous ne sommes pas responsables du contenu mis en ligne par les artistes. Nous retirerons cependant tout contenu illicite dès que nous en aurons connaissance effective.",
+    s10li3:"Notre responsabilité totale ne dépassera en aucun cas le montant payé par l'utilisateur au cours des 3 mois précédant l'événement.",
+    s10li4:"Ces limitations s'appliquent dans toute la mesure permise par la loi applicable.",
+    s11h2:'11. Suspension et résiliation',
+    s11li1strong:'Par l\'utilisateur :', s11li1text:'tu peux résilier ton compte à tout moment en écrivant à',
+    s11li2strong:'Par MbôláMusic :', s11li2text:"nous pouvons suspendre ou résilier les comptes qui enfreignent ces Conditions, sans remboursement, après notification préalable (sauf en cas d'infraction grave).",
+    s11li3pre:'Après la résiliation, les données sont traitées conformément à la', s11li3link:'Politique de confidentialité',
+    s12h2:'12. Modification des Conditions',
+    s12p1:"Nous nous réservons le droit de modifier ces Conditions. Nous t'en informerons au moins <strong>30 jours à l'avance</strong> par e-mail ou avis sur la plateforme. Si tu continues à utiliser le service après cette date, tu acceptes les nouvelles Conditions. Si tu n'es pas d'accord, tu peux résilier ton compte avant la date d'entrée en vigueur.",
+    s13h2:'13. Loi applicable, arbitrage et résolution des litiges',
+    s13p1:"Ces Conditions sont régies par la législation de <strong>Guinée Équatoriale</strong>. En matière de protection des données et de droits des consommateurs de l'Union européenne, la législation européenne correspondante s'applique en outre, dans la mesure où elle ne peut être exclue par contrat.",
+    s13h3a:'13.1 Arbitrage contraignant et renonciation aux actions collectives',
+    s13highlight:"Sauf disposition contraire de la législation impérative applicable en ta faveur (p. ex. droits non susceptibles de renonciation des consommateurs de l'UE), toi et MbôláMusic convenez de résoudre tout litige, réclamation ou controverse découlant de ces Conditions ou de l'utilisation du service par voie d'<strong>arbitrage individuel et contraignant</strong>, et renoncez expressément au droit d'engager ou de participer à un <strong>recours collectif, une action de groupe ou une procédure représentative</strong>, ainsi qu'au droit à un procès devant jury.",
+    s13li1:"L'arbitrage sera administré par une institution arbitrale reconnue et mutuellement convenue (p. ex. AAA ou JAMS pour les utilisateurs aux États-Unis, ou le centre d'arbitrage commercial compétent selon ton pays de résidence).",
+    s13li2pre:'Avant d\'engager un arbitrage, les deux parties tenteront de résoudre le litige à l\'amiable en écrivant à',
+    s13li2post:". Si aucun accord n'est trouvé sous 30 jours, l'une ou l'autre partie peut engager l'arbitrage.",
+    s13li3:"Chaque partie assume ses propres frais de représentation juridique ; les frais administratifs de l'arbitrage sont répartis selon les règles de l'institution arbitrale choisie.",
+    s13li4:"Cette clause ne s'applique pas : (a) aux réclamations pouvant être portées devant un tribunal de petites créances ; (b) aux utilisateurs de l'UE dans la mesure où la réglementation de protection des consommateurs leur garantit le droit de saisir les tribunaux ou la plateforme ODR ; (c) aux actions pour infraction à la propriété intellectuelle, y compris la procédure DMCA de la Section 8.",
+    s13h3b:"13.2 Utilisateurs non soumis à l'arbitrage (p. ex. consommateurs de l'UE)",
+    s13p2pre:'Nous encourageons le contact direct en première instance :',
+    s13p2post:"Si aucun accord n'est trouvé, les parties pourront recourir à la médiation ou aux tribunaux compétents de Malabo, Guinée Équatoriale. Les consommateurs de l'UE peuvent également recourir à la plateforme européenne de résolution en ligne des litiges (RLL) :",
+    s14h2:'14. Contact', s14soporte:'Assistance', s14legal:'Juridique',
+    footerPrivacy:'Politique de confidentialité', footerHome:"Retour à l'accueil",
+  },
+  pt: {
+    back:'← Início', badge:'Versão 1.1 — Junho de 2026', h1:'Termos de Uso',
+    subtitle:'Última atualização: 30 de junho de 2026 · Aplicável a todos os utilizadores da plataforma MbôláMusic (web e aplicação móvel).',
+    s1h2:'1. Partes do Contrato',
+    s1p1:'Estes Termos de Uso ("Termos") constituem um contrato vinculativo entre a <strong>MbôláMusic SARL</strong> ("MbôláMusic", "nós", "a plataforma") e qualquer pessoa que aceda ou utilize os serviços ("Utilizador", "tu").',
+    s1p2:'Ao criar uma conta, descarregar a aplicação ou usar o site, aceitas estes Termos na íntegra. Se não concordares, não utilizes o serviço.',
+    s2h2:'2. Descrição do Serviço',
+    s2p1:'A MbôláMusic é uma plataforma de streaming e download de música dirigida principalmente ao público da Guiné Equatorial. Oferece:',
+    s2li1:'Reprodução de música online e download cifrado para uso offline.',
+    s2li2:'Portal para artistas: carregamento de música, estatísticas e recebimento de royalties.',
+    s2li3:'Sistema de pagamentos com carteira virtual em FCFA.',
+    s2li4:'Funções sociais: seguir artistas, feed personalizado, charts.',
+    s3h2:'3. Registo e Conta', s3h3a:'3.1 Requisitos',
+    s3li1:'Deves ter pelo menos 16 anos para te registares.',
+    s3li2:'Os dados de registo devem ser verdadeiros. Fornecer informação falsa pode resultar no cancelamento da conta.',
+    s3li3:'És responsável por manter a confidencialidade da tua palavra-passe.',
+    s3h3b:'3.2 Tipos de conta', s3th1:'Tipo', s3th2:'Descrição', s3th3:'Requisitos adicionais',
+    s3r1c1:'Ouvinte', s3r1c2:'Acesso ao catálogo de música', s3r1c3:'Nenhum',
+    s3r2c1:'Artista', s3r2c2:'Carrega e publica música, recebe royalties', s3r2c3:'Nome artístico, subscrição mensal ativa',
+    s3r3c1:'Administrador', s3r3c2:'Gestão completa da plataforma', s3r3c3:'Designado pela MbôláMusic',
+    s4h2:'4. Preços, Pagamentos e Reembolsos', s4h3a:'4.1 Tarifas em vigor',
+    s4th1:'Conceito', s4th2:'Valor', s4th3:'Notas',
+    s4r1c1:'Período gratuito inicial (ouvintes)', s4r1c3:'1 mês a partir do registo',
+    s4r2c1:'Subscrição mensal (ouvinte)', s4r2c3:'Renovação automática',
+    s4r3c1:'Reprodução por uso (sem subscrição)', s4r3c3:'Descontado da carteira',
+    s4r4c1:'Download para uso offline', s4r4c3:'Apenas a partir da aplicação',
+    s4r5c1:'Subscrição mensal (artista)', s4r5c3:'Necessária para publicar música',
+    s4h3b:'4.2 Royalties dos artistas',
+    s4p1:'O artista recebe <strong>70&nbsp;% do valor de cada reprodução paga ou download</strong>; os restantes 30&nbsp;% correspondem à comissão da plataforma. Os ganhos são creditados no perfil do artista e podem ser levantados mediante pedido ao administrador.',
+    s4h3c:'4.3 Política de reembolsos',
+    s4warn:'Os pagamentos de subscrição não são reembolsáveis depois de ativados, salvo erro técnico imputável e demonstrável à MbôláMusic. As recargas de carteira não utilizadas podem ser solicitadas como reembolso dentro dos 14 dias seguintes à recarga, em conformidade com o direito de desistência europeu (Diretiva 2011/83/UE), quando aplicável.',
+    s5h2:'5. Obrigações do Utilizador Ouvinte',
+    s5li1:'Usar o serviço exclusivamente para fins pessoais, não comerciais.',
+    s5li2:'Não redistribuir, retransmitir nem partilhar publicamente o conteúdo descarregado.',
+    s5li3:'Não tentar contornar os sistemas de proteção DRM/cifra.',
+    s5li4:'Não usar a plataforma para atividades ilegais.',
+    s6h2:'6. Obrigações do Utilizador Artista',
+    s6li1:'Garantir que possuis todos os direitos (de autor, de interpretação, de fonograma) sobre a música que carregas, ou que tens a devida autorização.',
+    s6li2:'Não carregar música de terceiros sem licença, conteúdo ofensivo, violento, de ódio ou que viole direitos de menores.',
+    s6li3:'Manter a subscrição ativa para que a tua música permaneça visível. Se expirar, a música é ocultada temporariamente, não é eliminada.',
+    s6li4:'Fornecer dados bancários válidos para receber royalties.',
+    s6highlight:'<strong>Propriedade intelectual:</strong> a MbôláMusic atua como plataforma de distribuição. Não adquire nenhum direito de propriedade sobre a tua música. Concedes à MbôláMusic uma licença limitada, não exclusiva e revogável para reproduzir, transmitir e armazenar a tua música dentro do serviço.',
+    s7h2:'7. Conteúdo Proibido', s7p1:'É expressamente proibido publicar ou partilhar conteúdo que:',
+    s7li1:'Infrinja direitos de propriedade intelectual de terceiros.',
+    s7li2:'Incite ao ódio em razão de raça, etnia, género, religião, orientação sexual, deficiência ou outras características protegidas.',
+    s7li3:'Contenha material sexualmente explícito que envolva menores.',
+    s7li4:'Promova atividades ilegais, violência ou terrorismo.',
+    s7li5:'Difunda informação falsa que cause dano a pessoas ou organizações.',
+    s8h2:'8. Notificação e Remoção de Conteúdo (Procedimento DMCA)',
+    s8p1:'A MbôláMusic respeita os direitos de propriedade intelectual de terceiros e responde a notificações válidas de infração de direitos de autor em conformidade com o Digital Millennium Copyright Act (DMCA, 17 U.S.C. § 512) e a legislação aplicável em cada jurisdição.',
+    s8h3a:'8.1 Agente designado', s8correoLabel:'E-mail',
+    s8registrado:'Registado no U.S. Copyright Office nos termos do 17 U.S.C. § 512(c)(2).',
+    s8h3b:'8.2 Como enviar uma notificação de infração',
+    s8p2:'Se considerares que a tua obra protegida por direitos de autor foi copiada ou distribuída na plataforma de forma que constitui uma infração, envia uma notificação por escrito ao nosso agente designado que inclua:',
+    s8li1:'Assinatura física ou eletrónica do titular do direito ou do seu representante autorizado.',
+    s8li2:'Identificação da obra protegida que reclamas como infringida.',
+    s8li3:'Identificação do conteúdo infrator e a sua localização na plataforma (link ou ID da faixa).',
+    s8li4:'Os teus dados de contacto: nome, morada, telefone e e-mail.',
+    s8li5:'Declaração de boa-fé de que o uso denunciado não está autorizado pelo titular, pelo seu representante ou pela lei.',
+    s8li6:'Declaração, sob pena de perjúrio, de que a informação da notificação é exata e de que és o titular do direito ou estás autorizado a atuar em seu nome.',
+    s8h3c:'8.3 Remoção e contranotificação',
+    s8p3:'Após receber uma notificação válida, removeremos ou desativaremos prontamente o acesso ao conteúdo denunciado e notificaremos o artista que o carregou. O artista pode apresentar uma contranotificação com os mesmos requisitos formais se considerar que a remoção foi errónea ou o conteúdo foi identificado incorretamente; nesse caso, poderemos restaurar o conteúdo num prazo de 10 a 14 dias úteis, salvo se o reclamante iniciar uma ação judicial antes desse prazo.',
+    s8h3d:'8.4 Infratores reincidentes',
+    s8p4:'A MbôláMusic cancelará, em circunstâncias apropriadas, as contas de artistas que sejam infratores reincidentes de direitos de autor.',
+    s9h2:'9. Propriedade Intelectual da Plataforma',
+    s9p1:'Todos os direitos sobre o software, design, marcas, logótipos, nome comercial "MbôláMusic" e conteúdo próprio (excluindo a música dos artistas) pertencem à MbôláMusic SARL. É proibida a sua reprodução, modificação ou distribuição sem autorização escrita.',
+    s10h2:'10. Limitação de Responsabilidade',
+    s10li1:'A MbôláMusic não garante a disponibilidade ininterrupta do serviço (força maior, manutenção, etc.).',
+    s10li2:'Não nos responsabilizamos pelo conteúdo carregado pelos artistas. No entanto, removeremos conteúdo ilícito assim que tivermos conhecimento efetivo.',
+    s10li3:'Em nenhum caso a nossa responsabilidade total excederá o montante pago pelo utilizador nos 3 meses anteriores ao evento.',
+    s10li4:'Estas limitações aplicam-se na máxima medida permitida pela lei aplicável.',
+    s11h2:'11. Suspensão e Cancelamento',
+    s11li1strong:'Pelo utilizador:', s11li1text:'podes cancelar a tua conta a qualquer momento escrevendo para',
+    s11li2strong:'Pela MbôláMusic:', s11li2text:'podemos suspender ou cancelar contas que incumpram estes Termos, sem reembolso, após aviso prévio (exceto em casos de infração grave).',
+    s11li3pre:'Após o cancelamento, os dados são tratados em conformidade com a', s11li3link:'Política de Privacidade',
+    s12h2:'12. Alteração dos Termos',
+    s12p1:'Reservamo-nos o direito de alterar estes Termos. Notificar-te-emos com pelo menos <strong>30 dias de antecedência</strong> por e-mail ou aviso na plataforma. Se continuares a usar o serviço após essa data, aceitas os novos Termos. Se não concordares, podes cancelar a tua conta antes da data de entrada em vigor.',
+    s13h2:'13. Lei Aplicável, Arbitragem e Resolução de Litígios',
+    s13p1:'Estes Termos regem-se pela legislação da <strong>Guiné Equatorial</strong>. Em matéria de proteção de dados e direitos dos consumidores da União Europeia, aplica-se adicionalmente a legislação europeia correspondente, no que não possa ser excluído por contrato.',
+    s13h3a:'13.1 Arbitragem vinculativa e renúncia a ações coletivas',
+    s13highlight:'Salvo disposição em contrário da legislação imperativa aplicável a teu favor (p. ex. direitos irrenunciáveis dos consumidores da UE), tu e a MbôláMusic concordam em resolver qualquer disputa, reclamação ou controvérsia decorrente destes Termos ou do uso do serviço através de <strong>arbitragem individual e vinculativa</strong>, e renunciam expressamente ao direito de iniciar ou participar numa <strong>ação coletiva, ação de classe ou processo representativo</strong>, bem como ao direito a julgamento por júri.',
+    s13li1:'A arbitragem será administrada por uma instituição arbitral reconhecida e mutuamente acordada (p. ex. AAA ou JAMS para utilizadores nos EUA, ou o centro de arbitragem comercial competente segundo o teu país de residência).',
+    s13li2pre:'Antes de iniciar uma arbitragem, ambas as partes tentarão resolver a disputa de forma informal escrevendo para',
+    s13li2post:'. Se não for alcançado acordo em 30 dias, qualquer uma das partes pode iniciar a arbitragem.',
+    s13li3:'Cada parte assume os seus próprios custos de representação legal; os custos administrativos da arbitragem são atribuídos de acordo com as regras da instituição arbitral escolhida.',
+    s13li4:'Esta cláusula não se aplica a: (a) reclamações que possam ser apresentadas num tribunal de pequenas causas; (b) utilizadores da UE, na medida em que a regulamentação de proteção do consumidor lhes garanta o direito de recorrer aos tribunais ou à plataforma ODR; (c) ações por infração de propriedade intelectual, incluindo o procedimento DMCA da Secção 8.',
+    s13h3b:'13.2 Utilizadores não sujeitos a arbitragem (p. ex. consumidores da UE)',
+    s13p2pre:'Incentivamos o contacto direto em primeira instância:',
+    s13p2post:'Se não for alcançado um acordo, as partes poderão recorrer a mediação ou aos tribunais competentes de Malabo, Guiné Equatorial. Os consumidores da UE podem também recorrer à plataforma de resolução de litígios em linha da Comissão Europeia (RLL):',
+    s14h2:'14. Contacto', s14soporte:'Suporte', s14legal:'Jurídico',
+    footerPrivacy:'Política de Privacidade', footerHome:'Voltar ao início',
+  },
+  en: {
+    back:'← Home', badge:'Version 1.1 — June 2026', h1:'Terms of Use',
+    subtitle:'Last updated: June 30, 2026 · Applicable to all users of the MbôláMusic platform (web and mobile app).',
+    s1h2:'1. Parties to the Contract',
+    s1p1:'These Terms of Use ("Terms") constitute a binding agreement between <strong>MbôláMusic SARL</strong> ("MbôláMusic", "we", "the platform") and any person who accesses or uses the services ("User", "you").',
+    s1p2:'By creating an account, downloading the app, or using the website, you accept these Terms in full. If you do not agree, do not use the service.',
+    s2h2:'2. Description of the Service',
+    s2p1:'MbôláMusic is a music streaming and download platform aimed mainly at the Equatorial Guinea audience. It offers:',
+    s2li1:'Online music playback and encrypted download for offline use.',
+    s2li2:'Portal for artists: uploading music, statistics, and royalty collection.',
+    s2li3:'Payment system with a virtual wallet in FCFA.',
+    s2li4:'Social features: following artists, personalized feed, charts.',
+    s3h2:'3. Registration and Account', s3h3a:'3.1 Requirements',
+    s3li1:'You must be at least 16 years old to register.',
+    s3li2:'Registration information must be truthful. Providing false information may result in account cancellation.',
+    s3li3:'You are responsible for keeping your password confidential.',
+    s3h3b:'3.2 Account types', s3th1:'Type', s3th2:'Description', s3th3:'Additional requirements',
+    s3r1c1:'Listener', s3r1c2:'Access to the music catalog', s3r1c3:'None',
+    s3r2c1:'Artist', s3r2c2:'Uploads and publishes music, receives royalties', s3r2c3:'Artist name, active monthly subscription',
+    s3r3c1:'Administrator', s3r3c2:'Full platform management', s3r3c3:'Appointed by MbôláMusic',
+    s4h2:'4. Prices, Payments and Refunds', s4h3a:'4.1 Current rates',
+    s4th1:'Item', s4th2:'Amount', s4th3:'Notes',
+    s4r1c1:'Initial free period (listeners)', s4r1c3:'1 month from registration',
+    s4r2c1:'Monthly subscription (listener)', s4r2c3:'Automatic renewal',
+    s4r3c1:'Pay-per-play (no subscription)', s4r3c3:'Deducted from wallet',
+    s4r4c1:'Download for offline use', s4r4c3:'App only',
+    s4r5c1:'Monthly subscription (artist)', s4r5c3:'Required to publish music',
+    s4h3b:'4.2 Artist royalties',
+    s4p1:'The artist receives <strong>70% of the amount from each paid play or download</strong>; the remaining 30% corresponds to the platform commission. Earnings are credited to the artist\'s profile and can be withdrawn by requesting it from the administrator.',
+    s4h3c:'4.3 Refund policy',
+    s4warn:'Subscription payments are non-refundable once activated, except for a demonstrable technical error attributable to MbôláMusic. Unused wallet top-ups may be requested as a refund within 14 calendar days of the top-up, in accordance with European withdrawal rights (Directive 2011/83/EU) where applicable.',
+    s5h2:'5. Listener User Obligations',
+    s5li1:'Use the service exclusively for personal, non-commercial use.',
+    s5li2:'Not redistribute, retransmit, or publicly share downloaded content.',
+    s5li3:'Not attempt to circumvent DRM/encryption protection systems.',
+    s5li4:'Not use the platform for illegal activities.',
+    s6h2:'6. Artist User Obligations',
+    s6li1:'Guarantee that you hold all rights (copyright, performance, phonogram) to the music you upload, or that you have the corresponding authorization.',
+    s6li2:'Not upload unlicensed third-party music, offensive, violent, or hateful content, or content that violates the rights of minors.',
+    s6li3:'Keep your subscription active so your music remains visible. If it lapses, the music is temporarily hidden, not deleted.',
+    s6li4:'Provide valid bank details to receive royalties.',
+    s6highlight:'<strong>Intellectual property:</strong> MbôláMusic acts as a distribution platform. It does not acquire any ownership rights over your music. You grant MbôláMusic a limited, non-exclusive, revocable license to reproduce, transmit, and store your music within the service.',
+    s7h2:'7. Prohibited Content', s7p1:'It is expressly prohibited to publish or share content that:',
+    s7li1:'Infringes third-party intellectual property rights.',
+    s7li2:'Incites hatred based on race, ethnicity, gender, religion, sexual orientation, disability, or other protected characteristics.',
+    s7li3:'Contains sexually explicit material involving minors.',
+    s7li4:'Promotes illegal activities, violence, or terrorism.',
+    s7li5:'Spreads false information that causes harm to people or organizations.',
+    s8h2:'8. Notice and Takedown of Content (DMCA Procedure)',
+    s8p1:'MbôláMusic respects the intellectual property rights of third parties and responds to valid copyright infringement notices in accordance with the Digital Millennium Copyright Act (DMCA, 17 U.S.C. § 512) and applicable law in each jurisdiction.',
+    s8h3a:'8.1 Designated agent', s8correoLabel:'Email',
+    s8registrado:'Registered with the U.S. Copyright Office under 17 U.S.C. § 512(c)(2).',
+    s8h3b:'8.2 How to submit an infringement notice',
+    s8p2:'If you believe your copyrighted work has been copied or distributed on the platform in a way that constitutes infringement, send a written notice to our designated agent that includes:',
+    s8li1:"Physical or electronic signature of the rights holder or their authorized representative.",
+    s8li2:'Identification of the protected work you claim has been infringed.',
+    s8li3:'Identification of the infringing content and its location on the platform (link or track ID).',
+    s8li4:'Your contact information: name, address, phone, and email.',
+    s8li5:"A good-faith statement that the disputed use is not authorized by the rights holder, their representative, or the law.",
+    s8li6:'A statement, under penalty of perjury, that the notice information is accurate and that you are the rights holder or authorized to act on their behalf.',
+    s8h3c:'8.3 Takedown and counter-notice',
+    s8p3:"Upon receiving a valid notice, we will promptly remove or disable access to the reported content and notify the artist who uploaded it. The artist may submit a counter-notice meeting the same formal requirements if they believe the takedown was mistaken or the content was misidentified; in that case, we may restore the content within 10 to 14 business days, unless the claimant initiates legal action before that deadline.",
+    s8h3d:'8.4 Repeat infringers',
+    s8p4:'MbôláMusic will terminate, under appropriate circumstances, the accounts of artists who are repeat copyright infringers.',
+    s9h2:'9. Platform Intellectual Property',
+    s9p1:'All rights to the software, design, trademarks, logos, the trade name "MbôláMusic", and proprietary content (excluding artists\' music) belong to MbôláMusic SARL. Reproduction, modification, or distribution without written authorization is prohibited.',
+    s10h2:'10. Limitation of Liability',
+    s10li1:'MbôláMusic does not guarantee uninterrupted availability of the service (force majeure, maintenance, etc.).',
+    s10li2:'We are not responsible for content uploaded by artists. However, we will remove unlawful content as soon as we become effectively aware of it.',
+    s10li3:"In no event shall our total liability exceed the amount paid by the user in the 3 months prior to the event.",
+    s10li4:'These limitations apply to the fullest extent permitted by applicable law.',
+    s11h2:'11. Suspension and Cancellation',
+    s11li1strong:'By the user:', s11li1text:'you can cancel your account at any time by writing to',
+    s11li2strong:'By MbôláMusic:', s11li2text:'we may suspend or cancel accounts that breach these Terms, without refund, following prior notice (except in cases of serious infringement).',
+    s11li3pre:'After cancellation, data is handled in accordance with the', s11li3link:'Privacy Policy',
+    s12h2:'12. Changes to the Terms',
+    s12p1:'We reserve the right to modify these Terms. We will notify you at least <strong>30 days in advance</strong> by email or notice on the platform. If you continue using the service after that date, you accept the new Terms. If you disagree, you may cancel your account before the effective date.',
+    s13h2:'13. Governing Law, Arbitration and Dispute Resolution',
+    s13p1:'These Terms are governed by the laws of <strong>Equatorial Guinea</strong>. Regarding data protection and consumer rights of European Union residents, the corresponding European legislation additionally applies to the extent it cannot be excluded by contract.',
+    s13h3a:'13.1 Binding arbitration and class action waiver',
+    s13highlight:'Unless applicable mandatory law in your favor provides otherwise (e.g., non-waivable EU consumer rights), you and MbôláMusic agree to resolve any dispute, claim, or controversy arising from these Terms or the use of the service through <strong>individual, binding arbitration</strong>, and expressly waive the right to bring or participate in a <strong>class action, class arbitration, or representative proceeding</strong>, as well as the right to a jury trial.',
+    s13li1:'Arbitration will be administered by a recognized, mutually agreed arbitration institution (e.g., AAA or JAMS for U.S. users, or the competent commercial arbitration center according to your country of residence).',
+    s13li2pre:'Before initiating arbitration, both parties will attempt to resolve the dispute informally by writing to',
+    s13li2post:'. If no agreement is reached within 30 days, either party may initiate arbitration.',
+    s13li3:'Each party bears its own legal representation costs; arbitration administrative costs are allocated according to the rules of the chosen arbitration institution.',
+    s13li4:'This clause does not apply to: (a) claims that may be brought in small claims court; (b) EU users to the extent consumer protection regulations guarantee them the right to go to court or the ODR platform; (c) intellectual property infringement actions, including the DMCA procedure in Section 8.',
+    s13h3b:'13.2 Users not subject to arbitration (e.g., EU consumers)',
+    s13p2pre:'We encourage direct contact in the first instance:',
+    s13p2post:'If no agreement is reached, the parties may resort to mediation or the competent courts of Malabo, Equatorial Guinea. EU consumers may also use the European Commission\'s Online Dispute Resolution (ODR) platform:',
+    s14h2:'14. Contact', s14soporte:'Support', s14legal:'Legal',
+    footerPrivacy:'Privacy Policy', footerHome:'Back to home',
+  },
+};
+
+function setText(id, val) { const el = document.getElementById(id); if (el && val != null) el.textContent = val; }
+function setHTML(id, val) { const el = document.getElementById(id); if (el && val != null) el.innerHTML = val; }
+
+function setLang(code, save = true) {
+  const t = T[code] || T['es'];
+  if (save) localStorage.setItem('mbola_lang', code);
+  document.documentElement.lang = code;
+  const l = LANGS[code];
+  document.getElementById('lang-current').textContent = `${l.flag} ${l.code}`;
+  document.querySelectorAll('.lang-opt').forEach((el, i) => {
+    const codes = ['es','fr','pt','en'];
+    el.classList.toggle('active', codes[i] === code);
+  });
+  setText('l-back', t.back);
+  setText('l-badge', t.badge);
+  setText('l-h1', t.h1);
+  setText('l-subtitle', t.subtitle);
+  setText('l-s1-h2', t.s1h2); setHTML('l-s1-p1', t.s1p1); setText('l-s1-p2', t.s1p2);
+  setText('l-s2-h2', t.s2h2); setText('l-s2-p1', t.s2p1);
+  setText('l-s2-li1', t.s2li1); setText('l-s2-li2', t.s2li2); setText('l-s2-li3', t.s2li3); setText('l-s2-li4', t.s2li4);
+  setText('l-s3-h2', t.s3h2); setText('l-s3-h3a', t.s3h3a);
+  setText('l-s3-li1', t.s3li1); setText('l-s3-li2', t.s3li2); setText('l-s3-li3', t.s3li3);
+  setText('l-s3-h3b', t.s3h3b);
+  setText('l-s3-th1', t.s3th1); setText('l-s3-th2', t.s3th2); setText('l-s3-th3', t.s3th3);
+  setText('l-s3-r1c1', t.s3r1c1); setText('l-s3-r1c2', t.s3r1c2); setText('l-s3-r1c3', t.s3r1c3);
+  setText('l-s3-r2c1', t.s3r2c1); setText('l-s3-r2c2', t.s3r2c2); setText('l-s3-r2c3', t.s3r2c3);
+  setText('l-s3-r3c1', t.s3r3c1); setText('l-s3-r3c2', t.s3r3c2); setText('l-s3-r3c3', t.s3r3c3);
+  setText('l-s4-h2', t.s4h2); setText('l-s4-h3a', t.s4h3a);
+  setText('l-s4-th1', t.s4th1); setText('l-s4-th2', t.s4th2); setText('l-s4-th3', t.s4th3);
+  setText('l-s4-r1c1', t.s4r1c1); setText('l-s4-r1c3', t.s4r1c3);
+  setText('l-s4-r2c1', t.s4r2c1); setText('l-s4-r2c3', t.s4r2c3);
+  setText('l-s4-r3c1', t.s4r3c1); setText('l-s4-r3c3', t.s4r3c3);
+  setText('l-s4-r4c1', t.s4r4c1); setText('l-s4-r4c3', t.s4r4c3);
+  setText('l-s4-r5c1', t.s4r5c1); setText('l-s4-r5c3', t.s4r5c3);
+  setText('l-s4-h3b', t.s4h3b); setHTML('l-s4-p1', t.s4p1);
+  setText('l-s4-h3c', t.s4h3c); setText('l-s4-warn', t.s4warn);
+  setText('l-s5-h2', t.s5h2);
+  setText('l-s5-li1', t.s5li1); setText('l-s5-li2', t.s5li2); setText('l-s5-li3', t.s5li3); setText('l-s5-li4', t.s5li4);
+  setText('l-s6-h2', t.s6h2);
+  setText('l-s6-li1', t.s6li1); setText('l-s6-li2', t.s6li2); setText('l-s6-li3', t.s6li3); setText('l-s6-li4', t.s6li4);
+  setHTML('l-s6-highlight', t.s6highlight);
+  setText('l-s7-h2', t.s7h2); setText('l-s7-p1', t.s7p1);
+  setText('l-s7-li1', t.s7li1); setText('l-s7-li2', t.s7li2); setText('l-s7-li3', t.s7li3); setText('l-s7-li4', t.s7li4); setText('l-s7-li5', t.s7li5);
+  setText('l-s8-h2', t.s8h2); setText('l-s8-p1', t.s8p1);
+  setText('l-s8-h3a', t.s8h3a); setText('l-s8-correo-label', t.s8correoLabel); setText('l-s8-registrado', t.s8registrado);
+  setText('l-s8-h3b', t.s8h3b); setText('l-s8-p2', t.s8p2);
+  setText('l-s8-li1', t.s8li1); setText('l-s8-li2', t.s8li2); setText('l-s8-li3', t.s8li3);
+  setText('l-s8-li4', t.s8li4); setText('l-s8-li5', t.s8li5); setText('l-s8-li6', t.s8li6);
+  setText('l-s8-h3c', t.s8h3c); setText('l-s8-p3', t.s8p3);
+  setText('l-s8-h3d', t.s8h3d); setText('l-s8-p4', t.s8p4);
+  setText('l-s9-h2', t.s9h2); setText('l-s9-p1', t.s9p1);
+  setText('l-s10-h2', t.s10h2);
+  setText('l-s10-li1', t.s10li1); setText('l-s10-li2', t.s10li2); setText('l-s10-li3', t.s10li3); setText('l-s10-li4', t.s10li4);
+  setText('l-s11-h2', t.s11h2);
+  setText('l-s11-li1-strong', t.s11li1strong); setText('l-s11-li1-text', t.s11li1text);
+  setText('l-s11-li2-strong', t.s11li2strong); setText('l-s11-li2-text', t.s11li2text);
+  setText('l-s11-li3-pre', t.s11li3pre); setText('l-s11-li3-link', t.s11li3link);
+  setText('l-s12-h2', t.s12h2); setHTML('l-s12-p1', t.s12p1);
+  setText('l-s13-h2', t.s13h2); setHTML('l-s13-p1', t.s13p1);
+  setText('l-s13-h3a', t.s13h3a); setHTML('l-s13-highlight', t.s13highlight);
+  setHTML('l-s13-li1', t.s13li1);
+  setText('l-s13-li2-pre', t.s13li2pre); setText('l-s13-li2-post', t.s13li2post);
+  setText('l-s13-li3', t.s13li3); setText('l-s13-li4', t.s13li4);
+  setText('l-s13-h3b', t.s13h3b);
+  setText('l-s13-p2-pre', t.s13p2pre + ' '); setText('l-s13-p2-post', t.s13p2post);
+  setText('l-s14-h2', t.s14h2); setText('l-s14-soporte', t.s14soporte); setText('l-s14-legal', t.s14legal);
+  setText('l-footer-privacy', t.footerPrivacy); setText('l-footer-home', t.footerHome);
+}
+
+setLang(localStorage.getItem('mbola_lang') || 'es', false);
+</script>
 </body>
 </html>

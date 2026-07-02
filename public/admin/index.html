@@ -148,10 +148,10 @@
 <div id="login-screen">
   <div class="login-card">
     <h1>MbôláMusic</h1>
-    <p>Panel de administración</p>
-    <input id="login-id" type="text" placeholder="Email, teléfono o usuario" />
-    <input id="login-pw" type="password" placeholder="Contraseña" />
-    <button id="login-btn" onclick="doLogin()">Entrar</button>
+    <p data-i18n="loginPanelTitle">Panel de administración</p>
+    <input id="login-id" type="text" placeholder="Email, teléfono o usuario" data-i18n-placeholder="loginIdPlaceholder" />
+    <input id="login-pw" type="password" placeholder="Contraseña" data-i18n-placeholder="loginPwPlaceholder" />
+    <button id="login-btn" onclick="doLogin()" data-i18n="loginEnterBtn">Entrar</button>
     <div id="login-err" class="error-msg"></div>
   </div>
 </div>
@@ -162,18 +162,18 @@
     <h1>🎵 MbôláMusic Admin</h1>
     <span id="admin-name"></span>
     <button class="lang-btn" onclick="toggleLang()" id="lang-toggle-btn">🇫🇷 FR</button>
-    <button onclick="openChangePasswordModal()" style="width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;">🔒 Contraseña</button>
+    <button onclick="openChangePasswordModal()" style="width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;">🔒 <span data-i18n="changePasswordBtn">Contraseña</span></button>
     <button onclick="logout()" style="width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;" data-i18n="logout">Salir</button>
   </header>
   <nav>
-    <button class="active" onclick="showTab('stats', this)">Estadísticas</button>
-    <button onclick="showTab('users', this)">Usuarios</button>
-    <button onclick="showTab('payments', this)">Pagos pendientes</button>
-    <button onclick="showTab('tracks', this)">🎵 Canciones</button>
-    <button onclick="showTab('online', this)" id="online-tab-btn">🟢 En línea <span id="online-badge" style="background:var(--success);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
-    <button onclick="showTab('chat', this)" id="chat-tab-btn">💬 Soporte <span id="chat-badge" style="display:none;background:var(--error);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
-    <button onclick="showTab('ads', this)">📢 Publicidad</button>
-    <button onclick="showTab('tools', this)">🛠️ Herramientas</button>
+    <button class="active" onclick="showTab('stats', this)" data-i18n="tabStats">Estadísticas</button>
+    <button onclick="showTab('users', this)" data-i18n="tabUsers">Usuarios</button>
+    <button onclick="showTab('payments', this)" data-i18n="tabPayments">Pagos pendientes</button>
+    <button onclick="showTab('tracks', this)">🎵 <span data-i18n="tabTracks">Canciones</span></button>
+    <button onclick="showTab('online', this)" id="online-tab-btn">🟢 <span data-i18n="tabOnline">En línea</span> <span id="online-badge" style="background:var(--success);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
+    <button onclick="showTab('chat', this)" id="chat-tab-btn">💬 <span data-i18n="tabChat">Soporte</span> <span id="chat-badge" style="display:none;background:var(--error);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
+    <button onclick="showTab('ads', this)">📢 <span data-i18n="tabAds">Publicidad</span></button>
+    <button onclick="showTab('tools', this)">🛠️ <span data-i18n="tabTools">Herramientas</span></button>
   </nav>
   <main>
     <div id="tab-stats"></div>
@@ -184,40 +184,40 @@
     <div id="tab-chat" style="display:none"></div>
     <div id="tab-ads" style="display:none"></div>
     <div id="tab-tools" style="display:none">
-      <h2 style="margin-bottom:24px;font-size:18px;">🛠️ Herramientas de mantenimiento</h2>
+      <h2 style="margin-bottom:24px;font-size:18px;">🛠️ <span data-i18n="toolsTitle">Herramientas de mantenimiento</span></h2>
 
       <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
-        <h3 style="margin-bottom:8px;">🔍 Diagnóstico de almacenamiento (R2/S3)</h3>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Sube un archivo de prueba diminuto al bucket configurado y comprueba de inmediato si es accesible desde el CDN público. Úsalo para saber si el audio/carátulas que se suben realmente se pueden reproducir.</p>
-        <button onclick="runAdminTool('storage-diagnostics','Probando almacenamiento...')" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;">Probar almacenamiento</button>
+        <h3 style="margin-bottom:8px;">🔍 <span data-i18n="toolStorageTitle">Diagnóstico de almacenamiento (R2/S3)</span></h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;" data-i18n="toolStorageDesc">Sube un archivo de prueba diminuto al bucket configurado y comprueba de inmediato si es accesible desde el CDN público. Úsalo para saber si el audio/carátulas que se suben realmente se pueden reproducir.</p>
+        <button onclick="runAdminTool('storage-diagnostics', i18n('toolStorageRunning','Probando almacenamiento...'))" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;" data-i18n="toolStorageBtn">Probar almacenamiento</button>
         <div id="tool-storage-diagnostics-result" style="margin-top:12px;font-size:13px;white-space:pre-wrap;"></div>
       </div>
 
       <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
         <h3 style="margin-bottom:8px;">🔐 Row Level Security (PostgreSQL)</h3>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Activa RLS en las tablas sensibles (usuarios, pagos, suscripciones, etc.) para que solo el rol de la app pueda leerlas/escribirlas; cualquier otra conexión directa a la BD queda bloqueada. Ya se ejecuta automáticamente en cada arranque — usa esto para verificarlo o relanzarlo. Es seguro ejecutarlo varias veces.</p>
-        <button onclick="runAdminTool('setup-rls','Activando RLS...')" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;">Activar / verificar RLS</button>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;" data-i18n="toolRlsDesc">Activa RLS en las tablas sensibles (usuarios, pagos, suscripciones, etc.) para que solo el rol de la app pueda leerlas/escribirlas; cualquier otra conexión directa a la BD queda bloqueada. Ya se ejecuta automáticamente en cada arranque — usa esto para verificarlo o relanzarlo. Es seguro ejecutarlo varias veces.</p>
+        <button onclick="runAdminTool('setup-rls', i18n('toolRlsRunning','Activando RLS...'))" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;" data-i18n="toolRlsBtn">Activar / verificar RLS</button>
         <div id="tool-setup-rls-result" style="margin-top:12px;font-size:13px;white-space:pre-wrap;"></div>
       </div>
 
       <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
-        <h3 style="margin-bottom:8px;">📸 Corregir URLs de medios (CDN)</h3>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Actualiza las URLs de audio y carátulas de canciones para que usen el CDN público configurado en CDN_BASE_URL, solo si el archivo nuevo realmente existe ahí (nunca borra ni deja vacío lo existente). No toca avatares de perfil.</p>
-        <button onclick="runAdminTool('fix-media-urls','Corrigiendo URLs...')" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;">Corregir URLs de medios</button>
+        <h3 style="margin-bottom:8px;">📸 <span data-i18n="toolMediaTitle">Corregir URLs de medios (CDN)</span></h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;" data-i18n="toolMediaDesc">Actualiza las URLs de audio y carátulas de canciones para que usen el CDN público configurado en CDN_BASE_URL, solo si el archivo nuevo realmente existe ahí (nunca borra ni deja vacío lo existente). No toca avatares de perfil.</p>
+        <button onclick="runAdminTool('fix-media-urls', i18n('toolMediaRunning','Corrigiendo URLs...'))" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;" data-i18n="toolMediaBtn">Corregir URLs de medios</button>
         <div id="tool-fix-media-urls-result" style="margin-top:12px;font-size:13px;"></div>
       </div>
 
       <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
-        <h3 style="margin-bottom:8px;">🎵 Reparar audio de canciones de prueba</h3>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Restaura el audio de las canciones de prueba (SoundHelix) cuyo archivo quedó apuntando a una URL rota en el CDN, y les asigna una carátula de muestra si nunca tuvieron una.</p>
-        <button onclick="runAdminTool('fix-seed-audio','Reparando audio...')" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;">Reparar audio de prueba</button>
+        <h3 style="margin-bottom:8px;">🎵 <span data-i18n="toolSeedAudioTitle">Reparar audio de canciones de prueba</span></h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;" data-i18n="toolSeedAudioDesc">Restaura el audio de las canciones de prueba (SoundHelix) cuyo archivo quedó apuntando a una URL rota en el CDN, y les asigna una carátula de muestra si nunca tuvieron una.</p>
+        <button onclick="runAdminTool('fix-seed-audio', i18n('toolSeedAudioRunning','Reparando audio...'))" style="width:auto;padding:10px 24px;background:var(--accent);color:#000;border-radius:8px;font-weight:bold;" data-i18n="toolSeedAudioBtn">Reparar audio de prueba</button>
         <div id="tool-fix-seed-audio-result" style="margin-top:12px;font-size:13px;"></div>
       </div>
 
       <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
-        <h3 style="margin-bottom:8px;">🎤 Activar prueba gratuita a artistas existentes</h3>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Da 30 días de suscripción gratuita a todos los artistas que aún no tienen una suscripción activa, para que puedan subir y publicar música de inmediato.</p>
-        <button onclick="runAdminTool('fix-artist-trials','Activando pruebas...')" style="width:auto;padding:10px 24px;background:var(--success);color:#fff;border-radius:8px;font-weight:bold;">Activar prueba artistas</button>
+        <h3 style="margin-bottom:8px;">🎤 <span data-i18n="toolTrialsTitle">Activar prueba gratuita a artistas existentes</span></h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;" data-i18n="toolTrialsDesc">Da 30 días de suscripción gratuita a todos los artistas que aún no tienen una suscripción activa, para que puedan subir y publicar música de inmediato.</p>
+        <button onclick="runAdminTool('fix-artist-trials', i18n('toolTrialsRunning','Activando pruebas...'))" style="width:auto;padding:10px 24px;background:var(--success);color:#fff;border-radius:8px;font-weight:bold;" data-i18n="toolTrialsBtn">Activar prueba artistas</button>
         <div id="tool-fix-artist-trials-result" style="margin-top:12px;font-size:13px;"></div>
       </div>
     </div>
@@ -242,30 +242,30 @@
 <!-- User detail modal -->
 <div id="user-modal" class="modal-overlay hidden">
   <div class="modal-box">
-    <h3>👤 Detalle de usuario</h3>
-    <div class="mfield"><label>Usuario</label><input id="mu-username" type="text" /></div>
+    <h3>👤 <span data-i18n="userModalTitle">Detalle de usuario</span></h3>
+    <div class="mfield"><label data-i18n="userLabel">Usuario</label><input id="mu-username" type="text" /></div>
     <div class="mfield"><label>Email</label><input id="mu-email" type="email" /></div>
-    <div class="mfield"><label>País</label><input id="mu-country" type="text" /></div>
-    <div class="mfield"><label>Ciudad</label><input id="mu-city" type="text" /></div>
+    <div class="mfield"><label data-i18n="countryLabel">País</label><input id="mu-country" type="text" /></div>
+    <div class="mfield"><label data-i18n="cityLabel">Ciudad</label><input id="mu-city" type="text" /></div>
     <div id="mu-artist-section" style="display:none">
-      <div class="mfield"><label>Nombre artístico</label><input id="mu-artistname" type="text" /></div>
-      <div class="mfield"><label>Bio</label><textarea id="mu-bio"></textarea></div>
+      <div class="mfield"><label data-i18n="artistNameLabel">Nombre artístico</label><input id="mu-artistname" type="text" /></div>
+      <div class="mfield"><label data-i18n="bioLabel">Bio</label><textarea id="mu-bio"></textarea></div>
     </div>
-    <div class="mfield"><label>Monedero (FCFA)</label><input id="mu-wallet" type="number" min="0" /></div>
-    <div class="mfield"><label>Verificado</label>
+    <div class="mfield"><label data-i18n="walletLabel">Monedero (FCFA)</label><input id="mu-wallet" type="number" min="0" /></div>
+    <div class="mfield"><label data-i18n="verifiedLabel">Verificado</label>
       <select id="mu-verified" style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid #333;border-radius:8px;color:var(--text);font-size:14px;margin:0;">
-        <option value="true">Sí</option><option value="false">No</option>
+        <option value="true" data-i18n="yesOption">Sí</option><option value="false" data-i18n="noOption">No</option>
       </select>
     </div>
     <div id="mu-stats" style="font-size:13px;color:var(--muted);margin-bottom:8px;"></div>
     <div class="txn-list">
-      <h4>Historial de transacciones</h4>
-      <div id="mu-txns"><div class="loading">Cargando…</div></div>
+      <h4 data-i18n="txnHistoryLabel">Historial de transacciones</h4>
+      <div id="mu-txns"><div class="loading" data-i18n="loadingLabel">Cargando…</div></div>
     </div>
     <div class="modal-actions">
-      <button class="btn-primary" onclick="saveUser()">Guardar cambios</button>
-      <button class="btn-danger2" onclick="promptResetPw()">Resetear contraseña</button>
-      <button class="btn-secondary" onclick="closeUserModal()">Cerrar</button>
+      <button class="btn-primary" onclick="saveUser()" data-i18n="saveChangesBtn">Guardar cambios</button>
+      <button class="btn-danger2" onclick="promptResetPw()" data-i18n="resetPwBtn">Resetear contraseña</button>
+      <button class="btn-secondary" onclick="closeUserModal()" data-i18n="closeBtn">Cerrar</button>
     </div>
     <div id="mu-msg" style="font-size:13px;margin-top:8px;"></div>
   </div>
@@ -299,7 +299,7 @@
     <span id="mp-artist">—</span>
   </div>
   <audio id="mp-audio" controls></audio>
-  <button onclick="closeMiniPlayer()">✕ Cerrar</button>
+  <button onclick="closeMiniPlayer()">✕ <span data-i18n="closeBtn">Cerrar</span></button>
 </div>
 
 <script>
@@ -317,7 +317,7 @@ async function doLogin() {
   btn.disabled = true;
   try {
     const r = await apiFetch('/auth/login', 'POST', { identifier: id, password: pw }, false);
-    if (r.user.role !== 'ADMIN') throw new Error('No tienes rol de administrador');
+    if (r.user.role !== 'ADMIN') throw new Error(i18n('notAdminError', 'No tienes rol de administrador'));
     _token = r.token;
     _user  = r.user;
     localStorage.setItem('adminToken', _token);
@@ -344,7 +344,7 @@ async function runAdminTool(endpoint, loadingMsg) {
     resultEl.textContent = '✅ ' + JSON.stringify(data, null, 2);
   } catch (e) {
     resultEl.style.color = 'var(--error)';
-    resultEl.textContent = '❌ ' + (e.message || 'Error desconocido');
+    resultEl.textContent = '❌ ' + (e.message || i18n('unknownError', 'Error desconocido'));
   }
 }
 
@@ -396,7 +396,7 @@ function showTab(name, btn) {
 // ── Stats ─────────────────────────────────────────────────────────────────────
 async function loadStats() {
   const el = document.getElementById('tab-stats');
-  el.innerHTML = '<div class="loading">Cargando…</div>';
+  el.innerHTML = `<div class="loading">${i18n('loadingLabel','Cargando…')}</div>`;
   try {
     const d = await apiFetch('/admin/stats');
     // Also load platform earnings for withdrawal
@@ -439,23 +439,23 @@ async function renderSubDistSection() {
   })();
 
   let cfg = { minPlaysThreshold: 1000, adminPct: 30, artistPct: 70, subscriptionValue: 2000 };
-  let rows = '<div class="loading">Cargando repartos…</div>';
+  let rows = `<div class="loading">${i18n('loadingDistributions','Cargando repartos…')}</div>`;
 
   try { cfg = (await apiFetch(`/admin/subscription-config?month=${prevMonth}`)).config; } catch(_) {}
 
   try {
     const data = await apiFetch('/admin/subscription-distributions');
     if (!data.months || data.months.length === 0) {
-      rows = '<div class="empty">Sin repartos registrados aún. Configura los parámetros y ejecuta el reparto.</div>';
+      rows = `<div class="empty">${i18n('noDistributionsYet','Sin repartos registrados aún. Configura los parámetros y ejecuta el reparto.')}</div>`;
     } else {
       rows = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
         <thead><tr style="color:var(--muted);text-align:left;">
-          <th style="padding:8px 10px">Mes</th>
-          <th style="padding:8px 10px">Suscriptores</th>
-          <th style="padding:8px 10px">Fondo total</th>
-          <th style="padding:8px 10px;color:var(--success)">Artistas</th>
-          <th style="padding:8px 10px;color:var(--accent)">Admin (30%)</th>
-          <th style="padding:8px 10px;color:var(--error)">Reserva</th>
+          <th style="padding:8px 10px">${i18n('monthLabel','Mes')}</th>
+          <th style="padding:8px 10px">${i18n('subscribersLabel','Suscriptores')}</th>
+          <th style="padding:8px 10px">${i18n('totalFundLabel','Fondo total')}</th>
+          <th style="padding:8px 10px;color:var(--success)">${i18n('artistsLabel','Artistas')}</th>
+          <th style="padding:8px 10px;color:var(--accent)">${i18n('adminPctLabel','Admin (30%)')}</th>
+          <th style="padding:8px 10px;color:var(--error)">${i18n('reserveLabel','Reserva')}</th>
           <th></th>
         </tr></thead><tbody>
         ${data.months.map(m => `<tr style="border-top:1px solid var(--surface2);">
@@ -466,52 +466,52 @@ async function renderSubDistSection() {
           <td style="padding:8px 10px;color:var(--accent)">${fmt(m.adminShare)} FCFA</td>
           <td style="padding:8px 10px;color:var(--error)">${fmt(m.reserve)} FCFA</td>
           <td style="padding:8px 10px">
-            <button class="btn-sm" onclick="showSubDistDetail('${m.month}')">Ver</button>
+            <button class="btn-sm" onclick="showSubDistDetail('${m.month}')">${i18n('viewBtn','Ver')}</button>
           </td>
         </tr>`).join('')}
         </tbody></table>`;
     }
   } catch(_) {
-    rows = '<div class="empty">No se pudo cargar el historial de repartos.</div>';
+    rows = `<div class="empty">${i18n('distributionsLoadError','No se pudo cargar el historial de repartos.')}</div>`;
   }
 
   return `
     <div style="background:var(--surface);border-radius:var(--radius);padding:20px;margin-top:8px;">
-      <h3 style="margin:0 0 16px;font-size:15px;">📊 Reparto mensual de suscripciones</h3>
+      <h3 style="margin:0 0 16px;font-size:15px;">📊 ${i18n('monthlyDistTitle','Reparto mensual de suscripciones')}</h3>
 
       <!-- Config form -->
       <details style="margin-bottom:16px;">
-        <summary style="cursor:pointer;font-size:13px;color:var(--muted);margin-bottom:8px;">⚙️ Parámetros del mes <b id="cfg-month-label">${prevMonth}</b></summary>
+        <summary style="cursor:pointer;font-size:13px;color:var(--muted);margin-bottom:8px;">⚙️ ${i18n('monthParamsLabel','Parámetros del mes')} <b id="cfg-month-label">${prevMonth}</b></summary>
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;align-items:flex-end;">
           <div class="mfield" style="margin:0;flex:1;min-width:140px;">
-            <label>Mes (YYYY-MM)</label>
+            <label>${i18n('monthYyyyMmLabel','Mes (YYYY-MM)')}</label>
             <input id="cfg-month" type="month" value="${prevMonth}" onchange="document.getElementById('cfg-month-label').textContent=this.value" style="padding:6px 10px;font-size:13px;"/>
           </div>
           <div class="mfield" style="margin:0;flex:1;min-width:120px;">
-            <label>Valor suscripción (FCFA)</label>
+            <label>${i18n('subValueLabel','Valor suscripción (FCFA)')}</label>
             <input id="cfg-sub-val" type="number" value="${cfg.subscriptionValue}" min="100" step="100"/>
           </div>
           <div class="mfield" style="margin:0;flex:1;min-width:100px;">
-            <label>% Admin</label>
+            <label>${i18n('adminPctFieldLabel','% Admin')}</label>
             <input id="cfg-admin-pct" type="number" value="${cfg.adminPct}" min="1" max="99"/>
           </div>
           <div class="mfield" style="margin:0;flex:1;min-width:100px;">
-            <label>% Artistas</label>
+            <label>${i18n('artistPctFieldLabel','% Artistas')}</label>
             <input id="cfg-artist-pct" type="number" value="${cfg.artistPct}" min="1" max="99"/>
           </div>
           <div class="mfield" style="margin:0;flex:1;min-width:140px;">
-            <label>Umbral mínimo de plays</label>
+            <label>${i18n('minThresholdLabel','Umbral mínimo de plays')}</label>
             <input id="cfg-threshold" type="number" value="${cfg.minPlaysThreshold}" min="0" step="100"/>
           </div>
-          <button class="btn-sm btn-primary" style="margin-bottom:2px;" onclick="saveSubDistConfig()">Guardar config</button>
+          <button class="btn-sm btn-primary" style="margin-bottom:2px;" onclick="saveSubDistConfig()">${i18n('saveConfigBtn','Guardar config')}</button>
         </div>
         <div id="cfg-msg" style="font-size:12px;margin-top:6px;"></div>
       </details>
 
       <!-- Action buttons -->
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-        <button class="btn-sm btn-primary" onclick="triggerSubDistribution()">▶ Ejecutar reparto del mes anterior</button>
-        <button class="btn-sm" onclick="loadStats()">↻ Actualizar</button>
+        <button class="btn-sm btn-primary" onclick="triggerSubDistribution()">▶ ${i18n('runDistributionBtn','Ejecutar reparto del mes anterior')}</button>
+        <button class="btn-sm" onclick="loadStats()">↻ ${i18n('refreshBtn','Actualizar')}</button>
       </div>
 
       ${rows}
@@ -520,10 +520,10 @@ async function renderSubDistSection() {
     <!-- Sub distribution detail modal -->
     <div id="sub-dist-modal" class="modal-overlay hidden">
       <div class="modal-box" style="max-width:660px;max-height:80vh;overflow-y:auto;">
-        <h3 id="sub-dist-modal-title">Informe mensual</h3>
+        <h3 id="sub-dist-modal-title">${i18n('monthlyReportLabel','Informe mensual')}</h3>
         <div id="sub-dist-modal-body"></div>
         <div class="modal-actions" style="margin-top:12px;">
-          <button class="btn-secondary" onclick="document.getElementById('sub-dist-modal').classList.add('hidden')">Cerrar</button>
+          <button class="btn-secondary" onclick="document.getElementById('sub-dist-modal').classList.add('hidden')">${i18n('closeBtn','Cerrar')}</button>
         </div>
       </div>
     </div>`;
@@ -534,19 +534,19 @@ let _uPage = 1, _uRole = '';
 async function loadUsers(page = 1) {
   _uPage = page;
   const el = document.getElementById('tab-users');
+  const roleOptions = () => `
+          <option value="">${i18n('allOption','Todos')}</option>
+          <option value="ARTIST" ${_uRole==='ARTIST'?'selected':''}>${i18n('artistsLabel','Artistas')}</option>
+          <option value="LISTENER" ${_uRole==='LISTENER'?'selected':''}>${i18n('listenersLabel','Oyentes')}</option>
+          <option value="ADMIN" ${_uRole==='ADMIN'?'selected':''}>Admin</option>`;
   el.innerHTML = `
     <div class="section-header">
-      <h2>Usuarios</h2>
+      <h2>${i18n('tabUsers','Usuarios')}</h2>
       <div class="filters">
-        <select onchange="filterUsers(this.value)">
-          <option value="">Todos</option>
-          <option value="ARTIST" ${_uRole==='ARTIST'?'selected':''}>Artistas</option>
-          <option value="LISTENER" ${_uRole==='LISTENER'?'selected':''}>Oyentes</option>
-          <option value="ADMIN" ${_uRole==='ADMIN'?'selected':''}>Admin</option>
-        </select>
+        <select onchange="filterUsers(this.value)">${roleOptions()}</select>
       </div>
     </div>
-    <div class="loading">Cargando…</div>`;
+    <div class="loading">${i18n('loadingLabel','Cargando…')}</div>`;
   try {
     const qs = `?page=${page}&limit=20${_uRole ? '&role=' + _uRole : ''}`;
     const d = await apiFetch('/admin/users' + qs);
@@ -560,36 +560,31 @@ async function loadUsers(page = 1) {
         <td>${esc((u.artistProfile && u.artistProfile.artistName) || '—')}</td>
         <td>${subBadge(u)}</td>
         <td>${fmt(u.walletBalance)} FCFA</td>
-        <td>${new Date(u.createdAt).toLocaleDateString('es')}</td>
+        <td>${new Date(u.createdAt).toLocaleDateString(_lang)}</td>
         <td>
-          <button class="btn-sm btn-success" onclick="viewUser('${u.id}')">Detalles</button>
+          <button class="btn-sm btn-success" onclick="viewUser('${u.id}')">${i18n('detailsBtn','Detalles')}</button>
           ${u.role === 'ARTIST' ? `
-            <button class="btn-sm btn-warn" onclick="blockUser('${u.id}', '${esc(u.username)}')">Ocultar</button>
-            <button class="btn-sm btn-success" onclick="unblockUser('${u.id}')">Restaurar</button>
+            <button class="btn-sm btn-warn" onclick="blockUser('${u.id}', '${esc(u.username)}')">${i18n('hideBtn','Ocultar')}</button>
+            <button class="btn-sm btn-success" onclick="unblockUser('${u.id}')">${i18n('restoreBtn','Restaurar')}</button>
           ` : ''}
         </td>
       </tr>`).join('');
     var _toRemove = el.querySelector('.loading, .empty'); if (_toRemove) _toRemove.remove();
     el.innerHTML = `
       <div class="section-header">
-        <h2>Usuarios <small style="color:var(--muted)">(${d.total}) · Suscritos: ${subscribedCount} · Sin suscripción: ${unsubscribedCount}</small></h2>
+        <h2>${i18n('tabUsers','Usuarios')} <small style="color:var(--muted)">(${d.total}) · ${i18n('subscribedLabel','Suscritos')}: ${subscribedCount} · ${i18n('unsubscribedLabel','Sin suscripción')}: ${unsubscribedCount}</small></h2>
         <div class="filters">
-          <select onchange="filterUsers(this.value)">
-            <option value="">Todos</option>
-            <option value="ARTIST" ${_uRole==='ARTIST'?'selected':''}>Artistas</option>
-            <option value="LISTENER" ${_uRole==='LISTENER'?'selected':''}>Oyentes</option>
-            <option value="ADMIN" ${_uRole==='ADMIN'?'selected':''}>Admin</option>
-          </select>
+          <select onchange="filterUsers(this.value)">${roleOptions()}</select>
         </div>
       </div>
       <table>
-        <thead><tr><th>Usuario</th><th>Contacto</th><th>Rol</th><th>Nombre artístico</th><th>Suscripción</th><th>Monedero</th><th>Registro</th><th>Acciones</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="8" class="empty">Sin resultados</td></tr>'}</tbody>
+        <thead><tr><th>${i18n('userLabel','Usuario')}</th><th>${i18n('contactLabel','Contacto')}</th><th>${i18n('roleLabel','Rol')}</th><th>${i18n('artistNameLabel','Nombre artístico')}</th><th>${i18n('subscriptionLabel','Suscripción')}</th><th>${i18n('walletShortLabel','Monedero')}</th><th>${i18n('registeredLabel','Registro')}</th><th>${i18n('actionsLabel','Acciones')}</th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="8" class="empty">${i18n('noResultsLabel','Sin resultados')}</td></tr>`}</tbody>
       </table>
       <div class="pager">
-        <button onclick="loadUsers(${page-1})" ${page<=1?'disabled':''}>← Anterior</button>
-        <span style="color:var(--muted);font-size:13px">Página ${page} / ${d.pages}</span>
-        <button onclick="loadUsers(${page+1})" ${page>=d.pages?'disabled':''}>Siguiente →</button>
+        <button onclick="loadUsers(${page-1})" ${page<=1?'disabled':''}>← ${i18n('previousBtn','Anterior')}</button>
+        <span style="color:var(--muted);font-size:13px">${i18n('pageLabel','Página')} ${page} / ${d.pages}</span>
+        <button onclick="loadUsers(${page+1})" ${page>=d.pages?'disabled':''}>${i18n('nextBtn','Siguiente')} →</button>
       </div>`;
   } catch (e) {
     el.innerHTML += `<div class="empty">${e.message}</div>`;
@@ -600,17 +595,17 @@ function filterUsers(role) { _uRole = role; loadUsers(1); }
 
 function subBadge(u) {
   const sub = u.subscriptions && u.subscriptions[0];
-  if (!sub) return `<span style="background:rgba(248,113,113,0.12);color:var(--error);padding:2px 8px;border-radius:99px;font-size:11px;">Sin suscripción</span>`;
+  if (!sub) return `<span style="background:rgba(248,113,113,0.12);color:var(--error);padding:2px 8px;border-radius:99px;font-size:11px;">${i18n('noSubscriptionLabel','Sin suscripción')}</span>`;
   const label = {
-    LISTENER_MONTHLY: 'Oyente mensual',
-    ARTIST_MONTHLY: 'Artista mensual',
-    LISTENER_FREE: 'Prueba oyente',
-    ARTIST_FREE: 'Prueba artista',
+    LISTENER_MONTHLY: i18n('listenerMonthlyLabel','Oyente mensual'),
+    ARTIST_MONTHLY: i18n('artistMonthlySubLabel','Artista mensual'),
+    LISTENER_FREE: i18n('listenerTrialLabel','Prueba oyente'),
+    ARTIST_FREE: i18n('artistTrialLabel','Prueba artista'),
   }[sub.type] || sub.type;
   const exp = new Date(sub.endDate);
   const isExp = exp < new Date();
-  if (isExp) return `<span style="background:rgba(148,148,148,0.12);color:var(--muted);padding:2px 8px;border-radius:99px;font-size:11px;">⏰ Expirada</span>`;
-  return `<span style="background:rgba(74,222,128,0.12);color:var(--success);padding:2px 8px;border-radius:99px;font-size:11px;" title="Vence ${exp.toLocaleDateString('es')}">✓ ${label}</span>`;
+  if (isExp) return `<span style="background:rgba(148,148,148,0.12);color:var(--muted);padding:2px 8px;border-radius:99px;font-size:11px;">⏰ ${i18n('expiredLabel','Expirada')}</span>`;
+  return `<span style="background:rgba(74,222,128,0.12);color:var(--success);padding:2px 8px;border-radius:99px;font-size:11px;" title="${i18n('expiresLabel','Vence')} ${exp.toLocaleDateString(_lang)}">✓ ${label}</span>`;
 }
 
 // ── User detail modal ─────────────────────────────────────────────────────────
@@ -621,7 +616,7 @@ async function viewUser(id) {
   const modal = document.getElementById('user-modal');
   modal.classList.remove('hidden');
   document.getElementById('mu-msg').textContent = '';
-  document.getElementById('mu-txns').innerHTML = '<div class="loading">Cargando…</div>';
+  document.getElementById('mu-txns').innerHTML = `<div class="loading">${i18n('loadingLabel','Cargando…')}</div>`;
   try {
     const d = await apiFetch('/admin/users/' + id);
     const u = d.user;
@@ -640,10 +635,10 @@ async function viewUser(id) {
       artistSec.style.display = 'none';
     }
     document.getElementById('mu-stats').textContent =
-      `Rol: ${u.role} · Plays: ${(u._count && u._count.plays) || 0} · Descargas: ${(u._count && u._count.downloads) || 0} · Registro: ${new Date(u.createdAt).toLocaleDateString('es')}`;
+      `${i18n('roleLabel','Rol')}: ${u.role} · Plays: ${(u._count && u._count.plays) || 0} · ${i18n('downloadsShortLabel','Descargas')}: ${(u._count && u._count.downloads) || 0} · ${i18n('registeredLabel','Registro')}: ${new Date(u.createdAt).toLocaleDateString(_lang)}`;
     const txns = u.payments || [];
     if (!txns.length) {
-      document.getElementById('mu-txns').innerHTML = '<div style="color:var(--muted);font-size:13px;">Sin transacciones</div>';
+      document.getElementById('mu-txns').innerHTML = `<div style="color:var(--muted);font-size:13px;">${i18n('noTransactionsLabel','Sin transacciones')}</div>`;
     } else {
       const statusColor = s => ({ COMPLETED:'var(--success)', FAILED:'var(--error)', VERIFYING:'var(--accent)', PENDING:'var(--accent)' }[s] || 'var(--muted)');
       document.getElementById('mu-txns').innerHTML = txns.slice(0, 20).map(p => `
@@ -651,7 +646,7 @@ async function viewUser(id) {
           <span>${p.purpose || p.method || '—'}</span>
           <span style="color:${statusColor(p.status)}">${p.status}</span>
           <span style="font-weight:bold">${fmt(p.amount)} FCFA</span>
-          <span style="color:var(--muted)">${new Date(p.createdAt).toLocaleDateString('es')}</span>
+          <span style="color:var(--muted)">${new Date(p.createdAt).toLocaleDateString(_lang)}</span>
         </div>`).join('');
     }
   } catch (e) {
@@ -662,7 +657,7 @@ async function viewUser(id) {
 
 async function saveUser() {
   const msg = document.getElementById('mu-msg');
-  msg.textContent = 'Guardando…';
+  msg.textContent = i18n('processing','Guardando…');
   msg.style.color = 'var(--muted)';
   try {
     await apiFetch('/admin/users/' + _currentUserId, 'PUT', {
@@ -674,7 +669,7 @@ async function saveUser() {
       isVerified:    document.getElementById('mu-verified').value === 'true',
     });
     msg.style.color = 'var(--success)';
-    msg.textContent = '✅ Guardado correctamente';
+    msg.textContent = '✅ ' + i18n('savedOkLabel','Guardado correctamente');
     loadUsers(_uPage);
   } catch(e) {
     msg.style.color = 'var(--error)';
@@ -683,12 +678,12 @@ async function saveUser() {
 }
 
 async function promptResetPw() {
-  const pw = prompt('Nueva contraseña para este usuario (mínimo 6 caracteres):');
-  if (!pw || pw.length < 6) { alert('Contraseña demasiado corta'); return; }
+  const pw = prompt(i18n('newPwPromptLabel','Nueva contraseña para este usuario (mínimo 6 caracteres):'));
+  if (!pw || pw.length < 6) { alert(i18n('pwTooShortLabel','Contraseña demasiado corta')); return; }
   try {
     await apiFetch('/admin/users/' + _currentUserId + '/reset-password', 'POST', { newPassword: pw });
     document.getElementById('mu-msg').style.color = 'var(--success)';
-    document.getElementById('mu-msg').textContent = '✅ Contraseña restablecida';
+    document.getElementById('mu-msg').textContent = '✅ ' + i18n('pwResetLabel','Contraseña restablecida');
   } catch(e) {
     document.getElementById('mu-msg').style.color = 'var(--error)';
     document.getElementById('mu-msg').textContent = '❌ ' + e.message;
@@ -748,7 +743,7 @@ async function submitChangePassword() {
 }
 
 async function blockUser(id, name) {
-  if (!confirm(`¿Ocultar toda la música de ${name}?`)) return;
+  if (!confirm(i18n('hideMusicConfirm','¿Ocultar toda la música de {0}?').replace('{0}', name))) return;
   try { await apiFetch('/admin/users/' + id + '/block', 'POST'); loadUsers(_uPage); }
   catch (e) { alert(e.message); }
 }
@@ -762,20 +757,20 @@ let _pPage = 1, _pStatus = 'VERIFYING';
 async function loadPayments(page = 1) {
   _pPage = page;
   const el = document.getElementById('tab-payments');
+  const statusOptions = () => `
+          <option value="VERIFYING" ${_pStatus==='VERIFYING'?'selected':''}>${i18n('verifyingLabel','Pendientes de verificar')}</option>
+          <option value="PENDING"   ${_pStatus==='PENDING'  ?'selected':''}>${i18n('pendingLabel','Pendientes')}</option>
+          <option value="COMPLETED" ${_pStatus==='COMPLETED'?'selected':''}>${i18n('completedLabel','Completados')}</option>
+          <option value="FAILED"    ${_pStatus==='FAILED'   ?'selected':''}>${i18n('failedLabel','Fallidos')}</option>
+          <option value=""          ${_pStatus===''         ?'selected':''}>${i18n('allOption','Todos')}</option>`;
   el.innerHTML = `
     <div class="section-header">
-      <h2>Pagos</h2>
+      <h2>${i18n('tabPaymentsPlain','Pagos')}</h2>
       <div class="filters">
-        <select onchange="filterPayments(this.value)">
-          <option value="VERIFYING" ${_pStatus==='VERIFYING'?'selected':''}>Pendientes de verificar</option>
-          <option value="PENDING"   ${_pStatus==='PENDING'  ?'selected':''}>Pendientes</option>
-          <option value="COMPLETED" ${_pStatus==='COMPLETED'?'selected':''}>Completados</option>
-          <option value="FAILED"    ${_pStatus==='FAILED'   ?'selected':''}>Fallidos</option>
-          <option value=""          ${_pStatus===''         ?'selected':''}>Todos</option>
-        </select>
+        <select onchange="filterPayments(this.value)">${statusOptions()}</select>
       </div>
     </div>
-    <div class="loading">Cargando…</div>`;
+    <div class="loading">${i18n('loadingLabel','Cargando…')}</div>`;
   try {
     const qs = `?page=${page}&limit=20${_pStatus ? '&status=' + _pStatus : ''}`;
     const d = await apiFetch('/admin/payments' + qs);
@@ -785,7 +780,7 @@ async function loadPayments(page = 1) {
     };
     let rows = d.payments.map(p => `
       <tr>
-        <td>${new Date(p.createdAt).toLocaleString('es')}</td>
+        <td>${new Date(p.createdAt).toLocaleString(_lang)}</td>
         <td>${esc((p.user && p.user.username) || '—')}</td>
         <td>${fmt(p.amount)} FCFA</td>
         <td>${p.method}</td>
@@ -794,34 +789,28 @@ async function loadPayments(page = 1) {
         <td>${esc(p.externalRef || '—')}</td>
         <td>
           ${(p.status === 'VERIFYING' || p.status === 'PENDING') ? `
-            <button class="btn-sm btn-success" onclick="confirmPay('${p.id}')">✓ Confirmar</button>
-            <button class="btn-sm btn-danger"  onclick="rejectPay('${p.id}')">✗ Rechazar</button>
+            <button class="btn-sm btn-success" onclick="confirmPay('${p.id}')">✓ ${i18n('confirmBtn','Confirmar')}</button>
+            <button class="btn-sm btn-danger"  onclick="rejectPay('${p.id}')">✗ ${i18n('rejectBtn','Rechazar')}</button>
           ` : (p.status === 'COMPLETED' && p.purpose === 'WALLET_TOPUP') ? `
-            <button class="btn-sm btn-warn" onclick="refundPay('${p.id}', ${p.amount})">↩ Reembolso</button>
+            <button class="btn-sm btn-warn" onclick="refundPay('${p.id}', ${p.amount})">↩ ${i18n('refundBtn','Reembolso')}</button>
           ` : '—'}
         </td>
       </tr>`).join('');
     el.innerHTML = `
       <div class="section-header">
-        <h2>Pagos <small style="color:var(--muted)">(${d.total})</small></h2>
+        <h2>${i18n('tabPaymentsPlain','Pagos')} <small style="color:var(--muted)">(${d.total})</small></h2>
         <div class="filters">
-          <select onchange="filterPayments(this.value)">
-            <option value="VERIFYING" ${_pStatus==='VERIFYING'?'selected':''}>Pendientes de verificar</option>
-            <option value="PENDING"   ${_pStatus==='PENDING'  ?'selected':''}>Pendientes</option>
-            <option value="COMPLETED" ${_pStatus==='COMPLETED'?'selected':''}>Completados</option>
-            <option value="FAILED"    ${_pStatus==='FAILED'   ?'selected':''}>Fallidos</option>
-            <option value=""          ${_pStatus===''         ?'selected':''}>Todos</option>
-          </select>
+          <select onchange="filterPayments(this.value)">${statusOptions()}</select>
         </div>
       </div>
       <table>
-        <thead><tr><th>Fecha</th><th>Usuario</th><th>Importe</th><th>Método</th><th>Concepto</th><th>Estado</th><th>Ref</th><th>Acciones</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="8" class="empty">Sin resultados</td></tr>'}</tbody>
+        <thead><tr><th>${i18n('dateLabel','Fecha')}</th><th>${i18n('userLabel','Usuario')}</th><th>${i18n('amountShortLabel','Importe')}</th><th>${i18n('methodLabel','Método')}</th><th>${i18n('conceptLabel','Concepto')}</th><th>${i18n('statusLabel','Estado')}</th><th>${i18n('refLabel','Ref')}</th><th>${i18n('actionsLabel','Acciones')}</th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="8" class="empty">${i18n('noResultsLabel','Sin resultados')}</td></tr>`}</tbody>
       </table>
       <div class="pager">
-        <button onclick="loadPayments(${page-1})" ${page<=1?'disabled':''}>← Anterior</button>
-        <span style="color:var(--muted);font-size:13px">Página ${page} / ${d.pages}</span>
-        <button onclick="loadPayments(${page+1})" ${page>=d.pages?'disabled':''}>Siguiente →</button>
+        <button onclick="loadPayments(${page-1})" ${page<=1?'disabled':''}>← ${i18n('previousBtn','Anterior')}</button>
+        <span style="color:var(--muted);font-size:13px">${i18n('pageLabel','Página')} ${page} / ${d.pages}</span>
+        <button onclick="loadPayments(${page+1})" ${page>=d.pages?'disabled':''}>${i18n('nextBtn','Siguiente')} →</button>
       </div>`;
   } catch (e) {
     el.innerHTML += `<div class="empty">${e.message}</div>`;
@@ -835,15 +824,15 @@ async function confirmPay(id) {
   catch (e) { alert(e.message); }
 }
 async function rejectPay(id) {
-  if (!confirm('¿Rechazar este pago?')) return;
+  if (!confirm(i18n('rejectPayConfirm','¿Rechazar este pago?'))) return;
   try { await apiFetch('/payments/' + id + '/reject', 'POST'); loadPayments(_pPage); }
   catch (e) { alert(e.message); }
 }
 async function refundPay(id, amount) {
-  if (!confirm(`¿Reembolsar ${fmt(amount)} FCFA al monedero del usuario? Esta acción descontará el saldo de su monedero.`)) return;
+  if (!confirm(i18n('refundConfirm','¿Reembolsar {0} FCFA al monedero del usuario? Esta acción descontará el saldo de su monedero.').replace('{0}', fmt(amount)))) return;
   try {
     await apiFetch('/payments/' + id + '/refund', 'POST');
-    alert('✅ Reembolso procesado. Se han descontado ' + fmt(amount) + ' FCFA del monedero.');
+    alert('✅ ' + i18n('refundProcessed','Reembolso procesado. Se han descontado {0} FCFA del monedero.').replace('{0}', fmt(amount)));
     loadPayments(_pPage);
   }
   catch (e) { alert('❌ ' + e.message); }
@@ -854,7 +843,7 @@ let _artists = [];
 
 async function loadTracks() {
   const el = document.getElementById('tab-tracks');
-  el.innerHTML = '<div class="loading">Cargando canciones…</div>';
+  el.innerHTML = `<div class="loading">${i18n('loadingTracksLabel','Cargando canciones…')}</div>`;
   try {
     const [td, ad] = await Promise.all([
       apiFetch('/admin/tracks'),
@@ -874,29 +863,29 @@ async function loadTracks() {
         <td>${(t._count && t._count.downloads) || 0}</td>
         <td>
           <span class="badge ${t.isPublished ? 'badge-done' : 'badge-failed'}">
-            ${t.isPublished ? 'Publicada' : 'Oculta'}
+            ${t.isPublished ? i18n('publishedLabel','Publicada') : i18n('hiddenLabel','Oculta')}
           </span>
         </td>
         <td>
-          <button class="btn-sm btn-warn" onclick="toggleTrack('${t.id}')">${t.isPublished ? 'Ocultar' : 'Publicar'}</button>
-          <button class="btn-sm btn-danger" onclick="deleteTrack('${t.id}','${esc(t.title)}')">Borrar</button>
+          <button class="btn-sm btn-warn" onclick="toggleTrack('${t.id}')">${t.isPublished ? i18n('hideBtn','Ocultar') : i18n('publishBtn','Publicar')}</button>
+          <button class="btn-sm btn-danger" onclick="deleteTrack('${t.id}','${esc(t.title)}')">${i18n('deleteBtn','Borrar')}</button>
         </td>
       </tr>`).join('');
 
     el.innerHTML = `
       <div class="upload-form">
-        <h3>➕ Subir nueva canción</h3>
+        <h3>➕ ${i18n('uploadNewTrackTitle','Subir nueva canción')}</h3>
         <div class="form-grid">
           <div class="form-group">
-            <label>Título *</label>
-            <input id="t-title" type="text" placeholder="Nombre de la canción">
+            <label>${i18n('titleLabel','Título')} *</label>
+            <input id="t-title" type="text" placeholder="${i18n('trackNamePlaceholder','Nombre de la canción')}">
           </div>
           <div class="form-group">
-            <label>Artista *</label>
-            <select id="t-artist"><option value="">— Seleccionar artista —</option>${artistOpts}</select>
+            <label>${i18n('artistLabel','Artista')} *</label>
+            <select id="t-artist"><option value="">— ${i18n('selectArtistOption','Seleccionar artista')} —</option>${artistOpts}</select>
           </div>
           <div class="form-group">
-            <label>Género *</label>
+            <label>${i18n('genreLabel','Género')} *</label>
             <select id="t-genre">
               <option value="afrobeat">Afrobeat</option>
               <option value="reggaeton">Reggaeton</option>
@@ -904,39 +893,39 @@ async function loadTracks() {
               <option value="ndombolo">Ndombolo</option>
               <option value="hiphop">Hip-Hop</option>
               <option value="pop">Pop</option>
-              <option value="tradicional">Tradicional</option>
-              <option value="otro">Otro</option>
+              <option value="tradicional">${i18n('traditionalGenre','Tradicional')}</option>
+              <option value="otro">${i18n('otherOption','Otro')}</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Álbum (opcional)</label>
-            <input id="t-album" type="text" placeholder="Nombre del álbum">
+            <label>${i18n('albumOptLabel','Álbum (opcional)')}</label>
+            <input id="t-album" type="text" placeholder="${i18n('albumNamePlaceholder','Nombre del álbum')}">
           </div>
           <div class="form-group">
-            <label>Archivo de audio (MP3/AAC)</label>
+            <label>${i18n('audioFileLabel','Archivo de audio (MP3/AAC)')}</label>
             <input id="t-audio" type="file" accept="audio/*">
           </div>
           <div class="form-group">
-            <label>O URL de audio externa</label>
-            <input id="t-audiourl" type="url" placeholder="https://... (si no subes archivo)">
+            <label>${i18n('externalAudioUrlLabel','O URL de audio externa')}</label>
+            <input id="t-audiourl" type="url" placeholder="${i18n('externalAudioPlaceholder','https://... (si no subes archivo)')}">
           </div>
           <div class="form-group">
-            <label>Portada (imagen, opcional)</label>
+            <label>${i18n('coverOptLabel','Portada (imagen, opcional)')}</label>
             <input id="t-cover" type="file" accept="image/*">
           </div>
           <div class="form-group" style="align-self:end">
-            <button class="btn-upload" id="upload-btn" onclick="uploadTrack()">⬆ Subir canción</button>
+            <button class="btn-upload" id="upload-btn" onclick="uploadTrack()">⬆ ${i18n('uploadTrackBtn','Subir canción')}</button>
           </div>
         </div>
         <div id="upload-msg" style="margin-top:10px;font-size:13px;"></div>
       </div>
 
       <div class="section-header">
-        <h2>Canciones <small style="color:var(--muted)">(${td.tracks.length})</small></h2>
+        <h2>${i18n('tabTracksPlain','Canciones')} <small style="color:var(--muted)">(${td.tracks.length})</small></h2>
       </div>
       <table>
-        <thead><tr><th>Play</th><th>Título</th><th>Artista</th><th>Género</th><th>Plays</th><th>Descargas</th><th>Estado</th><th>Acciones</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="8" class="empty">Sin canciones</td></tr>'}</tbody>
+        <thead><tr><th>Play</th><th>${i18n('titleLabel','Título')}</th><th>${i18n('artistLabel','Artista')}</th><th>${i18n('genreLabel','Género')}</th><th>Plays</th><th>${i18n('downloadsShortLabel','Descargas')}</th><th>${i18n('statusLabel','Estado')}</th><th>${i18n('actionsLabel','Acciones')}</th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="8" class="empty">${i18n('noTracksLabel','Sin canciones')}</td></tr>`}</tbody>
       </table>`;
   } catch(e) {
     el.innerHTML = `<div class="empty">${e.message}</div>`;
@@ -954,12 +943,12 @@ async function uploadTrack() {
   const msg = document.getElementById('upload-msg');
   const btn = document.getElementById('upload-btn');
 
-  if (!title || !artistId || !genre) { msg.style.color='var(--error)'; msg.textContent='Rellena título, artista y género.'; return; }
-  if (!audioFile && !audioUrl) { msg.style.color='var(--error)'; msg.textContent='Sube un archivo de audio o proporciona una URL.'; return; }
+  if (!title || !artistId || !genre) { msg.style.color='var(--error)'; msg.textContent=i18n('fillTitleArtistGenre','Rellena título, artista y género.'); return; }
+  if (!audioFile && !audioUrl) { msg.style.color='var(--error)'; msg.textContent=i18n('uploadAudioOrUrl','Sube un archivo de audio o proporciona una URL.'); return; }
 
   btn.disabled = true;
   msg.style.color = 'var(--muted)';
-  msg.textContent = 'Subiendo…';
+  msg.textContent = i18n('uploadingLabel','Subiendo…');
 
   try {
     const fd = new FormData();
@@ -979,7 +968,7 @@ async function uploadTrack() {
     const json = await res.json();
     if (!json.success) throw new Error(json.error || 'Error');
     msg.style.color = 'var(--success)';
-    msg.textContent = '✅ Canción subida: ' + json.data.track.title;
+    msg.textContent = '✅ ' + i18n('trackUploadedLabel','Canción subida') + ': ' + json.data.track.title;
     loadTracks();
   } catch(e) {
     msg.style.color = 'var(--error)';
@@ -990,7 +979,7 @@ async function uploadTrack() {
 }
 
 async function deleteTrack(id, title) {
-  if (!confirm(`¿Eliminar la canción "${title}"? Esta acción es irreversible.`)) return;
+  if (!confirm(i18n('deleteTrackConfirmAdmin','¿Eliminar la canción "{0}"? Esta acción es irreversible.').replace('{0}', title))) return;
   try {
     await apiFetch('/admin/tracks/' + id, 'DELETE');
     loadTracks();
@@ -1020,14 +1009,14 @@ function closeMiniPlayer() {
 // ── Online users ──────────────────────────────────────────────────────────────
 async function loadOnlineUsers() {
   const el = document.getElementById('tab-online');
-  el.innerHTML = '<div class="loading">Cargando usuarios en línea…</div>';
+  el.innerHTML = `<div class="loading">${i18n('loadingOnlineLabel','Cargando usuarios en línea…')}</div>`;
   try {
     const d = await apiFetch('/admin/online');
     const badge = document.getElementById('online-badge');
     if (badge) badge.textContent = d.users.length || '';
     if (!d.users.length) {
-      el.innerHTML = `<div class="section-header"><h2>Usuarios en línea ahora</h2></div>
-        <div class="empty">No hay usuarios activos en los últimos 5 minutos.</div>`;
+      el.innerHTML = `<div class="section-header"><h2>${i18n('onlineNowTitle','Usuarios en línea ahora')}</h2></div>
+        <div class="empty">${i18n('noActiveUsers5min','No hay usuarios activos en los últimos 5 minutos.')}</div>`;
       return;
     }
     const roleBadge = r => {
@@ -1036,8 +1025,8 @@ async function loadOnlineUsers() {
     };
     const timeAgo = ts => {
       const s = Math.floor((Date.now() - ts) / 1000);
-      if (s < 60) return `hace ${s}s`;
-      return `hace ${Math.floor(s/60)}min`;
+      if (s < 60) return i18n('agoSecondsLabel','hace {0}s').replace('{0}', s);
+      return i18n('agoMinutesLabel','hace {0}min').replace('{0}', Math.floor(s/60));
     };
     const rows = d.users.map(u => `
       <tr>
@@ -1049,12 +1038,12 @@ async function loadOnlineUsers() {
       </tr>`).join('');
     el.innerHTML = `
       <div class="section-header">
-        <h2>Usuarios en línea <small style="color:var(--muted)">(${d.users.length} activos)</small></h2>
-        <button class="btn-sm btn-success" onclick="loadOnlineUsers()" style="width:auto;">↺ Actualizar</button>
+        <h2>${i18n('onlineUsersLabel','Usuarios en línea')} <small style="color:var(--muted)">(${d.users.length} ${i18n('activeLabel','activos')})</small></h2>
+        <button class="btn-sm btn-success" onclick="loadOnlineUsers()" style="width:auto;">↺ ${i18n('refreshBtn','Actualizar')}</button>
       </div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Usuarios que han realizado alguna acción en los últimos 5 minutos.</p>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">${i18n('activeLast5minDesc','Usuarios que han realizado alguna acción en los últimos 5 minutos.')}</p>
       <table>
-        <thead><tr><th>Usuario</th><th>Email</th><th>Rol</th><th>Plataforma</th><th>Última acción</th></tr></thead>
+        <thead><tr><th>${i18n('userLabel','Usuario')}</th><th>Email</th><th>${i18n('roleLabel','Rol')}</th><th>${i18n('platformLabel','Plataforma')}</th><th>${i18n('lastActionLabel','Última acción')}</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
   } catch(e) {
@@ -1078,7 +1067,7 @@ let _chatPollTimer = null;
 
 async function loadChat() {
   const el = document.getElementById('tab-chat');
-  el.innerHTML = '<div class="loading">Cargando conversaciones…</div>';
+  el.innerHTML = `<div class="loading">${i18n('loadingConversationsLabel','Cargando conversaciones…')}</div>`;
   try {
     const convs = await apiFetch('/chat/admin/conversations');
     // Update badge
@@ -1092,17 +1081,17 @@ async function loadChat() {
     }
 
     el.innerHTML = `
-      <div class="section-header"><h2>💬 Soporte al usuario</h2></div>
+      <div class="section-header"><h2>💬 ${i18n('userSupportTitle','Soporte al usuario')}</h2></div>
       <div class="chat-layout">
         <div class="chat-list" id="chat-conv-list"></div>
         <div class="chat-window" id="chat-window">
-          <div class="chat-empty-state">Selecciona una conversación</div>
+          <div class="chat-empty-state">${i18n('selectConversationLabel','Selecciona una conversación')}</div>
         </div>
       </div>`;
 
     const listEl = document.getElementById('chat-conv-list');
     if (convs.length === 0) {
-      listEl.innerHTML = '<div class="empty">Sin conversaciones todavía</div>';
+      listEl.innerHTML = `<div class="empty">${i18n('noConversationsYetLabel','Sin conversaciones todavía')}</div>`;
       return;
     }
     convs.forEach(c => {
@@ -1137,10 +1126,10 @@ async function openConversation(userId, username, itemEl) {
   const win = document.getElementById('chat-window');
   win.innerHTML = `
     <div class="chat-window-header">💬 ${esc(username)}</div>
-    <div class="chat-messages" id="chat-msgs"><div class="loading">Cargando…</div></div>
+    <div class="chat-messages" id="chat-msgs"><div class="loading">${i18n('loadingLabel','Cargando…')}</div></div>
     <div class="chat-input-row">
-      <textarea id="chat-reply-input" placeholder="Escribe una respuesta…" onkeydown="chatKeydown(event)"></textarea>
-      <button onclick="adminReply()">Enviar</button>
+      <textarea id="chat-reply-input" placeholder="${i18n('writeReplyPlaceholder','Escribe una respuesta…')}" onkeydown="chatKeydown(event)"></textarea>
+      <button onclick="adminReply()">${i18n('sendBtn','Enviar')}</button>
     </div>`;
 
   await fetchMessages(userId);
@@ -1157,13 +1146,13 @@ async function fetchMessages(userId) {
     if (!el) return;
     el.innerHTML = '';
     if (msgs.length === 0) {
-      el.innerHTML = '<div class="empty">Sin mensajes aún</div>';
+      el.innerHTML = `<div class="empty">${i18n('noMessagesYetLabel','Sin mensajes aún')}</div>`;
       return;
     }
     msgs.forEach(m => {
       const div = document.createElement('div');
       div.className = `chat-bubble ${m.fromAdmin ? 'from-admin' : 'from-user'}`;
-      const time = new Date(m.createdAt).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+      const time = new Date(m.createdAt).toLocaleTimeString(_lang, { hour: '2-digit', minute: '2-digit' });
       div.innerHTML = `${esc(m.body)}<div class="cb-meta">${time}</div>`;
       el.appendChild(div);
     });
@@ -1183,7 +1172,7 @@ async function adminReply() {
     await apiFetch(`/chat/admin/conversations/${_chatUserId}`, 'POST', { body });
     await fetchMessages(_chatUserId);
   } catch (e) {
-    alert('Error al enviar: ' + e.message);
+    alert(i18n('sendErrorLabel','Error al enviar') + ': ' + e.message);
   }
 }
 
@@ -1205,7 +1194,7 @@ async function refreshChatBadge() {
 async function saveSubDistConfig() {
   const month = document.getElementById('cfg-month').value;
   const msg   = document.getElementById('cfg-msg');
-  if (!month) { msg.style.color='var(--error)'; msg.textContent='Selecciona el mes.'; return; }
+  if (!month) { msg.style.color='var(--error)'; msg.textContent=i18n('selectMonthLabel','Selecciona el mes.'); return; }
   const params = {
     month,
     subscriptionValue: parseInt(document.getElementById('cfg-sub-val').value,10)   || 2000,
@@ -1215,30 +1204,30 @@ async function saveSubDistConfig() {
   };
   if (params.adminPct + params.artistPct !== 100) {
     msg.style.color='var(--error)';
-    msg.textContent='% Admin + % Artistas debe sumar 100.';
+    msg.textContent=i18n('pctSumError','% Admin + % Artistas debe sumar 100.');
     return;
   }
   try {
     await apiFetch('/admin/subscription-config', 'POST', params);
-    msg.style.color='var(--success)'; msg.textContent='✅ Configuración guardada.';
+    msg.style.color='var(--success)'; msg.textContent='✅ ' + i18n('configSavedLabel','Configuración guardada.');
   } catch(e) {
     msg.style.color='var(--error)'; msg.textContent='❌ ' + e.message;
   }
 }
 
 async function triggerSubDistribution() {
-  if (!confirm('¿Ejecutar el reparto del mes anterior?\n\nEsta operación es idempotente — los suscriptores ya procesados se omitirán.')) return;
+  if (!confirm(i18n('runDistributionConfirm','¿Ejecutar el reparto del mes anterior?\n\nEsta operación es idempotente — los suscriptores ya procesados se omitirán.'))) return;
   try {
     const r = await apiFetch('/admin/subscription-distributions/run', 'POST', {});
     const msg = [
-      `✅ Reparto ${r.month} completado.`,
-      `Suscriptores válidos: ${r.total}`,
-      `Procesados: ${r.processed} · Omitidos: ${r.skipped} · Errores: ${(r.errors && r.errors.length) || 0}`,
-      `Fondo total: ${fmt(r.totalFund)} FCFA`,
-      `Admin (30%): ${fmt(r.adminEarnings)} FCFA`,
-      `Artistas distribuido: ${fmt(r.artistDistributed)} FCFA`,
-      `Reserva (umbral/sin escuchas): ${fmt(r.reserve)} FCFA`,
-      `Artistas elegibles: ${r.eligibleArtists}`,
+      `✅ ${i18n('distributionCompletedLabel','Reparto {0} completado.').replace('{0}', r.month)}`,
+      `${i18n('validSubscribersLabel','Suscriptores válidos')}: ${r.total}`,
+      `${i18n('processedLabel','Procesados')}: ${r.processed} · ${i18n('skippedLabel','Omitidos')}: ${r.skipped} · ${i18n('errorsLabel','Errores')}: ${(r.errors && r.errors.length) || 0}`,
+      `${i18n('totalFundLabel','Fondo total')}: ${fmt(r.totalFund)} FCFA`,
+      `${i18n('adminPctLabel','Admin (30%)')}: ${fmt(r.adminEarnings)} FCFA`,
+      `${i18n('artistsDistributedLabel','Artistas distribuido')}: ${fmt(r.artistDistributed)} FCFA`,
+      `${i18n('reserveThresholdLabel','Reserva (umbral/sin escuchas)')}: ${fmt(r.reserve)} FCFA`,
+      `${i18n('eligibleArtistsLabel','Artistas elegibles')}: ${r.eligibleArtists}`,
     ].join('\n');
     alert(msg);
     loadStats();
@@ -1251,8 +1240,8 @@ async function showSubDistDetail(month) {
   const modal = document.getElementById('sub-dist-modal');
   const title = document.getElementById('sub-dist-modal-title');
   const body  = document.getElementById('sub-dist-modal-body');
-  title.textContent = `Informe de reparto — ${month}`;
-  body.innerHTML = '<div class="loading">Cargando…</div>';
+  title.textContent = `${i18n('distributionReportLabel','Informe de reparto')} — ${month}`;
+  body.innerHTML = `<div class="loading">${i18n('loadingLabel','Cargando…')}</div>`;
   modal.classList.remove('hidden');
   try {
     const d = await apiFetch(`/admin/monthly-report/${month}`);
@@ -1265,11 +1254,11 @@ async function showSubDistDetail(month) {
       <!-- Admin summary -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
         <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:11px;color:var(--muted)">Suscriptores</div>
+          <div style="font-size:11px;color:var(--muted)">${i18n('subscribersLabel','Suscriptores')}</div>
           <div style="font-size:20px;font-weight:bold">${fmt(adm.totalSubscribers||0)}</div>
         </div>
         <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:11px;color:var(--muted)">Fondo total</div>
+          <div style="font-size:11px;color:var(--muted)">${i18n('totalFundLabel','Fondo total')}</div>
           <div style="font-size:20px;font-weight:bold;color:var(--accent)">${fmt(adm.totalFund||0)} FCFA</div>
         </div>
         <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
@@ -1277,30 +1266,30 @@ async function showSubDistDetail(month) {
           <div style="font-size:20px;font-weight:bold;color:var(--accent)">${fmt(adm.adminAmount||0)} FCFA</div>
         </div>
         <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:11px;color:var(--muted)">Pool artistas (tope)</div>
+          <div style="font-size:11px;color:var(--muted)">${i18n('artistPoolCapLabel','Pool artistas (tope)')}</div>
           <div style="font-size:16px;font-weight:bold;color:var(--success)">${fmt(adm.artistPool||0)} FCFA</div>
         </div>
         <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:11px;color:var(--muted)">Distribuido</div>
+          <div style="font-size:11px;color:var(--muted)">${i18n('distributedLabel','Distribuido')}</div>
           <div style="font-size:16px;font-weight:bold;color:var(--success)">${fmt(adm.distributedAmount||0)} FCFA</div>
         </div>
         <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:11px;color:var(--muted)">Reserva (no distribuido)</div>
+          <div style="font-size:11px;color:var(--muted)">${i18n('reserveNotDistributedLabel','Reserva (no distribuido)')}</div>
           <div style="font-size:16px;font-weight:bold;color:var(--error)">${fmt(adm.reserveAmount||0)} FCFA</div>
         </div>
       </div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">
-        Umbral mínimo aplicado: <b>${fmt(cfg.minPlaysThreshold||0)} plays</b>
+        ${i18n('minThresholdAppliedLabel','Umbral mínimo aplicado')}: <b>${fmt(cfg.minPlaysThreshold||0)} plays</b>
       </div>
       <!-- Per-artist breakdown -->
       ${artists.length === 0
-        ? '<div class="empty">Sin artistas elegibles para este mes.</div>'
+        ? `<div class="empty">${i18n('noEligibleArtistsLabel','Sin artistas elegibles para este mes.')}</div>`
         : `<table style="width:100%;border-collapse:collapse;font-size:13px;">
           <thead><tr style="color:var(--muted);text-align:left;">
             <th style="padding:6px 8px">#</th>
-            <th style="padding:6px 8px">Artista</th>
-            <th style="padding:6px 8px">Reproducciones</th>
-            <th style="padding:6px 8px">Ingresos (FCFA)</th>
+            <th style="padding:6px 8px">${i18n('artistLabel','Artista')}</th>
+            <th style="padding:6px 8px">${i18n('playsColumnLabel','Reproducciones')}</th>
+            <th style="padding:6px 8px">${i18n('earningsLabel','Ingresos (FCFA)')}</th>
           </tr></thead><tbody>
           ${artists.map((a,i) => `<tr style="border-top:1px solid var(--surface2);">
             <td style="padding:6px 8px;color:var(--muted)">${i+1}</td>
@@ -1366,6 +1355,110 @@ const _translations = {
     cpNewLabel:'Nouveau mot de passe', cpConfirmLabel:'Confirmer le nouveau mot de passe',
     cpSaveBtn:'Enregistrer', cpMinLength:'Le nouveau mot de passe doit comporter au moins 6 caractères.',
     cpMismatch:'Les mots de passe ne correspondent pas.', cpSuccess:'✅ Mot de passe mis à jour avec succès.',
+    loginPanelTitle:"Panneau d'administration", loginIdPlaceholder:"E-mail, téléphone ou nom d'utilisateur",
+    loginPwPlaceholder:'Mot de passe', loginEnterBtn:'Entrer', changePasswordBtn:'Mot de passe',
+    tabAds:'Publicité', tabTools:'Outils', notAdminError:"Vous n'avez pas le rôle administrateur",
+    unknownError:'Erreur inconnue',
+    toolsTitle:'Outils de maintenance', toolStorageTitle:'Diagnostic de stockage (R2/S3)',
+    toolStorageDesc:"Téléverse un minuscule fichier test dans le bucket configuré et vérifie immédiatement s'il est accessible depuis le CDN public. Utilise-le pour savoir si l'audio/les pochettes téléversés sont réellement lisibles.",
+    toolStorageBtn:'Tester le stockage', toolStorageRunning:'Test du stockage en cours...',
+    toolRlsDesc:"Active le RLS sur les tables sensibles (utilisateurs, paiements, abonnements, etc.) pour que seul le rôle de l'application puisse les lire/écrire ; toute autre connexion directe à la BD est bloquée. Cela s'exécute déjà automatiquement à chaque démarrage — utilise ceci pour le vérifier ou le relancer. Il est sûr de l'exécuter plusieurs fois.",
+    toolRlsBtn:'Activer / vérifier le RLS', toolRlsRunning:'Activation du RLS...',
+    toolMediaTitle:'Corriger les URLs des médias (CDN)',
+    toolMediaDesc:"Met à jour les URLs audio et pochettes des chansons pour utiliser le CDN public configuré dans CDN_BASE_URL, seulement si le nouveau fichier existe réellement là-bas (n'efface ni ne vide jamais l'existant). Ne touche pas aux avatars de profil.",
+    toolMediaBtn:'Corriger les URLs des médias', toolMediaRunning:'Correction des URLs...',
+    toolSeedAudioTitle:"Réparer l'audio des chansons de test",
+    toolSeedAudioDesc:"Restaure l'audio des chansons de test (SoundHelix) dont le fichier pointait vers une URL cassée sur le CDN, et leur attribue une pochette d'exemple si elles n'en ont jamais eu.",
+    toolSeedAudioBtn:"Réparer l'audio de test", toolSeedAudioRunning:"Réparation de l'audio...",
+    toolTrialsTitle:"Activer l'essai gratuit pour les artistes existants",
+    toolTrialsDesc:"Accorde 30 jours d'abonnement gratuit à tous les artistes qui n'ont pas encore d'abonnement actif, afin qu'ils puissent téléverser et publier de la musique immédiatement.",
+    toolTrialsBtn:"Activer l'essai artistes", toolTrialsRunning:'Activation des essais...',
+    userModalTitle:'Détail utilisateur', userLabel:'Utilisateur', countryLabel:'Pays', cityLabel:'Ville',
+    artistNameLabel:'Nom artistique', bioLabel:'Bio', walletLabel:'Portefeuille (FCFA)', verifiedLabel:'Vérifié',
+    yesOption:'Oui', noOption:'Non', txnHistoryLabel:'Historique des transactions', loadingLabel:'Chargement…',
+    saveChangesBtn:'Enregistrer les modifications', resetPwBtn:'Réinitialiser le mot de passe', closeBtn:'Fermer',
+    loadingDistributions:'Chargement des répartitions…',
+    noDistributionsYet:"Aucune répartition enregistrée pour l'instant. Configure les paramètres et exécute la répartition.",
+    monthLabel:'Mois', subscribersLabel:'Abonnés', totalFundLabel:'Fonds total', artistsLabel:'Artistes',
+    adminPctLabel:'Admin (30%)', reserveLabel:'Réserve', viewBtn:'Voir',
+    distributionsLoadError:"Impossible de charger l'historique des répartitions.",
+    monthlyDistTitle:'Répartition mensuelle des abonnements', monthParamsLabel:'Paramètres du mois',
+    monthYyyyMmLabel:'Mois (AAAA-MM)', subValueLabel:'Valeur abonnement (FCFA)', adminPctFieldLabel:'% Admin',
+    artistPctFieldLabel:'% Artistes', minThresholdLabel:"Seuil minimum d'écoutes", saveConfigBtn:'Enregistrer la config',
+    runDistributionBtn:'Exécuter la répartition du mois précédent', refreshBtn:'Actualiser',
+    monthlyReportLabel:'Rapport mensuel',
+    allOption:'Tous', listenersLabel:'Auditeurs', detailsBtn:'Détails', hideBtn:'Masquer', restoreBtn:'Restaurer',
+    subscribedLabel:'Abonnés', unsubscribedLabel:'Sans abonnement', contactLabel:'Contact', roleLabel:'Rôle',
+    walletShortLabel:'Portefeuille', registeredLabel:'Inscription', actionsLabel:'Actions',
+    noResultsLabel:'Aucun résultat', previousBtn:'Précédent', pageLabel:'Page', nextBtn:'Suivant',
+    noSubscriptionLabel:'Sans abonnement', listenerMonthlyLabel:'Auditeur mensuel', artistMonthlySubLabel:'Artiste mensuel',
+    listenerTrialLabel:'Essai auditeur', artistTrialLabel:'Essai artiste', expiredLabel:'Expiré', expiresLabel:'Expire le',
+    downloadsShortLabel:'Téléchargements', noTransactionsLabel:'Aucune transaction',
+    savedOkLabel:'Enregistré avec succès',
+    newPwPromptLabel:'Nouveau mot de passe pour cet utilisateur (minimum 6 caractères) :',
+    pwTooShortLabel:'Mot de passe trop court', pwResetLabel:'Mot de passe réinitialisé',
+    hideMusicConfirm:'Masquer toute la musique de {0} ?',
+    tabPaymentsPlain:'Paiements', verifyingLabel:'En attente de vérification', pendingLabel:'En attente',
+    completedLabel:'Terminés', failedLabel:'Échoués', dateLabel:'Date', amountShortLabel:'Montant',
+    methodLabel:'Méthode', conceptLabel:'Concept', statusLabel:'Statut', refLabel:'Réf',
+    confirmBtn:'Confirmer', rejectBtn:'Rejeter', refundBtn:'Remboursement', rejectPayConfirm:'Rejeter ce paiement ?',
+    refundConfirm:"Rembourser {0} FCFA sur le portefeuille de l'utilisateur ? Cette action déduira le solde de son portefeuille.",
+    refundProcessed:'Remboursement traité. {0} FCFA ont été déduits du portefeuille.',
+    loadingTracksLabel:'Chargement des chansons…', publishedLabel:'Publiée', hiddenLabel:'Masquée',
+    uploadNewTrackTitle:'Téléverser une nouvelle chanson', titleLabel:'Titre', trackNamePlaceholder:'Nom de la chanson',
+    artistLabel:'Artiste', selectArtistOption:'Sélectionner un artiste', genreLabel:'Genre',
+    traditionalGenre:'Traditionnel', otherOption:'Autre', albumOptLabel:'Album (optionnel)',
+    albumNamePlaceholder:"Nom de l'album", audioFileLabel:'Fichier audio (MP3/AAC)',
+    externalAudioUrlLabel:'Ou URL audio externe', externalAudioPlaceholder:'https://... (si tu ne téléverses pas de fichier)',
+    coverOptLabel:'Pochette (image, optionnel)', uploadTrackBtn:'Téléverser la chanson', tabTracksPlain:'Chansons',
+    noTracksLabel:'Aucune chanson', fillTitleArtistGenre:"Remplis le titre, l'artiste et le genre.",
+    uploadAudioOrUrl:'Téléverse un fichier audio ou fournis une URL.', uploadingLabel:'Téléversement…',
+    trackUploadedLabel:'Chanson téléversée',
+    deleteTrackConfirmAdmin:'Supprimer la chanson « {0} » ? Cette action est irréversible.',
+    loadingOnlineLabel:'Chargement des utilisateurs en ligne…', onlineNowTitle:'Utilisateurs en ligne maintenant',
+    noActiveUsers5min:'Aucun utilisateur actif au cours des 5 dernières minutes.',
+    agoSecondsLabel:'il y a {0}s', agoMinutesLabel:'il y a {0}min', onlineUsersLabel:'Utilisateurs en ligne',
+    activeLabel:'actifs', activeLast5minDesc:'Utilisateurs ayant effectué une action au cours des 5 dernières minutes.',
+    platformLabel:'Plateforme', lastActionLabel:'Dernière action',
+    loadingConversationsLabel:'Chargement des conversations…', userSupportTitle:'Support utilisateur',
+    selectConversationLabel:'Sélectionne une conversation', noConversationsYetLabel:"Aucune conversation pour l'instant",
+    writeReplyPlaceholder:'Écris une réponse…', sendBtn:'Envoyer', noMessagesYetLabel:"Aucun message pour l'instant",
+    sendErrorLabel:"Erreur d'envoi",
+    selectMonthLabel:'Sélectionne le mois.', pctSumError:'% Admin + % Artistes doit être égal à 100.',
+    configSavedLabel:'Configuration enregistrée.',
+    runDistributionConfirm:'Exécuter la répartition du mois précédent ?\n\nCette opération est idempotente — les abonnés déjà traités seront ignorés.',
+    distributionCompletedLabel:'Répartition {0} terminée.', validSubscribersLabel:'Abonnés valides',
+    processedLabel:'Traités', skippedLabel:'Ignorés', errorsLabel:'Erreurs',
+    artistsDistributedLabel:'Distribué aux artistes', reserveThresholdLabel:'Réserve (seuil/sans écoutes)',
+    eligibleArtistsLabel:'Artistes éligibles', distributionReportLabel:'Rapport de répartition',
+    artistPoolCapLabel:'Pool artistes (plafond)', distributedLabel:'Distribué',
+    reserveNotDistributedLabel:'Réserve (non distribué)', minThresholdAppliedLabel:'Seuil minimum appliqué',
+    noEligibleArtistsLabel:'Aucun artiste éligible pour ce mois.', playsColumnLabel:'Écoutes',
+    earningsLabel:'Revenus (FCFA)',
+    loadingAdsLabel:'Chargement des publicités…', slotTopBanner:'Bannière supérieure',
+    slotMidBanner:'Bannière intermédiaire', slotBottomBanner:'Bannière inférieure',
+    slotDiscoverScreen:'Écran Discover', slotLibraryScreen:'Écran Library', slotAllScreens:'Tous les écrans',
+    activeStatusLabel:'Actif', pausedStatusLabel:'En pause', clicksLabel:'clics', impressionsLabel:'imp.',
+    editBtn:'Modifier', pauseBtn:'Mettre en pause', activateBtn2:'Activer', deleteBtn:'Supprimer',
+    adManagementTitle:'Gestion de la publicité', adsCountLabel:'publicités', newAdBtn:'Nouvelle publicité',
+    noAdsLabel:'Aucune publicité. Crée la première avec « Nouvelle publicité ».', adLabel:'Publicité',
+    positionLabel:'Position', priorityLabel:'Priorité', statsLabel:'Statistiques',
+    adTitlePlaceholder:'Ex : Abonne-toi pour 2 000 FCFA', descriptionLabel:'Description',
+    adSubtitlePlaceholder:'Sous-titre de la publicité', iconLabel:'Icône',
+    targetUrlLabel:"URL de destination (optionnel — si tu la laisses vide, la publicité est publiée quand même et ne redirige nulle part au clic)",
+    imageUrlLabel:"URL de l'image (optionnel)", bgColorLabel:'Couleur de fond', accentColorLabel:"Couleur d'accent",
+    previewLabel:'Aperçu', adTitlePreview:'Titre de la publicité',
+    visualContentLabel:'Contenu visuel (image ou vidéo)', noMediaLabel:'Sans média', imageLabel:'Image',
+    noMediaShownLabel:'Aucune image ni vidéo ne sera affichée dans cette publicité.',
+    clickToUploadImageLabel:'Clique pour téléverser une image', maxSize2mbLabel:'max. 2 Mo',
+    videoUrlPlaceholder:'URL directe de vidéo .mp4 ou YouTube (15 s max.)',
+    videoExampleLabel:'Exemple : https://… /spot.mp4 · Uniquement des vidéos courtes (max. 15 s)',
+    saveAdBtn:'Enregistrer la publicité', editAdTitle:'Modifier la publicité',
+    imageMaxSizeError:"L'image ne peut pas dépasser 2 Mo. Compresse le fichier avant de le téléverser.",
+    titleRequiredLabel:'Le titre est obligatoire.', savingBtn:'Enregistrement…',
+    uploadingImageLabel:"Téléversement de l'image…", imageUploadError:"Erreur lors du téléversement de l'image",
+    deleteAdConfirm:'Supprimer la publicité « {0} » ? Cette action est irréversible.',
+    subscriptionLabel:'Abonnement', publishBtn:'Publier',
   },
   pt: {
     logout:'Sair', statUsers:'Utilizadores', statArtists:'Artistas',
@@ -1385,6 +1478,110 @@ const _translations = {
     cpNewLabel:'Nova palavra-passe', cpConfirmLabel:'Confirmar nova palavra-passe',
     cpSaveBtn:'Guardar', cpMinLength:'A nova palavra-passe deve ter pelo menos 6 caracteres.',
     cpMismatch:'As palavras-passe não coincidem.', cpSuccess:'✅ Palavra-passe atualizada com sucesso.',
+    loginPanelTitle:'Painel de administração', loginIdPlaceholder:'E-mail, telefone ou utilizador',
+    loginPwPlaceholder:'Palavra-passe', loginEnterBtn:'Entrar', changePasswordBtn:'Palavra-passe',
+    tabAds:'Publicidade', tabTools:'Ferramentas', notAdminError:'Não tem função de administrador',
+    unknownError:'Erro desconhecido',
+    toolsTitle:'Ferramentas de manutenção', toolStorageTitle:'Diagnóstico de armazenamento (R2/S3)',
+    toolStorageDesc:'Carrega um ficheiro de teste minúsculo para o bucket configurado e verifica de imediato se está acessível a partir do CDN público. Usa isto para saber se o áudio/capas carregados realmente podem ser reproduzidos.',
+    toolStorageBtn:'Testar armazenamento', toolStorageRunning:'A testar o armazenamento...',
+    toolRlsDesc:'Ativa o RLS nas tabelas sensíveis (utilizadores, pagamentos, subscrições, etc.) para que apenas o papel da aplicação as possa ler/escrever; qualquer outra ligação direta à BD fica bloqueada. Já é executado automaticamente em cada arranque — usa isto para verificar ou relançar. É seguro executar várias vezes.',
+    toolRlsBtn:'Ativar / verificar RLS', toolRlsRunning:'A ativar RLS...',
+    toolMediaTitle:'Corrigir URLs de media (CDN)',
+    toolMediaDesc:'Atualiza os URLs de áudio e capas das músicas para usarem o CDN público configurado em CDN_BASE_URL, apenas se o novo ficheiro realmente existir lá (nunca apaga nem deixa vazio o existente). Não altera avatares de perfil.',
+    toolMediaBtn:'Corrigir URLs de media', toolMediaRunning:'A corrigir URLs...',
+    toolSeedAudioTitle:'Reparar áudio de músicas de teste',
+    toolSeedAudioDesc:'Restaura o áudio das músicas de teste (SoundHelix) cujo ficheiro ficou a apontar para um URL quebrado no CDN, e atribui-lhes uma capa de amostra caso nunca tenham tido uma.',
+    toolSeedAudioBtn:'Reparar áudio de teste', toolSeedAudioRunning:'A reparar áudio...',
+    toolTrialsTitle:'Ativar teste gratuito para artistas existentes',
+    toolTrialsDesc:'Dá 30 dias de subscrição gratuita a todos os artistas que ainda não têm uma subscrição ativa, para que possam carregar e publicar música de imediato.',
+    toolTrialsBtn:'Ativar teste artistas', toolTrialsRunning:'A ativar testes...',
+    userModalTitle:'Detalhe do utilizador', userLabel:'Utilizador', countryLabel:'País', cityLabel:'Cidade',
+    artistNameLabel:'Nome artístico', bioLabel:'Bio', walletLabel:'Carteira (FCFA)', verifiedLabel:'Verificado',
+    yesOption:'Sim', noOption:'Não', txnHistoryLabel:'Histórico de transações', loadingLabel:'A carregar…',
+    saveChangesBtn:'Guardar alterações', resetPwBtn:'Repor palavra-passe', closeBtn:'Fechar',
+    loadingDistributions:'A carregar repartições…',
+    noDistributionsYet:'Ainda sem repartições registadas. Configura os parâmetros e executa a repartição.',
+    monthLabel:'Mês', subscribersLabel:'Subscritores', totalFundLabel:'Fundo total', artistsLabel:'Artistas',
+    adminPctLabel:'Admin (30%)', reserveLabel:'Reserva', viewBtn:'Ver',
+    distributionsLoadError:'Não foi possível carregar o histórico de repartições.',
+    monthlyDistTitle:'Repartição mensal de subscrições', monthParamsLabel:'Parâmetros do mês',
+    monthYyyyMmLabel:'Mês (AAAA-MM)', subValueLabel:'Valor da subscrição (FCFA)', adminPctFieldLabel:'% Admin',
+    artistPctFieldLabel:'% Artistas', minThresholdLabel:'Limiar mínimo de reproduções', saveConfigBtn:'Guardar configuração',
+    runDistributionBtn:'Executar repartição do mês anterior', refreshBtn:'Atualizar',
+    monthlyReportLabel:'Relatório mensal',
+    allOption:'Todos', listenersLabel:'Ouvintes', detailsBtn:'Detalhes', hideBtn:'Ocultar', restoreBtn:'Restaurar',
+    subscribedLabel:'Subscritos', unsubscribedLabel:'Sem subscrição', contactLabel:'Contacto', roleLabel:'Função',
+    walletShortLabel:'Carteira', registeredLabel:'Registo', actionsLabel:'Ações',
+    noResultsLabel:'Sem resultados', previousBtn:'Anterior', pageLabel:'Página', nextBtn:'Seguinte',
+    noSubscriptionLabel:'Sem subscrição', listenerMonthlyLabel:'Ouvinte mensal', artistMonthlySubLabel:'Artista mensal',
+    listenerTrialLabel:'Teste ouvinte', artistTrialLabel:'Teste artista', expiredLabel:'Expirada', expiresLabel:'Expira em',
+    downloadsShortLabel:'Transferências', noTransactionsLabel:'Sem transações',
+    savedOkLabel:'Guardado com sucesso',
+    newPwPromptLabel:'Nova palavra-passe para este utilizador (mínimo 6 caracteres):',
+    pwTooShortLabel:'Palavra-passe demasiado curta', pwResetLabel:'Palavra-passe reposta',
+    hideMusicConfirm:'Ocultar toda a música de {0}?',
+    tabPaymentsPlain:'Pagamentos', verifyingLabel:'Pendentes de verificação', pendingLabel:'Pendentes',
+    completedLabel:'Concluídos', failedLabel:'Falhados', dateLabel:'Data', amountShortLabel:'Montante',
+    methodLabel:'Método', conceptLabel:'Conceito', statusLabel:'Estado', refLabel:'Ref',
+    confirmBtn:'Confirmar', rejectBtn:'Rejeitar', refundBtn:'Reembolso', rejectPayConfirm:'Rejeitar este pagamento?',
+    refundConfirm:'Reembolsar {0} FCFA para a carteira do utilizador? Esta ação vai descontar o saldo da carteira dele.',
+    refundProcessed:'Reembolso processado. Foram descontados {0} FCFA da carteira.',
+    loadingTracksLabel:'A carregar músicas…', publishedLabel:'Publicada', hiddenLabel:'Oculta',
+    uploadNewTrackTitle:'Carregar nova música', titleLabel:'Título', trackNamePlaceholder:'Nome da música',
+    artistLabel:'Artista', selectArtistOption:'Selecionar artista', genreLabel:'Género',
+    traditionalGenre:'Tradicional', otherOption:'Outro', albumOptLabel:'Álbum (opcional)',
+    albumNamePlaceholder:'Nome do álbum', audioFileLabel:'Ficheiro de áudio (MP3/AAC)',
+    externalAudioUrlLabel:'Ou URL de áudio externo', externalAudioPlaceholder:'https://... (se não carregares um ficheiro)',
+    coverOptLabel:'Capa (imagem, opcional)', uploadTrackBtn:'Carregar música', tabTracksPlain:'Músicas',
+    noTracksLabel:'Sem músicas', fillTitleArtistGenre:'Preenche título, artista e género.',
+    uploadAudioOrUrl:'Carrega um ficheiro de áudio ou indica um URL.', uploadingLabel:'A carregar…',
+    trackUploadedLabel:'Música carregada',
+    deleteTrackConfirmAdmin:'Eliminar a música "{0}"? Esta ação é irreversível.',
+    loadingOnlineLabel:'A carregar utilizadores online…', onlineNowTitle:'Utilizadores online agora',
+    noActiveUsers5min:'Não há utilizadores ativos nos últimos 5 minutos.',
+    agoSecondsLabel:'há {0}s', agoMinutesLabel:'há {0}min', onlineUsersLabel:'Utilizadores online',
+    activeLabel:'ativos', activeLast5minDesc:'Utilizadores que realizaram alguma ação nos últimos 5 minutos.',
+    platformLabel:'Plataforma', lastActionLabel:'Última ação',
+    loadingConversationsLabel:'A carregar conversas…', userSupportTitle:'Suporte ao utilizador',
+    selectConversationLabel:'Seleciona uma conversa', noConversationsYetLabel:'Ainda sem conversas',
+    writeReplyPlaceholder:'Escreve uma resposta…', sendBtn:'Enviar', noMessagesYetLabel:'Ainda sem mensagens',
+    sendErrorLabel:'Erro ao enviar',
+    selectMonthLabel:'Seleciona o mês.', pctSumError:'% Admin + % Artistas deve somar 100.',
+    configSavedLabel:'Configuração guardada.',
+    runDistributionConfirm:'Executar a repartição do mês anterior?\n\nEsta operação é idempotente — os subscritores já processados serão ignorados.',
+    distributionCompletedLabel:'Repartição {0} concluída.', validSubscribersLabel:'Subscritores válidos',
+    processedLabel:'Processados', skippedLabel:'Ignorados', errorsLabel:'Erros',
+    artistsDistributedLabel:'Distribuído aos artistas', reserveThresholdLabel:'Reserva (limiar/sem reproduções)',
+    eligibleArtistsLabel:'Artistas elegíveis', distributionReportLabel:'Relatório de repartição',
+    artistPoolCapLabel:'Pool de artistas (limite)', distributedLabel:'Distribuído',
+    reserveNotDistributedLabel:'Reserva (não distribuído)', minThresholdAppliedLabel:'Limiar mínimo aplicado',
+    noEligibleArtistsLabel:'Sem artistas elegíveis para este mês.', playsColumnLabel:'Reproduções',
+    earningsLabel:'Rendimentos (FCFA)',
+    loadingAdsLabel:'A carregar anúncios…', slotTopBanner:'Banner superior',
+    slotMidBanner:'Banner intermédio', slotBottomBanner:'Banner inferior',
+    slotDiscoverScreen:'Ecrã Discover', slotLibraryScreen:'Ecrã Library', slotAllScreens:'Todos os ecrãs',
+    activeStatusLabel:'Ativo', pausedStatusLabel:'Pausado', clicksLabel:'cliques', impressionsLabel:'imp.',
+    editBtn:'Editar', pauseBtn:'Pausar', activateBtn2:'Ativar', deleteBtn:'Eliminar',
+    adManagementTitle:'Gestão de publicidade', adsCountLabel:'anúncios', newAdBtn:'Novo anúncio',
+    noAdsLabel:'Não há anúncios. Cria o primeiro com "Novo anúncio".', adLabel:'Anúncio',
+    positionLabel:'Posição', priorityLabel:'Prioridade', statsLabel:'Estatísticas',
+    adTitlePlaceholder:'Ex: Subscreve por 2.000 FCFA', descriptionLabel:'Descrição',
+    adSubtitlePlaceholder:'Subtítulo do anúncio', iconLabel:'Ícone',
+    targetUrlLabel:'URL de destino (opcional — se deixares vazio, o anúncio é publicado na mesma e não navega para lado nenhum ao clicar)',
+    imageUrlLabel:'URL da imagem (opcional)', bgColorLabel:'Cor de fundo', accentColorLabel:'Cor de destaque',
+    previewLabel:'Pré-visualização', adTitlePreview:'Título do anúncio',
+    visualContentLabel:'Conteúdo visual (imagem ou vídeo)', noMediaLabel:'Sem media', imageLabel:'Imagem',
+    noMediaShownLabel:'Não será exibida nenhuma imagem nem vídeo neste anúncio.',
+    clickToUploadImageLabel:'Clica para carregar imagem', maxSize2mbLabel:'máx. 2 MB',
+    videoUrlPlaceholder:'URL direto de vídeo .mp4 ou YouTube (15 s máx.)',
+    videoExampleLabel:'Exemplo: https://… /spot.mp4 · Apenas vídeos curtos (máx. 15 s)',
+    saveAdBtn:'Guardar anúncio', editAdTitle:'Editar anúncio',
+    imageMaxSizeError:'A imagem não pode exceder 2 MB. Comprime o ficheiro antes de o carregar.',
+    titleRequiredLabel:'O título é obrigatório.', savingBtn:'A guardar…',
+    uploadingImageLabel:'A carregar imagem…', imageUploadError:'Erro ao carregar a imagem',
+    deleteAdConfirm:'Eliminar o anúncio "{0}"? Esta ação não pode ser desfeita.',
+    subscriptionLabel:'Subscrição', publishBtn:'Publicar',
   },
   en: {
     logout:'Logout', statUsers:'Users', statArtists:'Artists',
@@ -1404,6 +1601,110 @@ const _translations = {
     cpNewLabel:'New password', cpConfirmLabel:'Confirm new password',
     cpSaveBtn:'Save', cpMinLength:'The new password must be at least 6 characters long.',
     cpMismatch:'Passwords do not match.', cpSuccess:'✅ Password updated successfully.',
+    loginPanelTitle:'Admin panel', loginIdPlaceholder:'Email, phone or username',
+    loginPwPlaceholder:'Password', loginEnterBtn:'Enter', changePasswordBtn:'Password',
+    tabAds:'Advertising', tabTools:'Tools', notAdminError:'You do not have an administrator role',
+    unknownError:'Unknown error',
+    toolsTitle:'Maintenance tools', toolStorageTitle:'Storage diagnostics (R2/S3)',
+    toolStorageDesc:"Uploads a tiny test file to the configured bucket and immediately checks whether it's reachable from the public CDN. Use it to find out whether uploaded audio/covers are actually playable.",
+    toolStorageBtn:'Test storage', toolStorageRunning:'Testing storage...',
+    toolRlsDesc:"Enables RLS on sensitive tables (users, payments, subscriptions, etc.) so only the app role can read/write them; any other direct DB connection is blocked. It already runs automatically on every startup — use this to verify it or re-run it. It's safe to run multiple times.",
+    toolRlsBtn:'Activate / verify RLS', toolRlsRunning:'Activating RLS...',
+    toolMediaTitle:'Fix media URLs (CDN)',
+    toolMediaDesc:'Updates song audio and cover URLs to use the public CDN configured in CDN_BASE_URL, only if the new file actually exists there (never deletes or empties existing values). Does not touch profile avatars.',
+    toolMediaBtn:'Fix media URLs', toolMediaRunning:'Fixing URLs...',
+    toolSeedAudioTitle:'Repair test song audio',
+    toolSeedAudioDesc:'Restores audio for test songs (SoundHelix) whose file was pointing to a broken CDN URL, and assigns them a sample cover if they never had one.',
+    toolSeedAudioBtn:'Repair test audio', toolSeedAudioRunning:'Repairing audio...',
+    toolTrialsTitle:'Activate free trial for existing artists',
+    toolTrialsDesc:"Gives 30 days of free subscription to all artists who don't yet have an active subscription, so they can upload and publish music right away.",
+    toolTrialsBtn:'Activate artist trial', toolTrialsRunning:'Activating trials...',
+    userModalTitle:'User detail', userLabel:'User', countryLabel:'Country', cityLabel:'City',
+    artistNameLabel:'Artist name', bioLabel:'Bio', walletLabel:'Wallet (FCFA)', verifiedLabel:'Verified',
+    yesOption:'Yes', noOption:'No', txnHistoryLabel:'Transaction history', loadingLabel:'Loading…',
+    saveChangesBtn:'Save changes', resetPwBtn:'Reset password', closeBtn:'Close',
+    loadingDistributions:'Loading distributions…',
+    noDistributionsYet:'No distributions recorded yet. Configure the parameters and run the distribution.',
+    monthLabel:'Month', subscribersLabel:'Subscribers', totalFundLabel:'Total fund', artistsLabel:'Artists',
+    adminPctLabel:'Admin (30%)', reserveLabel:'Reserve', viewBtn:'View',
+    distributionsLoadError:'Could not load distribution history.',
+    monthlyDistTitle:'Monthly subscription distribution', monthParamsLabel:'Month parameters',
+    monthYyyyMmLabel:'Month (YYYY-MM)', subValueLabel:'Subscription value (FCFA)', adminPctFieldLabel:'% Admin',
+    artistPctFieldLabel:'% Artists', minThresholdLabel:'Minimum plays threshold', saveConfigBtn:'Save config',
+    runDistributionBtn:"Run previous month's distribution", refreshBtn:'Refresh',
+    monthlyReportLabel:'Monthly report',
+    allOption:'All', listenersLabel:'Listeners', detailsBtn:'Details', hideBtn:'Hide', restoreBtn:'Restore',
+    subscribedLabel:'Subscribed', unsubscribedLabel:'Not subscribed', contactLabel:'Contact', roleLabel:'Role',
+    walletShortLabel:'Wallet', registeredLabel:'Registered', actionsLabel:'Actions',
+    noResultsLabel:'No results', previousBtn:'Previous', pageLabel:'Page', nextBtn:'Next',
+    noSubscriptionLabel:'No subscription', listenerMonthlyLabel:'Monthly listener', artistMonthlySubLabel:'Monthly artist',
+    listenerTrialLabel:'Listener trial', artistTrialLabel:'Artist trial', expiredLabel:'Expired', expiresLabel:'Expires',
+    downloadsShortLabel:'Downloads', noTransactionsLabel:'No transactions',
+    savedOkLabel:'Saved successfully',
+    newPwPromptLabel:'New password for this user (minimum 6 characters):',
+    pwTooShortLabel:'Password too short', pwResetLabel:'Password reset',
+    hideMusicConfirm:"Hide all of {0}'s music?",
+    tabPaymentsPlain:'Payments', verifyingLabel:'Pending verification', pendingLabel:'Pending',
+    completedLabel:'Completed', failedLabel:'Failed', dateLabel:'Date', amountShortLabel:'Amount',
+    methodLabel:'Method', conceptLabel:'Concept', statusLabel:'Status', refLabel:'Ref',
+    confirmBtn:'Confirm', rejectBtn:'Reject', refundBtn:'Refund', rejectPayConfirm:'Reject this payment?',
+    refundConfirm:"Refund {0} FCFA to the user's wallet? This will deduct the balance from their wallet.",
+    refundProcessed:'Refund processed. {0} FCFA has been deducted from the wallet.',
+    loadingTracksLabel:'Loading songs…', publishedLabel:'Published', hiddenLabel:'Hidden',
+    uploadNewTrackTitle:'Upload new song', titleLabel:'Title', trackNamePlaceholder:'Song name',
+    artistLabel:'Artist', selectArtistOption:'Select artist', genreLabel:'Genre',
+    traditionalGenre:'Traditional', otherOption:'Other', albumOptLabel:'Album (optional)',
+    albumNamePlaceholder:'Album name', audioFileLabel:'Audio file (MP3/AAC)',
+    externalAudioUrlLabel:'Or external audio URL', externalAudioPlaceholder:'https://... (if not uploading a file)',
+    coverOptLabel:'Cover (image, optional)', uploadTrackBtn:'Upload song', tabTracksPlain:'Songs',
+    noTracksLabel:'No songs', fillTitleArtistGenre:'Fill in title, artist and genre.',
+    uploadAudioOrUrl:'Upload an audio file or provide a URL.', uploadingLabel:'Uploading…',
+    trackUploadedLabel:'Song uploaded',
+    deleteTrackConfirmAdmin:'Delete the song "{0}"? This action is irreversible.',
+    loadingOnlineLabel:'Loading online users…', onlineNowTitle:'Users online now',
+    noActiveUsers5min:'No active users in the last 5 minutes.',
+    agoSecondsLabel:'{0}s ago', agoMinutesLabel:'{0}min ago', onlineUsersLabel:'Online users',
+    activeLabel:'active', activeLast5minDesc:'Users who performed an action in the last 5 minutes.',
+    platformLabel:'Platform', lastActionLabel:'Last action',
+    loadingConversationsLabel:'Loading conversations…', userSupportTitle:'User support',
+    selectConversationLabel:'Select a conversation', noConversationsYetLabel:'No conversations yet',
+    writeReplyPlaceholder:'Write a reply…', sendBtn:'Send', noMessagesYetLabel:'No messages yet',
+    sendErrorLabel:'Error sending',
+    selectMonthLabel:'Select the month.', pctSumError:'% Admin + % Artists must add up to 100.',
+    configSavedLabel:'Configuration saved.',
+    runDistributionConfirm:"Run the previous month's distribution?\n\nThis operation is idempotent — subscribers already processed will be skipped.",
+    distributionCompletedLabel:'Distribution {0} completed.', validSubscribersLabel:'Valid subscribers',
+    processedLabel:'Processed', skippedLabel:'Skipped', errorsLabel:'Errors',
+    artistsDistributedLabel:'Distributed to artists', reserveThresholdLabel:'Reserve (threshold/no plays)',
+    eligibleArtistsLabel:'Eligible artists', distributionReportLabel:'Distribution report',
+    artistPoolCapLabel:'Artist pool (cap)', distributedLabel:'Distributed',
+    reserveNotDistributedLabel:'Reserve (not distributed)', minThresholdAppliedLabel:'Minimum threshold applied',
+    noEligibleArtistsLabel:'No eligible artists for this month.', playsColumnLabel:'Plays',
+    earningsLabel:'Earnings (FCFA)',
+    loadingAdsLabel:'Loading ads…', slotTopBanner:'Top banner',
+    slotMidBanner:'Middle banner', slotBottomBanner:'Bottom banner',
+    slotDiscoverScreen:'Discover screen', slotLibraryScreen:'Library screen', slotAllScreens:'All screens',
+    activeStatusLabel:'Active', pausedStatusLabel:'Paused', clicksLabel:'clicks', impressionsLabel:'impr.',
+    editBtn:'Edit', pauseBtn:'Pause', activateBtn2:'Activate', deleteBtn:'Delete',
+    adManagementTitle:'Ad management', adsCountLabel:'ads', newAdBtn:'New ad',
+    noAdsLabel:'No ads. Create the first one with "New ad".', adLabel:'Ad',
+    positionLabel:'Position', priorityLabel:'Priority', statsLabel:'Statistics',
+    adTitlePlaceholder:'E.g.: Subscribe for 2,000 FCFA', descriptionLabel:'Description',
+    adSubtitlePlaceholder:'Ad subtitle', iconLabel:'Icon',
+    targetUrlLabel:'Target URL (optional — if left empty, the ad is still published and does not navigate anywhere on click)',
+    imageUrlLabel:'Image URL (optional)', bgColorLabel:'Background color', accentColorLabel:'Accent color',
+    previewLabel:'Preview', adTitlePreview:'Ad title',
+    visualContentLabel:'Visual content (image or video)', noMediaLabel:'No media', imageLabel:'Image',
+    noMediaShownLabel:'No image or video will be shown in this ad.',
+    clickToUploadImageLabel:'Click to upload image', maxSize2mbLabel:'max. 2 MB',
+    videoUrlPlaceholder:'Direct .mp4 or YouTube video URL (15s max.)',
+    videoExampleLabel:'Example: https://… /spot.mp4 · Short videos only (max. 15s)',
+    saveAdBtn:'Save ad', editAdTitle:'Edit ad',
+    imageMaxSizeError:'The image cannot exceed 2 MB. Compress the file before uploading it.',
+    titleRequiredLabel:'Title is required.', savingBtn:'Saving…',
+    uploadingImageLabel:'Uploading image…', imageUploadError:'Error uploading the image',
+    deleteAdConfirm:'Delete the ad "{0}"? This action cannot be undone.',
+    subscriptionLabel:'Subscription', publishBtn:'Publish',
   },
 };
 const _langs = ['es','fr','pt','en'];
@@ -1417,23 +1718,36 @@ function i18n(key, fallback) {
 
 function applyLang() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
+    if (!el.hasAttribute('data-i18n-es')) el.setAttribute('data-i18n-es', el.textContent);
     const key = el.getAttribute('data-i18n');
-    const t = i18n(key, null);
-    if (t) el.textContent = t;
+    const t = i18n(key, el.getAttribute('data-i18n-es'));
+    el.textContent = t;
   });
-  const tabMap = { stats:'tabStats', users:'tabUsers', payments:'tabPayments',
-                   tracks:'tabTracks', online:'tabOnline', chat:'tabChat' };
-  document.querySelectorAll('nav button').forEach(btn => {
-    const fn = btn.getAttribute('onclick') || '';
-    const match = fn.match(/showTab\('(\w+)'/);
-    if (match && tabMap[match[1]]) {
-      const t = i18n(tabMap[match[1]], null);
-      if (t) btn.innerHTML = btn.innerHTML.replace(/^[^<]+/, t + ' ');
-    }
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    if (!el.hasAttribute('data-i18n-placeholder-es')) el.setAttribute('data-i18n-placeholder-es', el.getAttribute('placeholder'));
+    const key = el.getAttribute('data-i18n-placeholder');
+    const t = i18n(key, el.getAttribute('data-i18n-placeholder-es'));
+    el.setAttribute('placeholder', t);
   });
   const btn = document.getElementById('lang-toggle-btn');
   const nextLang = _langs[(_langs.indexOf(_lang) + 1) % _langs.length];
   if (btn) btn.textContent = _langLabels[nextLang];
+}
+
+// Re-renderiza el contenido dinámico de la pestaña activa para que recoja el nuevo idioma
+function _reloadActiveTab() {
+  const active = document.querySelector('nav button.active');
+  if (!active) return;
+  const fn = active.getAttribute('onclick') || '';
+  const match = fn.match(/showTab\('(\w+)'/);
+  const name = match ? match[1] : null;
+  if (name === 'stats')    loadStats();
+  if (name === 'users')    loadUsers(_uPage);
+  if (name === 'payments') loadPayments(_pPage);
+  if (name === 'tracks')   loadTracks();
+  if (name === 'online')   loadOnlineUsers();
+  if (name === 'chat')     loadChat();
+  if (name === 'ads')      loadAds();
 }
 
 function toggleLang() {
@@ -1441,24 +1755,27 @@ function toggleLang() {
   _lang = _langs[(idx + 1) % _langs.length];
   localStorage.setItem('adminLang', _lang);
   applyLang();
+  _reloadActiveTab();
 }
 
 // ── Publicidad ────────────────────────────────────────────────────────────────
-const AD_SLOTS = [
-  { value: 'web-top',      label: 'Web — Banner superior' },
-  { value: 'web-mid',      label: 'Web — Banner intermedio' },
-  { value: 'web-bottom',   label: 'Web — Banner inferior' },
-  { value: 'app-discover', label: 'APK — Pantalla Discover' },
-  { value: 'app-library',  label: 'APK — Pantalla Library' },
-  { value: 'app-all',      label: 'APK — Todas las pantallas' },
-];
+function adSlots() {
+  return [
+    { value: 'web-top',      label: 'Web — ' + i18n('slotTopBanner','Banner superior') },
+    { value: 'web-mid',      label: 'Web — ' + i18n('slotMidBanner','Banner intermedio') },
+    { value: 'web-bottom',   label: 'Web — ' + i18n('slotBottomBanner','Banner inferior') },
+    { value: 'app-discover', label: 'APK — ' + i18n('slotDiscoverScreen','Pantalla Discover') },
+    { value: 'app-library',  label: 'APK — ' + i18n('slotLibraryScreen','Pantalla Library') },
+    { value: 'app-all',      label: 'APK — ' + i18n('slotAllScreens','Todas las pantallas') },
+  ];
+}
 const AD_ICONS = ['star','mic','download_done','people','music_note','headphones','trending_up','campaign'];
 
 let _ads = [];
 
 async function loadAds() {
   const el = document.getElementById('tab-ads');
-  el.innerHTML = '<div class="loading">Cargando anuncios…</div>';
+  el.innerHTML = `<div class="loading">${i18n('loadingAdsLabel','Cargando anuncios…')}</div>`;
   try {
     const d = await apiFetch('/admin/ads');
     _ads = d.ads || [];
@@ -1469,7 +1786,7 @@ async function loadAds() {
 }
 
 function renderAdsTab(el) {
-  const slotOptions = AD_SLOTS.map(s => `<option value="${s.value}">${s.label}</option>`).join('');
+  const slotOptions = adSlots().map(s => `<option value="${s.value}">${s.label}</option>`).join('');
   const iconOptions = AD_ICONS.map(i => `<option value="${i}">${i}</option>`).join('');
 
   const rows = _ads.map(ad => `
@@ -1491,19 +1808,19 @@ function renderAdsTab(el) {
             : `<span style="color:var(--muted);font-size:11px;">—</span>`
         }
       </td>
-      <td><span style="background:rgba(245,158,11,0.12);color:var(--accent);padding:2px 8px;border-radius:99px;font-size:11px;">${esc(AD_SLOTS.find(s=>s.value===ad.slot)?.label || ad.slot)}</span></td>
+      <td><span style="background:rgba(245,158,11,0.12);color:var(--accent);padding:2px 8px;border-radius:99px;font-size:11px;">${esc(adSlots().find(s=>s.value===ad.slot)?.label || ad.slot)}</span></td>
       <td style="text-align:center;">${ad.priority}</td>
       <td style="text-align:center;">
         <span style="background:${ad.isActive ? 'rgba(74,222,128,0.15)' : 'rgba(248,113,113,0.15)'};color:${ad.isActive ? '#4ade80' : '#f87171'};padding:2px 10px;border-radius:99px;font-size:11px;">
-          ${ad.isActive ? 'Activo' : 'Pausado'}
+          ${ad.isActive ? i18n('activeStatusLabel','Activo') : i18n('pausedStatusLabel','Pausado')}
         </span>
       </td>
-      <td style="text-align:center;font-size:12px;color:var(--muted);">${fmt(ad.clicks)} clics / ${fmt(ad.impressions)} imp.</td>
+      <td style="text-align:center;font-size:12px;color:var(--muted);">${fmt(ad.clicks)} ${i18n('clicksLabel','clics')} / ${fmt(ad.impressions)} ${i18n('impressionsLabel','imp.')}</td>
       <td>
         <div style="display:flex;gap:6px;justify-content:flex-end;">
-          <button onclick="editAdModal('${ad.id}')" style="padding:4px 10px;background:var(--surface2);border-radius:6px;font-size:12px;">✏️ Editar</button>
-          <button onclick="toggleAdStatus('${ad.id}')" style="padding:4px 10px;background:var(--surface2);border-radius:6px;font-size:12px;">${ad.isActive ? '⏸ Pausar' : '▶ Activar'}</button>
-          <button onclick="deleteAd('${ad.id}')" style="padding:4px 10px;background:rgba(248,113,113,0.15);color:#f87171;border-radius:6px;font-size:12px;">🗑 Eliminar</button>
+          <button onclick="editAdModal('${ad.id}')" style="padding:4px 10px;background:var(--surface2);border-radius:6px;font-size:12px;">✏️ ${i18n('editBtn','Editar')}</button>
+          <button onclick="toggleAdStatus('${ad.id}')" style="padding:4px 10px;background:var(--surface2);border-radius:6px;font-size:12px;">${ad.isActive ? '⏸ ' + i18n('pauseBtn','Pausar') : '▶ ' + i18n('activateBtn2','Activar')}</button>
+          <button onclick="deleteAd('${ad.id}')" style="padding:4px 10px;background:rgba(248,113,113,0.15);color:#f87171;border-radius:6px;font-size:12px;">🗑 ${i18n('deleteBtn','Eliminar')}</button>
         </div>
       </td>
     </tr>
@@ -1511,22 +1828,22 @@ function renderAdsTab(el) {
 
   el.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-      <h2 style="font-size:18px;">📢 Gestión de publicidad <small style="color:var(--muted);font-size:13px;">(${_ads.length} anuncios)</small></h2>
-      <button onclick="newAdModal()" style="padding:8px 18px;background:var(--accent);color:#000;border-radius:8px;font-weight:700;">+ Nuevo anuncio</button>
+      <h2 style="font-size:18px;">📢 ${i18n('adManagementTitle','Gestión de publicidad')} <small style="color:var(--muted);font-size:13px;">(${_ads.length} ${i18n('adsCountLabel','anuncios')})</small></h2>
+      <button onclick="newAdModal()" style="padding:8px 18px;background:var(--accent);color:#000;border-radius:8px;font-weight:700;">+ ${i18n('newAdBtn','Nuevo anuncio')}</button>
     </div>
 
-    ${_ads.length === 0 ? `<div style="text-align:center;padding:40px;color:var(--muted);">No hay anuncios. Crea el primero con "Nuevo anuncio".</div>` : `
+    ${_ads.length === 0 ? `<div style="text-align:center;padding:40px;color:var(--muted);">${i18n('noAdsLabel','No hay anuncios. Crea el primero con "Nuevo anuncio".')}</div>` : `
     <div style="overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;">
         <thead>
           <tr style="border-bottom:1px solid var(--border);text-align:left;">
-            <th style="padding:10px 8px;font-size:12px;color:var(--muted);">Anuncio</th>
+            <th style="padding:10px 8px;font-size:12px;color:var(--muted);">${i18n('adLabel','Anuncio')}</th>
             <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:center;">Media</th>
-            <th style="padding:10px 8px;font-size:12px;color:var(--muted);">Posición</th>
-            <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:center;">Prioridad</th>
-            <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:center;">Estado</th>
-            <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:center;">Estadísticas</th>
-            <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:right;">Acciones</th>
+            <th style="padding:10px 8px;font-size:12px;color:var(--muted);">${i18n('positionLabel','Posición')}</th>
+            <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:center;">${i18n('priorityLabel','Prioridad')}</th>
+            <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:center;">${i18n('statusLabel','Estado')}</th>
+            <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:center;">${i18n('statsLabel','Estadísticas')}</th>
+            <th style="padding:10px 8px;font-size:12px;color:var(--muted);text-align:right;">${i18n('actionsLabel','Acciones')}</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -1538,69 +1855,69 @@ function renderAdsTab(el) {
     <div id="ad-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;">
       <div style="background:var(--surface);border-radius:14px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;position:relative;">
         <button onclick="closeAdModal()" style="position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
-        <h3 id="ad-modal-title" style="font-size:16px;font-weight:700;margin-bottom:20px;color:var(--accent);">Nuevo anuncio</h3>
+        <h3 id="ad-modal-title" style="font-size:16px;font-weight:700;margin-bottom:20px;color:var(--accent);">${i18n('newAdBtn','Nuevo anuncio')}</h3>
 
         <input type="hidden" id="ad-id">
 
         <div style="display:grid;gap:14px;">
           <div>
-            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Título *</label>
-            <input id="ad-title" type="text" placeholder="Ej: Suscríbete por 2.000 FCFA" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;">
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">${i18n('titleLabel','Título')} *</label>
+            <input id="ad-title" type="text" placeholder="${i18n('adTitlePlaceholder','Ej: Suscríbete por 2.000 FCFA')}" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;">
           </div>
           <div>
-            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Descripción</label>
-            <input id="ad-description" type="text" placeholder="Subtítulo del anuncio" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;">
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">${i18n('descriptionLabel','Descripción')}</label>
+            <input id="ad-description" type="text" placeholder="${i18n('adSubtitlePlaceholder','Subtítulo del anuncio')}" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;">
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div>
-              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Posición *</label>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">${i18n('positionLabel','Posición')} *</label>
               <select id="ad-slot" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;">
                 ${slotOptions}
               </select>
             </div>
             <div>
-              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Icono</label>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">${i18n('iconLabel','Icono')}</label>
               <select id="ad-icon" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;">
                 ${iconOptions}
               </select>
             </div>
           </div>
           <div>
-            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">URL de destino (opcional — si la dejas vacía, el anuncio se publica igual y no navega a ningún sitio al hacer clic)</label>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">${i18n('targetUrlLabel','URL de destino (opcional — si la dejas vacía, el anuncio se publica igual y no navega a ningún sitio al hacer clic)')}</label>
             <input id="ad-link" type="text" placeholder="https://… o #seccion" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;">
           </div>
           <div>
-            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">URL de imagen (opcional)</label>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">${i18n('imageUrlLabel','URL de imagen (opcional)')}</label>
             <input id="ad-image" type="text" placeholder="https://… (logo o banner)" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;">
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
             <div>
-              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Color fondo</label>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">${i18n('bgColorLabel','Color fondo')}</label>
               <div style="display:flex;gap:6px;align-items:center;">
                 <input type="color" id="ad-bgcolor" value="#1A1200" style="width:38px;height:36px;padding:2px;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;">
                 <input id="ad-bgcolor-hex" type="text" value="#1A1200" maxlength="7" style="flex:1;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:12px;" oninput="document.getElementById('ad-bgcolor').value=this.value">
               </div>
             </div>
             <div>
-              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Color acento</label>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">${i18n('accentColorLabel','Color acento')}</label>
               <div style="display:flex;gap:6px;align-items:center;">
                 <input type="color" id="ad-accent" value="#F59E0B" style="width:38px;height:36px;padding:2px;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;">
                 <input id="ad-accent-hex" type="text" value="#F59E0B" maxlength="7" style="flex:1;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:12px;" oninput="document.getElementById('ad-accent').value=this.value">
               </div>
             </div>
             <div>
-              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Prioridad</label>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">${i18n('priorityLabel','Prioridad')}</label>
               <input id="ad-priority" type="number" value="0" min="0" max="100" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;">
             </div>
           </div>
           <!-- Vista previa -->
           <div>
-            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Vista previa</label>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">${i18n('previewLabel','Vista previa')}</label>
             <div id="ad-preview" style="border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;background:#1A1200;border:1px solid rgba(245,158,11,0.3);">
               <div id="ad-preview-icon" style="width:36px;height:36px;border-radius:50%;background:rgba(245,158,11,0.15);display:flex;align-items:center;justify-content:center;font-size:18px;">⭐</div>
               <div style="flex:1;">
-                <div id="ad-preview-title" style="font-weight:700;font-size:12px;color:#fff;">Título del anuncio</div>
-                <div id="ad-preview-desc" style="font-size:10px;color:rgba(255,255,255,0.5);">Descripción</div>
+                <div id="ad-preview-title" style="font-weight:700;font-size:12px;color:#fff;">${i18n('adTitlePreview','Título del anuncio')}</div>
+                <div id="ad-preview-desc" style="font-size:10px;color:rgba(255,255,255,0.5);">${i18n('descriptionLabel','Descripción')}</div>
               </div>
               <span style="font-size:9px;color:rgba(255,255,255,0.25);">Ad</span>
             </div>
@@ -1609,16 +1926,16 @@ function renderAdsTab(el) {
 
           <!-- ── Media upload ── -->
           <div>
-            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:8px;">Contenido visual (imagen o video)</label>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:8px;">${i18n('visualContentLabel','Contenido visual (imagen o video)')}</label>
             <!-- Tabs -->
             <div style="display:flex;gap:4px;margin-bottom:10px;">
-              <button id="ad-media-tab-none"  onclick="setAdMediaTab('none')"  style="flex:1;padding:6px;background:var(--surface2);border-radius:6px;font-size:12px;border:2px solid transparent;" class="ad-media-tab">Sin media</button>
-              <button id="ad-media-tab-image" onclick="setAdMediaTab('image')" style="flex:1;padding:6px;background:var(--surface2);border-radius:6px;font-size:12px;border:2px solid transparent;" class="ad-media-tab">📷 Imagen</button>
+              <button id="ad-media-tab-none"  onclick="setAdMediaTab('none')"  style="flex:1;padding:6px;background:var(--surface2);border-radius:6px;font-size:12px;border:2px solid transparent;" class="ad-media-tab">${i18n('noMediaLabel','Sin media')}</button>
+              <button id="ad-media-tab-image" onclick="setAdMediaTab('image')" style="flex:1;padding:6px;background:var(--surface2);border-radius:6px;font-size:12px;border:2px solid transparent;" class="ad-media-tab">📷 ${i18n('imageLabel','Imagen')}</button>
               <button id="ad-media-tab-video" onclick="setAdMediaTab('video')" style="flex:1;padding:6px;background:var(--surface2);border-radius:6px;font-size:12px;border:2px solid transparent;" class="ad-media-tab">🎬 Video</button>
             </div>
             <!-- Panel: sin media -->
             <div id="ad-media-panel-none" style="display:block;padding:10px;background:var(--bg);border-radius:8px;border:1px dashed var(--border);text-align:center;color:var(--muted);font-size:12px;">
-              No se mostrará ninguna imagen ni video en este anuncio.
+              ${i18n('noMediaShownLabel','No se mostrará ninguna imagen ni video en este anuncio.')}
             </div>
             <!-- Panel: imagen -->
             <div id="ad-media-panel-image" style="display:none;">
@@ -1626,22 +1943,22 @@ function renderAdsTab(el) {
                 <div id="ad-image-preview-wrap" style="display:none;margin-bottom:8px;">
                   <img id="ad-image-preview" src="" style="max-width:100%;max-height:100px;border-radius:6px;object-fit:contain;">
                 </div>
-                <div style="font-size:12px;color:var(--muted);">Haz clic para subir imagen<br><span style="font-size:10px;">JPG, PNG, WebP — máx. 2 MB</span></div>
+                <div style="font-size:12px;color:var(--muted);">${i18n('clickToUploadImageLabel','Haz clic para subir imagen')}<br><span style="font-size:10px;">JPG, PNG, WebP — ${i18n('maxSize2mbLabel','máx. 2 MB')}</span></div>
                 <input type="file" id="ad-media-file" accept="image/*" style="display:none;" onchange="onAdImageSelected(this)">
               </div>
             </div>
             <!-- Panel: video -->
             <div id="ad-media-panel-video" style="display:none;">
-              <input id="ad-video-url" type="text" placeholder="URL directa de video .mp4 o YouTube (15 s máx.)" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;" oninput="updateAdVideoPreview()">
+              <input id="ad-video-url" type="text" placeholder="${i18n('videoUrlPlaceholder','URL directa de video .mp4 o YouTube (15 s máx.)')}" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:13px;box-sizing:border-box;" oninput="updateAdVideoPreview()">
               <div id="ad-video-preview" style="display:none;margin-top:8px;border-radius:8px;overflow:hidden;"></div>
-              <div style="font-size:11px;color:var(--muted);margin-top:6px;">Ejemplo: https://… /spot.mp4 · Solo videos cortos (máx. 15 s)</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:6px;">${i18n('videoExampleLabel','Ejemplo: https://… /spot.mp4 · Solo videos cortos (máx. 15 s)')}</div>
             </div>
           </div>
 
         <div id="ad-modal-err" style="display:none;color:#f87171;font-size:12px;margin-top:10px;"></div>
         <div style="display:flex;gap:10px;margin-top:20px;">
-          <button onclick="closeAdModal()" style="flex:1;padding:10px;background:var(--surface2);border-radius:8px;color:var(--muted);">Cancelar</button>
-          <button id="ad-save-btn" onclick="saveAd()" style="flex:2;padding:10px;background:var(--accent);color:#000;border-radius:8px;font-weight:700;">Guardar anuncio</button>
+          <button onclick="closeAdModal()" style="flex:1;padding:10px;background:var(--surface2);border-radius:8px;color:var(--muted);">${i18n('cancelBtn','Cancelar')}</button>
+          <button id="ad-save-btn" onclick="saveAd()" style="flex:2;padding:10px;background:var(--accent);color:#000;border-radius:8px;font-weight:700;">${i18n('saveAdBtn','Guardar anuncio')}</button>
         </div>
       </div>
     </div>
@@ -1707,7 +2024,7 @@ function onAdImageSelected(input) {
   const file = input.files[0];
   if (!file) return;
   if (file.size > 2 * 1024 * 1024) {
-    alert('La imagen no puede superar 2 MB. Comprime el archivo antes de subirlo.');
+    alert(i18n('imageMaxSizeError','La imagen no puede superar 2 MB. Comprime el archivo antes de subirlo.'));
     input.value = ''; return;
   }
   _adMediaFile = file;
@@ -1758,7 +2075,7 @@ function _resetAdMediaUI(ad) {
 }
 
 function newAdModal() {
-  document.getElementById('ad-modal-title').textContent = 'Nuevo anuncio';
+  document.getElementById('ad-modal-title').textContent = i18n('newAdBtn','Nuevo anuncio');
   document.getElementById('ad-id').value = '';
   document.getElementById('ad-title').value = '';
   document.getElementById('ad-description').value = '';
@@ -1780,7 +2097,7 @@ function newAdModal() {
 function editAdModal(id) {
   const ad = _ads.find(a => a.id === id);
   if (!ad) return;
-  document.getElementById('ad-modal-title').textContent = 'Editar anuncio';
+  document.getElementById('ad-modal-title').textContent = i18n('editAdTitle','Editar anuncio');
   document.getElementById('ad-id').value = ad.id;
   document.getElementById('ad-title').value = ad.title;
   document.getElementById('ad-description').value = ad.description || '';
@@ -1808,7 +2125,7 @@ async function saveAd() {
   const title = document.getElementById('ad-title').value.trim();
   const slot  = document.getElementById('ad-slot').value;
   const errEl = document.getElementById('ad-modal-err');
-  if (!title) { errEl.textContent = 'El título es obligatorio.'; errEl.style.display=''; return; }
+  if (!title) { errEl.textContent = i18n('titleRequiredLabel','El título es obligatorio.'); errEl.style.display=''; return; }
 
   const body = {
     title,
@@ -1823,7 +2140,7 @@ async function saveAd() {
   };
 
   const btn = document.getElementById('ad-save-btn');
-  btn.disabled = true; btn.textContent = 'Guardando…';
+  btn.disabled = true; btn.textContent = i18n('savingBtn','Guardando…');
   errEl.style.display = 'none';
 
   try {
@@ -1837,7 +2154,7 @@ async function saveAd() {
 
     // ── Subir / actualizar media ──
     if (_adMediaTab === 'image' && _adMediaFile && adId) {
-      btn.textContent = 'Subiendo imagen…';
+      btn.textContent = i18n('uploadingImageLabel','Subiendo imagen…');
       const fd = new FormData();
       fd.append('media', _adMediaFile);
       const mediaRes = await fetch(API + '/admin/ads/' + adId + '/media', {
@@ -1846,7 +2163,7 @@ async function saveAd() {
         body: fd,
       });
       const mediaJson = await mediaRes.json();
-      if (!mediaJson.success) throw new Error(mediaJson.error || 'Error al subir la imagen');
+      if (!mediaJson.success) throw new Error(mediaJson.error || i18n('imageUploadError','Error al subir la imagen'));
     } else if (_adMediaTab === 'video' && adId) {
       const videoUrl = (document.getElementById('ad-video-url').value || '').trim();
       if (videoUrl) {
@@ -1862,7 +2179,7 @@ async function saveAd() {
     errEl.textContent = e.message;
     errEl.style.display = '';
   } finally {
-    btn.disabled = false; btn.textContent = 'Guardar anuncio';
+    btn.disabled = false; btn.textContent = i18n('saveAdBtn','Guardar anuncio');
   }
 }
 
@@ -1875,7 +2192,7 @@ async function toggleAdStatus(id) {
 
 async function deleteAd(id) {
   const ad = _ads.find(a => a.id === id);
-  if (!confirm(`¿Eliminar el anuncio "${ad?.title}"? Esta acción no se puede deshacer.`)) return;
+  if (!confirm(i18n('deleteAdConfirm','¿Eliminar el anuncio "{0}"? Esta acción no se puede deshacer.').replace('{0}', ad?.title))) return;
   try {
     await apiFetch('/admin/ads/' + id, 'DELETE');
     loadAds();
