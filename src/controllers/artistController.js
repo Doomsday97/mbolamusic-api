@@ -123,6 +123,7 @@ async function publicProfile(req, res) {
     username: user.username,
     artistName: user.artistProfile.artistName,
     bio: user.artistProfile.bio,
+    socialLinks: user.artistProfile.socialLinks || {},
     country: user.country,
     city: user.city,
     followerCount: user.followers.length,

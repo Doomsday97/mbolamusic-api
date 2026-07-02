@@ -156,6 +156,7 @@ model ArtistProfile {
   bio             String?
   idDocumentUrl   String?  // documento de identidad para verificación
   idVerified      Boolean  @default(false)
+  socialLinks     Json?    // { instagram, facebook, tiktok, youtube, twitter, whatsapp }
 
   totalEarnings   Int      @default(0) // ganancias acumuladas en FCFA (no retiradas)
 

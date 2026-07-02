@@ -12,6 +12,31 @@ function genReferralCode() {
   return crypto.randomBytes(4).toString('hex').toUpperCase(); // ej: A3F7C291
 }
 
+// Plataformas de redes sociales admitidas en el perfil de artista
+const SOCIAL_PLATFORMS = ['instagram', 'facebook', 'tiktok', 'youtube', 'twitter', 'whatsapp'];
+
+// Valida y normaliza el objeto de enlaces sociales recibido del cliente.
+// Solo se aceptan URLs https:// de las plataformas conocidas; el resto se ignora.
+// Lanza un Error con mensaje amigable si alguna URL presente es inválida.
+// Devuelve, por cada plataforma presente en `input`, la URL normalizada o
+// `null` si se envió vacía (indica que el artista quiere borrar ese enlace).
+// Las plataformas ausentes en `input` no se tocan (permite updates parciales).
+function sanitizeSocialLinks(input) {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) return undefined;
+  const out = {};
+  for (const key of SOCIAL_PLATFORMS) {
+    if (!(key in input)) continue;
+    const val = input[key];
+    const trimmed = typeof val === 'string' ? val.trim() : '';
+    if (!trimmed) { out[key] = null; continue; }
+    if (!/^https:\/\/[^\s]+$/i.test(trimmed)) {
+      throw new Error(`El enlace de ${key} debe ser una URL https:// válida`);
+    }
+    out[key] = trimmed;
+  }
+  return out;
+}
+
 // ----- Validación -----
 const registerSchema = z.object({
   email: z.string().email().optional(),
@@ -148,7 +173,7 @@ async function myReferral(req, res) {
 
 // PUT /api/auth/profile
 async function updateProfile(req, res) {
-  const { username, country, city, artistName, bio } = req.body;
+  const { username, country, city, artistName, bio, socialLinks } = req.body;
   const userId = req.user.id;
 
   if (username && username.length < 3) return fail(res, 'El nombre de usuario debe tener al menos 3 caracteres');
@@ -166,12 +191,28 @@ async function updateProfile(req, res) {
     },
   });
 
-  if (req.user.role === 'ARTIST' && (artistName || bio !== undefined)) {
+  if (req.user.role === 'ARTIST' && (artistName || bio !== undefined || socialLinks !== undefined)) {
+    let socialLinksData;
+    if (socialLinks !== undefined) {
+      let ops;
+      try {
+        ops = sanitizeSocialLinks(socialLinks);
+      } catch (e) {
+        return fail(res, e.message);
+      }
+      if (ops === undefined) return fail(res, 'Formato de enlaces sociales inválido');
+      const current = await prisma.artistProfile.findUnique({ where: { userId }, select: { socialLinks: true } });
+      const merged = { ...(current?.socialLinks || {}), ...ops };
+      for (const k of Object.keys(merged)) if (merged[k] === null) delete merged[k];
+      socialLinksData = merged;
+    }
+
     await prisma.artistProfile.update({
       where: { userId },
       data: {
         ...(artistName && { artistName }),
         ...(bio !== undefined && { bio }),
+        ...(socialLinksData !== undefined && { socialLinks: socialLinksData }),
       },
     });
   }
