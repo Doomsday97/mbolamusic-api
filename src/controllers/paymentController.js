@@ -291,13 +291,18 @@ async function artistEarningsWithdraw(req, res) {
 
   const profile = await prisma.artistProfile.findUnique({ where: { userId: req.user.id } });
   if (!profile) return fail(res, 'Perfil de artista no encontrado', 404);
-  if (profile.totalEarnings < amount) return fail(res, `Ganancias disponibles insuficientes. Tienes ${profile.totalEarnings} FCFA.`);
+
+  // UPDATE atómico con condición de ganancias suficientes: evita que dos
+  // solicitudes de retiro simultáneas dejen totalEarnings en negativo.
+  const deducted = await prisma.artistProfile.updateMany({
+    where: { id: profile.id, totalEarnings: { gte: amount } },
+    data: { totalEarnings: { decrement: amount } },
+  });
+  if (deducted.count === 0) {
+    return fail(res, `Ganancias disponibles insuficientes. Tienes ${profile.totalEarnings} FCFA.`);
+  }
 
   await prisma.$transaction([
-    prisma.artistProfile.update({
-      where: { id: profile.id },
-      data: { totalEarnings: { decrement: amount } },
-    }),
     prisma.user.update({
       where: { id: req.user.id },
       data: { walletBalance: { increment: amount } },
@@ -325,13 +330,21 @@ async function walletWithdraw(req, res) {
   if (amount > MONTHLY_WALLET_LIMIT) return fail(res, `El monto máximo por operación es ${MONTHLY_WALLET_LIMIT} FCFA`);
 
   const user = await prisma.user.findUnique({ where: { id: req.user.id } });
-  if (!user || user.walletBalance < amount) return fail(res, 'Saldo insuficiente en el monedero');
+  if (!user) return fail(res, 'Usuario no encontrado', 404);
 
   const monthTotal = await getMonthlyWalletTotal(req.user.id);
   if (monthTotal + amount > MONTHLY_WALLET_LIMIT) {
     const remaining = MONTHLY_WALLET_LIMIT - monthTotal;
     return fail(res, `Límite mensual de ${MONTHLY_WALLET_LIMIT} FCFA superado. Puedes retirar ${remaining} FCFA más este mes.`);
   }
+
+  // UPDATE atómico con condición de saldo suficiente: evita que dos
+  // solicitudes de retiro simultáneas sobregiren el monedero.
+  const deducted = await prisma.user.updateMany({
+    where: { id: req.user.id, walletBalance: { gte: amount } },
+    data: { walletBalance: { decrement: amount } },
+  });
+  if (deducted.count === 0) return fail(res, 'Saldo insuficiente en el monedero');
 
   const payment = await prisma.payment.create({
     data: {
@@ -341,11 +354,6 @@ async function walletWithdraw(req, res) {
       status: 'COMPLETED',
       purpose: 'WALLET_WITHDRAW',
     },
-  });
-
-  await prisma.user.update({
-    where: { id: req.user.id },
-    data: { walletBalance: { decrement: amount } },
   });
 
   return ok(res, { payment, monthlyUsed: monthTotal + amount, monthlyLimit: MONTHLY_WALLET_LIMIT });
@@ -450,15 +458,20 @@ async function adminRefundPayment(req, res) {
 
   const user = await prisma.user.findUnique({ where: { id: payment.userId } });
   if (!user) return fail(res, 'Usuario no encontrado', 404);
-  if (user.walletBalance < payment.amount) {
-    return fail(res, `Saldo insuficiente. El usuario tiene ${user.walletBalance} FCFA, se intenta reembolsar ${payment.amount} FCFA`);
+
+  // UPDATE atómico con condición de saldo suficiente: el usuario pudo haber
+  // gastado el saldo entre la comprobación y este punto (ej. otra compra en
+  // curso mientras el admin revisaba el pago).
+  const deducted = await prisma.user.updateMany({
+    where: { id: payment.userId, walletBalance: { gte: payment.amount } },
+    data: { walletBalance: { decrement: payment.amount } },
+  });
+  if (deducted.count === 0) {
+    const fresh = await prisma.user.findUnique({ where: { id: payment.userId } });
+    return fail(res, `Saldo insuficiente. El usuario tiene ${fresh.walletBalance} FCFA, se intenta reembolsar ${payment.amount} FCFA`);
   }
 
   await prisma.$transaction([
-    prisma.user.update({
-      where: { id: payment.userId },
-      data: { walletBalance: { decrement: payment.amount } },
-    }),
     prisma.payment.update({
       where: { id: payment.id },
       data: { status: 'FAILED' },
