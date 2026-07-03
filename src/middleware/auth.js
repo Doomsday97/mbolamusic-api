@@ -3,11 +3,15 @@ const { fail } = require('../utils/response');
 const prisma = require('../config/prisma');
 const onlineTracker = require('./onlineTracker');
 
-// Verifica el JWT y carga el usuario en req.user
+// Verifica el JWT y carga el usuario en req.user.
+// Acepta el token de dos formas:
+//  - Header "Authorization: Bearer <token>" (APK / Postman / curl)
+//  - Cookie HttpOnly "token" (Flutter Web, la puso /api/auth/login)
 async function authenticate(req, res, next) {
   try {
     const header = req.headers.authorization || '';
-    const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+    const bearerToken = header.startsWith('Bearer ') ? header.slice(7) : null;
+    const token = bearerToken || req.cookies?.token || null;
     if (!token) return fail(res, 'No autenticado', 401);
 
     const decoded = verifyToken(token);

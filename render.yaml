@@ -25,6 +25,12 @@ services:
       - key: JWT_EXPIRES_IN
         value: 30d
 
+      # ── Cloudflare Turnstile (CAPTCHA en Flutter Web) ───────────────────────────
+      # Configurar manualmente en Render dashboard con la Secret Key del site
+      # creado en Cloudflare > Turnstile.
+      - key: TURNSTILE_SECRET_KEY
+        sync: false
+
       # ── CORS ─────────────────────────────────────────────────────────────────
       # En producción no necesitamos orígenes extra: OWN_DOMAINS cubre la web.
       # La APK envía peticiones sin Origin y también está permitida.

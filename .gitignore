@@ -1,9 +1,16 @@
 node_modules/
 .env
+.env.*
+!.env.example
 uploads/
 *.log
 dist/
 .DS_Store
+
+# Certificados/llaves privadas sueltas que a veces se descargan junto a un SDK
+*.pem
+*.p12
+*.key
 
 # Credencial de Firebase Admin SDK — nunca debe subirse al repositorio
 firebase-service-account.json

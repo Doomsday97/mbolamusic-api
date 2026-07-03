@@ -124,8 +124,42 @@ async function register(req, res) {
     }
   }
 
+  return respondWithAuth(req, res, user, 201);
+}
+
+// 30 días en ms — debe coincidir con JWT_EXPIRES_IN (backend/.env)
+const COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+
+// Responde login/registro de dos formas distintas según el cliente:
+//  - Flutter Web (petición con header Origin, viene de un navegador):
+//    el JWT se guarda en una cookie HttpOnly + Secure + SameSite=Strict,
+//    invisible para JavaScript — protege contra robo de token vía XSS.
+//    El body NO incluye el token.
+//  - APK (sin header Origin): el JWT va en el body JSON, como siempre;
+//    la app lo guarda cifrado con flutter_secure_storage.
+function respondWithAuth(req, res, user, statusCode = 200) {
   const token = signToken({ id: user.id, role: user.role });
-  return ok(res, { token, user: sanitize(user) }, 201);
+  const isWeb = Boolean(req.headers.origin);
+
+  if (isWeb) {
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: COOKIE_MAX_AGE_MS,
+      path: '/',
+    });
+    return ok(res, { user: sanitize(user) }, statusCode);
+  }
+
+  return ok(res, { token, user: sanitize(user) }, statusCode);
+}
+
+// POST /api/auth/logout — solo relevante para Flutter Web (borra la cookie);
+// la APK simplemente descarta el token guardado localmente.
+async function logout(req, res) {
+  res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'strict', path: '/' });
+  return ok(res, { loggedOut: true });
 }
 
 // POST /api/auth/login
@@ -143,8 +177,7 @@ async function login(req, res) {
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) return fail(res, 'Credenciales incorrectas', 401);
 
-  const token = signToken({ id: user.id, role: user.role });
-  return ok(res, { token, user: sanitize(user) });
+  return respondWithAuth(req, res, user);
 }
 
 // GET /api/auth/me
@@ -364,4 +397,4 @@ async function updateAvatar(req, res) {
   return ok(res, { user: sanitize(fresh), avatarUrl });
 }
 
-module.exports = { register, login, me, myReferral, updateProfile, updateAvatar, listArtists, changePassword, setSecurityQuestions, recoverChallenge, recoverVerify, updateFcmToken };
+module.exports = { register, login, logout, me, myReferral, updateProfile, updateAvatar, listArtists, changePassword, setSecurityQuestions, recoverChallenge, recoverVerify, updateFcmToken };

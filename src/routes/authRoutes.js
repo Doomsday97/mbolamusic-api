@@ -2,9 +2,11 @@ const router = require('express').Router();
 const auth = require('../controllers/authController');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { upload, uploadMemory } = require('../config/upload');
+const { requireTurnstile } = require('../services/turnstile');
 
-router.post('/register',                         auth.register);
-router.post('/login',                            auth.login);
+router.post('/register',                         requireTurnstile(), auth.register);
+router.post('/login',                            requireTurnstile(), auth.login);
+router.post('/logout',                           auth.logout);
 router.get('/me',                                authenticate, auth.me);
 router.get('/my-referral',                       authenticate, auth.myReferral);
 router.put('/profile',                           authenticate, auth.updateProfile);
