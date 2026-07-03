@@ -201,10 +201,26 @@ async function payPerPlay(req, res) {
 // POST /api/payments/per-download   body: { trackId, method }
 async function payPerDownload(req, res) {
   const { trackId, method } = req.body;
-  if (!PAYMENT_METHODS.includes(method)) return fail(res, `Método de pago inválido: ${method}`);
   try {
   const track = await prisma.track.findUnique({ where: { id: trackId } });
   if (!track) return fail(res, 'Canción no encontrada', 404);
+
+  // El administrador gestiona la plataforma, no es un usuario de pago-por-uso:
+  // tiene acceso completo sin cargo, igual que ya ocurre con la reproducción.
+  if (req.user.role === 'ADMIN') {
+    await prisma.download.create({ data: { userId: req.user.id, trackId } });
+    await prisma.track.update({
+      where: { id: trackId },
+      data: { downloadCount: { increment: 1 } },
+    });
+    return ok(res, {
+      payment: null,
+      result: { status: 'COMPLETED' },
+      audioUrl: track.audioUrl,
+    });
+  }
+
+  if (!PAYMENT_METHODS.includes(method)) return fail(res, `Método de pago inválido: ${method}`);
 
   const { payment, result } = await processPayment({
     user: req.user,
