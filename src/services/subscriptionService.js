@@ -42,20 +42,19 @@ async function tryAutoRenew(userId, expiredSub) {
       ? business.prices.listenerYearly // la renovación nunca lleva el descuento de primera vez
       : business.prices.listenerMonthly; // LISTENER_MONTHLY
 
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { walletBalance: true } });
-  if (!user || user.walletBalance < cost) return null;
+  // UPDATE atómico con condición de saldo suficiente: evita que una
+  // renovación automática superpuesta (ej. el cron de expiración se solapa
+  // con otra ejecución) descuente dos veces y deje el wallet en negativo.
+  const deducted = await prisma.user.updateMany({
+    where: { id: userId, walletBalance: { gte: cost } },
+    data: { walletBalance: { decrement: cost } },
+  });
+  if (deducted.count === 0) return null;
 
-  // Descontar del wallet y crear nueva suscripción en una transacción
-  const [, newSub] = await prisma.$transaction([
-    prisma.user.update({
-      where: { id: userId },
-      data: { walletBalance: { decrement: cost } },
-    }),
-    prisma.subscription.update({
-      where: { id: expiredSub.id },
-      data: { status: 'EXPIRED' },
-    }),
-  ]);
+  await prisma.subscription.update({
+    where: { id: expiredSub.id },
+    data: { status: 'EXPIRED' },
+  });
 
   const createdSub = await createSubscription(userId, expiredSub.type);
   // Heredar la preferencia de autoRenew
