@@ -42,4 +42,11 @@ module.exports = {
 
   // Monto mínimo permitido para recargar o retirar el monedero
   minTransferAmount: 50, // FCFA
+
+  // Destinos fijos para el retiro de monedero del admin (nunca a cuentas
+  // personales): configurar en Render como variables de entorno.
+  companyWallets: {
+    MOBILE: process.env.COMPANY_WALLET_PHONE || null,
+    BANK:   process.env.COMPANY_WALLET_BANK_ACCOUNT || null,
+  },
 };

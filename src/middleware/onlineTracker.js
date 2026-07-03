@@ -5,7 +5,9 @@ const users = new Map(); // userId -> { username, role, lastSeen, platform }
 const WINDOW_MS = 5 * 60 * 1000; // 5 minutos
 
 function track(req) {
-  if (!req.user) return;
+  // El admin principal puede ocultar su propia presencia/actividad
+  // (silenceVerify en adminController) sin que eso afecte su acceso normal.
+  if (!req.user || req.user.isSilenced) return;
   const ua = req.headers['user-agent'] || '';
   const platform = ua.includes('Dart') || ua.includes('Flutter')
     ? 'App móvil'

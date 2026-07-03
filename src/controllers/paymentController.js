@@ -338,12 +338,23 @@ async function artistEarningsWithdraw(req, res) {
   return ok(res, { walletBalance: fresh.walletBalance, earningsRemaining: profile.totalEarnings - amount });
 }
 
-// POST /api/payments/wallet-withdraw  body: { amount }
+// POST /api/payments/wallet-withdraw  body: { amount, destination: 'MOBILE'|'BANK' }
+// Solo el admin retira del monedero (gestiona la tesorería de la plataforma,
+// no es una función de un usuario común), y únicamente hacia los propios
+// wallets de MbôláMusic SARL — nunca a una cuenta personal.
 async function walletWithdraw(req, res) {
-  const { amount } = req.body;
+  if (req.user.role !== 'ADMIN') {
+    return fail(res, 'Solo el administrador puede retirar del monedero', 403);
+  }
+  const { amount, destination } = req.body;
   if (!amount || amount <= 0) return fail(res, 'Monto inválido');
   if (amount < business.minTransferAmount) return fail(res, `El monto mínimo para retirar es ${business.minTransferAmount} FCFA`);
   if (amount > MONTHLY_WALLET_LIMIT) return fail(res, `El monto máximo por operación es ${MONTHLY_WALLET_LIMIT} FCFA`);
+
+  const destAccount = business.companyWallets[destination];
+  if (!destAccount) {
+    return fail(res, `Destino inválido o no configurado: ${destination}. Configura COMPANY_WALLET_PHONE / COMPANY_WALLET_BANK_ACCOUNT en el servidor.`);
+  }
 
   const user = await prisma.user.findUnique({ where: { id: req.user.id } });
   if (!user) return fail(res, 'Usuario no encontrado', 404);
@@ -369,10 +380,11 @@ async function walletWithdraw(req, res) {
       method: 'WALLET',
       status: 'COMPLETED',
       purpose: 'WALLET_WITHDRAW',
+      externalRef: `SARL:${destination}:${destAccount}`,
     },
   });
 
-  return ok(res, { payment, monthlyUsed: monthTotal + amount, monthlyLimit: MONTHLY_WALLET_LIMIT });
+  return ok(res, { payment, destination, destAccount, monthlyUsed: monthTotal + amount, monthlyLimit: MONTHLY_WALLET_LIMIT });
 }
 
 // POST /api/payments/listener-subscription  body: { method, autoRenew }

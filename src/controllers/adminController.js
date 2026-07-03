@@ -326,6 +326,47 @@ async function bootstrapSuperAdmin(req, res) {
   return ok(res, result);
 }
 
+// GET /api/admin/silence-challenge  (solo el admin principal, sobre sí mismo)
+// El admin principal no se puede eliminar ni deshabilitar por nadie más:
+// solo puede ocultar su propia presencia/actividad, y solo él mismo,
+// verificando una de sus preguntas de seguridad + su contraseña.
+async function silenceChallenge(req, res) {
+  if (!req.user.isSuperAdmin) {
+    return fail(res, 'Solo el administrador principal puede usar esta función', 403);
+  }
+  const questions = await prisma.securityQuestion.findMany({ where: { userId: req.user.id } });
+  if (!questions.length) return fail(res, 'No tienes preguntas de seguridad configuradas');
+  const q = questions[Math.floor(Math.random() * questions.length)];
+  return ok(res, { questionId: q.id, question: q.question, isSilenced: req.user.isSilenced });
+}
+
+// POST /api/admin/silence-verify  body: { questionId, answer, password, silence }
+async function silenceVerify(req, res) {
+  if (!req.user.isSuperAdmin) {
+    return fail(res, 'Solo el administrador principal puede usar esta función', 403);
+  }
+  const { questionId, answer, password, silence } = req.body;
+  if (!questionId || !answer || !password || typeof silence !== 'boolean') {
+    return fail(res, 'Faltan campos');
+  }
+
+  const q = await prisma.securityQuestion.findFirst({ where: { id: questionId, userId: req.user.id } });
+  if (!q) return fail(res, 'Pregunta no válida', 400);
+
+  const bcrypt = require('bcryptjs');
+  const validAnswer = await bcrypt.compare(answer.trim().toLowerCase(), q.answerHash);
+  if (!validAnswer) return fail(res, 'Respuesta incorrecta', 401);
+
+  const validPassword = await bcrypt.compare(password, req.user.passwordHash);
+  if (!validPassword) return fail(res, 'Contraseña incorrecta', 401);
+
+  const updated = await prisma.user.update({
+    where: { id: req.user.id },
+    data: { isSilenced: silence },
+  });
+  return ok(res, { isSilenced: updated.isSilenced });
+}
+
 // POST /api/admin/tracks  -> sube sin requerir suscripción de artista
 async function adminUploadTrack(req, res) {
   const { title, genre, artistId, album, durationSec, audioUrl: externalUrl } = req.body;
@@ -938,6 +979,7 @@ module.exports = {
   listAds, createAd, updateAd, deleteAd, toggleAd, uploadAdMedia, removeAdMedia, publicAds,
   trackAdClick, trackAdImpression,
   promoteToAdmin, demoteFromAdmin, bootstrapSuperAdmin,
+  silenceChallenge, silenceVerify,
   deleteAccount,
   broadcastUpdate,
 };

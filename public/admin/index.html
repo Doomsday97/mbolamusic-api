@@ -165,6 +165,7 @@
     <h1>🎵 MbôláMusic Admin</h1>
     <span id="admin-name"></span>
     <button class="lang-btn" onclick="toggleLang()" id="lang-toggle-btn">ES</button>
+    <button id="silence-btn" onclick="openSilenceModal()" style="display:none;width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;"></button>
     <button onclick="openChangePasswordModal()" style="width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;">🔒 <span data-i18n="changePasswordBtn">Contraseña</span></button>
     <button onclick="logout()" style="width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;" data-i18n="logout">Salir</button>
   </header>
@@ -242,6 +243,20 @@
   </div>
 </div>
 
+<div id="silence-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h3 id="silence-title">🙈 Silenciar mi actividad</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Solo el administrador principal puede hacer esto, y solo sobre sí mismo. Verifica tu identidad respondiendo tu pregunta de seguridad y tu contraseña.</p>
+    <div class="mfield"><label id="silence-question">Pregunta de seguridad</label><input id="silence-answer" type="text" /></div>
+    <div class="mfield"><label>Tu contraseña</label><input id="silence-password" type="password" /></div>
+    <div id="silence-err" style="display:none;color:var(--error);font-size:13px;margin-bottom:8px;"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="silence-save-btn" onclick="submitSilence()">Confirmar</button>
+      <button class="btn-secondary" onclick="closeSilenceModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- User detail modal -->
 <div id="user-modal" class="modal-overlay hidden">
   <div class="modal-box">
@@ -309,6 +324,7 @@
 const API = '/api';
 let _token = localStorage.getItem('adminToken');
 let _user  = null;
+let _silenceChallenge = null;
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 async function doLogin() {
@@ -365,7 +381,59 @@ function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('admin-name').textContent = (_user && _user.username) || '';
+  const silenceBtn = document.getElementById('silence-btn');
+  if (_user && _user.isSuperAdmin) {
+    silenceBtn.style.display = '';
+    silenceBtn.textContent = _user.isSilenced ? '🙉 Actividad oculta' : '🙈 Silenciar actividad';
+  } else {
+    silenceBtn.style.display = 'none';
+  }
   loadStats();
+}
+
+// ── Silenciar actividad del admin principal (solo él mismo, 2 pasos) ───────────
+async function openSilenceModal() {
+  document.getElementById('silence-answer').value = '';
+  document.getElementById('silence-password').value = '';
+  document.getElementById('silence-err').style.display = 'none';
+  try {
+    const r = await apiFetch('/admin/silence-challenge', 'GET');
+    document.getElementById('silence-question').textContent = r.question;
+    document.getElementById('silence-title').textContent = _user.isSilenced
+      ? '🙉 Mostrar mi actividad' : '🙈 Silenciar mi actividad';
+    _silenceChallenge = r;
+    document.getElementById('silence-modal').classList.remove('hidden');
+  } catch (e) {
+    alert(e.message);
+  }
+}
+function closeSilenceModal() {
+  document.getElementById('silence-modal').classList.add('hidden');
+}
+async function submitSilence() {
+  const answer = document.getElementById('silence-answer').value;
+  const password = document.getElementById('silence-password').value;
+  const errEl = document.getElementById('silence-err');
+  const btn = document.getElementById('silence-save-btn');
+  errEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Confirmando…';
+  try {
+    const r = await apiFetch('/admin/silence-verify', 'POST', {
+      questionId: _silenceChallenge.questionId,
+      answer, password,
+      silence: !_user.isSilenced,
+    });
+    _user.isSilenced = r.isSilenced;
+    closeSilenceModal();
+    const silenceBtn = document.getElementById('silence-btn');
+    silenceBtn.textContent = _user.isSilenced ? '🙉 Actividad oculta' : '🙈 Silenciar actividad';
+    alert(_user.isSilenced ? '✅ Tu actividad ahora está oculta.' : '✅ Tu actividad vuelve a ser visible.');
+  } catch (e) {
+    errEl.textContent = e.message;
+    errEl.style.display = '';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Confirmar';
+  }
 }
 
 // ── API helper ────────────────────────────────────────────────────────────────

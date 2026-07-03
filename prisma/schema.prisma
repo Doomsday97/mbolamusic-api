@@ -72,6 +72,7 @@ model User {
   role          Role      @default(LISTENER)
   previousRole  Role?     // rol antes de ser designado ADMIN, para restaurarlo al degradar
   isSuperAdmin  Boolean   @default(false) // solo el admin principal puede designar/quitar otros admins
+  isSilenced    Boolean   @default(false) // el admin principal oculta su presencia/actividad (no bloquea su acceso)
 
   username      String    @unique
   country       String    @default("Guinea Ecuatorial")
