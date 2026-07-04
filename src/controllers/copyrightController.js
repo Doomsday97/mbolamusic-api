@@ -13,6 +13,8 @@ const CLAIM_INCLUDE = {
 };
 
 // GET /api/admin/copyright-claims
+// Endpoint solo-ADMIN (protegido en adminRoutes.js): se expone el mensaje
+// real del error para diagnóstico, igual que storageDiagnostics/setupRls.
 async function listClaims(req, res) {
   try {
     const claims = await prisma.copyrightClaim.findMany({
@@ -22,7 +24,7 @@ async function listClaims(req, res) {
     return ok(res, { claims });
   } catch (e) {
     console.error('[copyright]', e);
-    return fail(res, 'Error al obtener las reclamaciones', 500);
+    return fail(res, `Error al obtener las reclamaciones: ${e.message}`, 500);
   }
 }
 
