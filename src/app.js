@@ -101,6 +101,11 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login',    authLimiter);
 app.use('/api/auth/register', authLimiter);
+// Recuperación de contraseña: sin límite, permitía enumerar usuarios
+// (identifier existe -> 200, no existe -> 404) y probar respuestas de
+// pregunta de seguridad sin restricción.
+app.use('/api/auth/recover-password/challenge', authLimiter);
+app.use('/api/auth/recover-password/verify',    authLimiter);
 
 // ── 4. Body parsers ───────────────────────────────────────────────────────────
 app.use(express.json({ limit: '1mb' }));

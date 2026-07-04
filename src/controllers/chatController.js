@@ -17,7 +17,8 @@ async function getMyMessages(req, res) {
 
     res.json({ success: true, data: messages, error: null });
   } catch (e) {
-    res.status(500).json({ success: false, data: null, error: e.message });
+    console.error('[chat]', e);
+    res.status(500).json({ success: false, data: null, error: 'Error interno del servidor' });
   }
 }
 
@@ -49,7 +50,8 @@ async function sendMessage(req, res) {
     });
     res.json({ success: true, data: msg, error: null });
   } catch (e) {
-    res.status(500).json({ success: false, data: null, error: e.message });
+    console.error('[chat]', e);
+    res.status(500).json({ success: false, data: null, error: 'Error interno del servidor' });
   }
 }
 
@@ -61,7 +63,8 @@ async function unreadCount(req, res) {
     });
     res.json({ success: true, data: { count }, error: null });
   } catch (e) {
-    res.status(500).json({ success: false, data: null, error: e.message });
+    console.error('[chat]', e);
+    res.status(500).json({ success: false, data: null, error: 'Error interno del servidor' });
   }
 }
 
@@ -101,7 +104,8 @@ async function adminListConversations(req, res) {
 
     res.json({ success: true, data: enriched, error: null });
   } catch (e) {
-    res.status(500).json({ success: false, data: null, error: e.message });
+    console.error('[chat]', e);
+    res.status(500).json({ success: false, data: null, error: 'Error interno del servidor' });
   }
 }
 
@@ -122,7 +126,8 @@ async function adminGetMessages(req, res) {
 
     res.json({ success: true, data: messages, error: null });
   } catch (e) {
-    res.status(500).json({ success: false, data: null, error: e.message });
+    console.error('[chat]', e);
+    res.status(500).json({ success: false, data: null, error: 'Error interno del servidor' });
   }
 }
 
@@ -164,7 +169,8 @@ async function adminSendMessage(req, res) {
 
     res.json({ success: true, data: msg, error: null });
   } catch (e) {
-    res.status(500).json({ success: false, data: null, error: e.message });
+    console.error('[chat]', e);
+    res.status(500).json({ success: false, data: null, error: 'Error interno del servidor' });
   }
 }
 

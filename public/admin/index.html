@@ -1273,13 +1273,17 @@ async function fetchMessages(userId) {
       const media = m.mediaUrl
         ? (m.mediaType === 'video'
             ? `<a href="${esc(m.mediaUrl)}" target="_blank" rel="noopener" style="display:block;margin-bottom:6px;text-decoration:none;color:inherit;">▶ ${i18n('videoLabel','Video')}</a>`
-            : `<img src="${esc(m.mediaUrl)}" style="max-width:180px;max-height:180px;border-radius:8px;display:block;margin-bottom:6px;cursor:pointer;" onclick="window.open('${esc(m.mediaUrl)}','_blank')">`)
+            : `<img src="${esc(m.mediaUrl)}" data-media-url="${esc(m.mediaUrl)}" class="cb-media-img" style="max-width:180px;max-height:180px;border-radius:8px;display:block;margin-bottom:6px;cursor:pointer;">`)
         : '';
       const translateBtn = m.body
         ? `<button class="cb-translate-btn" onclick="translateBubble('${m.id}')" title="${i18n('translateLabel','Traducir')}">🌐 ${i18n('translateLabel','Traducir')}</button>`
         : '';
       div.innerHTML = `${media}${m.body ? esc(m.body) : ''}<div class="cb-meta"><span>${time}</span>${translateBtn}</div><div class="cb-translation" id="cb-translation-${m.id}" style="display:none;"></div>`;
       if (m.body) div.dataset.body = m.body;
+      const mediaImg = div.querySelector('.cb-media-img');
+      // data-* es un atributo HTML normal (no un literal JS dentro de onclick),
+      // por lo que escapar con esc() aquí sí es suficiente y no sufre doble-decodificación.
+      if (mediaImg) mediaImg.addEventListener('click', () => window.open(mediaImg.dataset.mediaUrl, '_blank'));
       el.appendChild(div);
     });
     el.scrollTop = el.scrollHeight;

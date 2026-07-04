@@ -191,7 +191,8 @@ async function getUser(req, res) {
     if (!user) return fail(res, 'Usuario no encontrado', 404);
     return ok(res, { user });
   } catch (e) {
-    return fail(res, 'Error al obtener usuario: ' + e.message, 500);
+    console.error('[admin:getUser]', e);
+    return fail(res, 'Error al obtener usuario', 500);
   }
 }
 
@@ -215,7 +216,9 @@ async function updateUser(req, res) {
     });
     return ok(res, { user: stripPassword(updated) });
   } catch (e) {
-    return fail(res, 'Error al actualizar usuario: ' + e.message, 500);
+    console.error('[admin:updateUser]', e);
+    const msg = e.code === 'P2002' ? 'Ese email o usuario ya está en uso' : 'Error al actualizar usuario';
+    return fail(res, msg, 500);
   }
 }
 

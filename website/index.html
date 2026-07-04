@@ -585,7 +585,14 @@ function updateNavAuth() {
       navUser.insertBefore(navAv, navUser.firstChild);
     }
     if (user.avatarUrl) {
-      navAv.innerHTML = `<img src="${user.avatarUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+      // Asignar .src via DOM (no innerHTML): avatarUrl no se escapa antes de
+      // esto, y un valor manipulado podría romper el atributo src="..." e
+      // inyectar HTML/JS. Con .src no hay parseo de HTML posible.
+      navAv.textContent = '';
+      const img = document.createElement('img');
+      img.src = user.avatarUrl;
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+      navAv.appendChild(img);
     } else {
       navAv.textContent = (user.username || '?')[0].toUpperCase();
     }
@@ -1568,7 +1575,7 @@ function renderTrackCard(t, i) {
        onmouseout="this.style.borderColor='rgba(255,255,255,0.06)';this.style.transform='translateY(0)'">
     <div style="height:130px;background:${bgs[i%3]};display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
       ${t.coverUrl
-        ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'">`
+        ? `<img src="${_attrEsc(t.coverUrl)}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'">`
         : `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(245,158,11,0.35)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`}
       <div id="play-spin-${t.id}" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -1606,9 +1613,20 @@ async function playWebTrack(trackId, title, artistName, coverUrl) {
   document.getElementById('wp-artist').textContent = artistName;
   const coverWrap = document.getElementById('wp-cover-wrap');
   if (coverWrap) {
-    coverWrap.innerHTML = coverUrl
-      ? `<img src="${coverUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'22\' height=\'22\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'rgba(245,158,11,0.5)\' stroke-width=\'1.5\'><path d=\'M9 18V5l12-2v13\'/><circle cx=\'6\' cy=\'18\' r=\'3\'/><circle cx=\'18\' cy=\'16\' r=\'3\'/></svg>'">`
-      : `<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='rgba(245,158,11,0.5)' stroke-width='1.5'><path d='M9 18V5l12-2v13'/><circle cx='6' cy='18' r='3'/><circle cx='18' cy='16' r='3'/></svg>`;
+    // coverUrl no está saneado -- construir con el DOM en vez de innerHTML
+    // (una URL manipulada podría romper el atributo src="..." e inyectar
+    // HTML/JS; con .src no hay parseo de HTML posible).
+    const noCoverSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='rgba(245,158,11,0.5)' stroke-width='1.5'><path d='M9 18V5l12-2v13'/><circle cx='6' cy='18' r='3'/><circle cx='18' cy='16' r='3'/></svg>`;
+    if (coverUrl) {
+      coverWrap.textContent = '';
+      const cImg = document.createElement('img');
+      cImg.src = coverUrl;
+      cImg.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+      cImg.onerror = () => { coverWrap.innerHTML = noCoverSvg; };
+      coverWrap.appendChild(cImg);
+    } else {
+      coverWrap.innerHTML = noCoverSvg;
+    }
   }
   document.getElementById('web-player').style.display = 'block';
 
@@ -1833,7 +1851,7 @@ function loadTrending() {
              onmouseover="this.style.borderColor='rgba(245,158,11,0.5)';this.style.transform='translateY(-3px)'"
              onmouseout="this.style.borderColor='rgba(255,255,255,0.07)';this.style.transform='translateY(0)'">
           <div style="height:160px;background:rgba(245,158,11,0.12);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
-            ${t.coverUrl ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'">` : `<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="rgba(245,158,11,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`}
+            ${t.coverUrl ? `<img src="${_attrEsc(t.coverUrl)}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'">` : `<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="rgba(245,158,11,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`}
             <div style="position:absolute;bottom:8px;right:8px;background:var(--amber);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(245,158,11,.4);"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
           </div>
           <div style="padding:10px 12px;">
@@ -2398,7 +2416,11 @@ async function openMiCuenta() {
   // Avatar
   const wrap = document.getElementById('mc-avatar-wrap');
   if (user.avatarUrl) {
-    wrap.innerHTML = `<img src="${user.avatarUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+    wrap.textContent = '';
+    const avImg = document.createElement('img');
+    avImg.src = user.avatarUrl;
+    avImg.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+    wrap.appendChild(avImg);
   } else {
     wrap.textContent = (user.username || '?')[0].toUpperCase();
   }
@@ -2637,7 +2659,7 @@ async function loadArtistTracksWeb(token) {
       <div style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,0.04);border-radius:10px;${isDeleted ? 'opacity:0.6;' : ''}">
         <div style="width:44px;height:44px;border-radius:8px;flex-shrink:0;overflow:hidden;background:#222;display:flex;align-items:center;justify-content:center;">
           ${t.coverUrl
-            ? `<img src="${t.coverUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`
+            ? `<img src="${escHtml(t.coverUrl)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`
             : `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(245,158,11,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`}
         </div>
         <div style="flex:1;min-width:0;">
@@ -2676,7 +2698,7 @@ function openEditTrackWeb(track) {
   const genreSel = document.getElementById('et-genre');
   for (let o of genreSel.options) { if (o.value === track.genre) { o.selected = true; break; } }
   document.getElementById('et-cover-preview').innerHTML = track.coverUrl
-    ? `<img src="${track.coverUrl}" style="width:100%;height:100%;object-fit:cover;">`
+    ? `<img src="${escHtml(track.coverUrl)}" style="width:100%;height:100%;object-fit:cover;">`
     : '🖼️';
   document.getElementById('et-cover-name').textContent = 'Cambiar carátula…';
   document.getElementById('et-cover-input').value = '';
