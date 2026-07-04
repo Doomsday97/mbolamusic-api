@@ -320,8 +320,15 @@ model Download {
   track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
+  // PURCHASED: pago único de 200 FCFA, queda descargada para siempre hasta
+  // que el usuario la borre. SUBSCRIPTION: gratis mientras dure la
+  // suscripción del oyente, con tope mensual (ver business.js); no cuenta
+  // como "ya comprada" para el flujo de pago por descarga.
+  source    String   @default("PURCHASED")
+
   @@index([userId])
   @@index([trackId])
+  @@index([userId, source, createdAt])
 }
 
 model TrackLike {

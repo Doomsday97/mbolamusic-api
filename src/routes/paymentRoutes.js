@@ -15,6 +15,8 @@ router.post('/listener-subscription-yearly',       pay.payListenerYearlySubscrip
 router.post('/per-play',             pay.payPerPlay);
 router.post('/per-download',         pay.payPerDownload);
 router.get('/download-status/:trackId', pay.downloadStatus);
+router.get('/subscription-download-status', pay.subscriptionDownloadStatus);
+router.post('/subscription-download',       pay.subscriptionDownload);
 router.post('/wallet-topup',             pay.walletTopup);
 router.post('/wallet-withdraw',          pay.walletWithdraw);
 router.post('/artist-earnings-withdraw', pay.artistEarningsWithdraw);

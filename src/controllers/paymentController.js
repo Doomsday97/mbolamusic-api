@@ -203,10 +203,13 @@ async function payPerPlay(req, res) {
 // si el usuario ya compró esta descarga (p. ej. en otra sesión, o si borró
 // el archivo local/cambió de cuenta y volvió), para saltar directo a
 // descargar en vez de volver a pedirle que pague.
+// Solo cuenta como "ya comprada" una descarga PURCHASED (pago único de 200
+// FCFA) -- una descargada gratis por suscripción no cuenta como comprada,
+// porque deja de estar disponible si la suscripción vence.
 async function downloadStatus(req, res) {
   const { trackId } = req.params;
   const existingDownload = await prisma.download.findFirst({
-    where: { userId: req.user.id, trackId },
+    where: { userId: req.user.id, trackId, source: 'PURCHASED' },
   });
   return ok(res, { alreadyPurchased: !!existingDownload });
 }
@@ -218,12 +221,12 @@ async function payPerDownload(req, res) {
   const track = await prisma.track.findUnique({ where: { id: trackId } });
   if (!track) return fail(res, 'Canción no encontrada', 404);
 
-  // Si el usuario ya compró esta descarga antes (existe un Download suyo para
-  // esta pista), no se le vuelve a cobrar: solo se le reenvía el audioUrl para
-  // que pueda volver a descargarla (p. ej. tras cambiar de cuenta en el mismo
-  // dispositivo y volver, o tras borrar el archivo local).
+  // Si el usuario ya compró esta descarga antes (existe un Download PURCHASED
+  // suyo para esta pista), no se le vuelve a cobrar: solo se le reenvía el
+  // audioUrl para que pueda volver a descargarla (p. ej. tras cambiar de
+  // cuenta en el mismo dispositivo y volver, o tras borrar el archivo local).
   const existingDownload = await prisma.download.findFirst({
-    where: { userId: req.user.id, trackId },
+    where: { userId: req.user.id, trackId, source: 'PURCHASED' },
   });
   if (existingDownload) {
     return ok(res, {
@@ -270,6 +273,65 @@ async function payPerDownload(req, res) {
   return ok(res, { payment, result, audioUrl: track.audioUrl });
   } catch (e) {
     return fail(res, 'Error al procesar el pago', 500);
+  }
+}
+
+// Cuántas descargas por suscripción (gratis) lleva el usuario este mes
+// calendario -- el tope se reinicia el día 1 de cada mes.
+async function _subscriptionDownloadsThisMonth(userId) {
+  const start = new Date();
+  start.setDate(1);
+  start.setHours(0, 0, 0, 0);
+  return prisma.download.count({
+    where: { userId, source: 'SUBSCRIPTION', createdAt: { gte: start } },
+  });
+}
+
+// GET /api/payments/subscription-download-status
+// Le dice al cliente si el oyente tiene suscripción activa y cuántas
+// descargas gratis le quedan este mes, para decidir si ofrecer la descarga
+// gratuita en vez del pago único de 200 FCFA.
+async function subscriptionDownloadStatus(req, res) {
+  if (req.user.role !== 'LISTENER') {
+    return ok(res, { isSubscribed: false, usedThisMonth: 0, limit: business.subscriptionDownloadsPerMonth, remaining: 0 });
+  }
+  const isSubscribed = await subscriptionService.hasActiveListenerSubscription(req.user.id);
+  const usedThisMonth = isSubscribed ? await _subscriptionDownloadsThisMonth(req.user.id) : 0;
+  const limit = business.subscriptionDownloadsPerMonth;
+  return ok(res, { isSubscribed, usedThisMonth, limit, remaining: Math.max(0, limit - usedThisMonth) });
+}
+
+// POST /api/payments/subscription-download   body: { trackId }
+// Descarga gratis incluida en la suscripción de oyente (mensual/anual/prueba
+// gratis), con tope mensual. No crea Payment (es gratis) ni cuenta como
+// "comprada": se bloquea si la suscripción vence (ver DownloadService en la
+// app, que revalida antes de reproducir un archivo de este tipo offline).
+async function subscriptionDownload(req, res) {
+  const { trackId } = req.body;
+  if (!trackId) return fail(res, 'Falta trackId');
+  if (req.user.role !== 'LISTENER') {
+    return fail(res, 'Solo disponible para oyentes con suscripción activa', 403);
+  }
+  try {
+    const track = await prisma.track.findUnique({ where: { id: trackId } });
+    if (!track) return fail(res, 'Canción no encontrada', 404);
+
+    const sub = await subscriptionService.getActiveSubscription(req.user.id);
+    const isSubscribed = sub && await subscriptionService.hasActiveListenerSubscription(req.user.id);
+    if (!isSubscribed) return fail(res, 'Necesitas una suscripción activa para descargar gratis', 403);
+
+    const usedThisMonth = await _subscriptionDownloadsThisMonth(req.user.id);
+    const limit = business.subscriptionDownloadsPerMonth;
+    if (usedThisMonth >= limit) {
+      return fail(res, `Alcanzaste el límite de ${limit} descargas gratis este mes`, 403);
+    }
+
+    await prisma.download.create({ data: { userId: req.user.id, trackId, source: 'SUBSCRIPTION' } });
+    await prisma.track.update({ where: { id: trackId }, data: { downloadCount: { increment: 1 } } });
+
+    return ok(res, { audioUrl: track.audioUrl, subscriptionEndDate: sub.endDate });
+  } catch (e) {
+    return fail(res, 'Error al procesar la descarga', 500);
   }
 }
 
@@ -689,6 +751,8 @@ module.exports = {
   payPerPlay,
   payPerDownload,
   downloadStatus,
+  subscriptionDownloadStatus,
+  subscriptionDownload,
   walletTopup,
   walletWithdraw,
   artistEarningsWithdraw,

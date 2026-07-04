@@ -137,6 +137,18 @@ async function hasActiveArtistSubscription(userId) {
   return subs.some((s) => !isExpired(s.endDate));
 }
 
+// ¿Tiene el usuario una suscripción de OYENTE activa y vigente? (mensual,
+// anual o prueba gratis). A diferencia de listenerHasAccess/getActiveSubscription
+// -- que no filtran por tipo y podrían confundirse con una suscripción de
+// ARTISTA -- esta se usa para gatear beneficios exclusivos de oyente, como
+// las descargas gratis incluidas en la suscripción.
+async function hasActiveListenerSubscription(userId) {
+  const subs = await prisma.subscription.findMany({
+    where: { userId, status: 'ACTIVE', type: { in: ['LISTENER_MONTHLY', 'LISTENER_YEARLY', 'LISTENER_FREE'] } },
+  });
+  return subs.some((s) => !isExpired(s.endDate));
+}
+
 // ¿Ya tuvo el oyente alguna vez una suscripción anual (activa, expirada o cancelada)?
 // Determina si le corresponde el precio de primera vez (10.000 FCFA) o el precio normal (12.000 FCFA).
 async function hasEverHadYearlySubscription(userId) {
@@ -161,6 +173,7 @@ module.exports = {
   applySubscriptionEffects,
   listenerHasAccess,
   hasActiveArtistSubscription,
+  hasActiveListenerSubscription,
   hasEverHadYearlySubscription,
   listenerYearlyPrice,
   tryAutoRenew,
