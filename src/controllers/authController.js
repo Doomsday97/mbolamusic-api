@@ -127,19 +127,22 @@ async function register(req, res) {
   return respondWithAuth(req, res, user, 201);
 }
 
+const { isConsumerWebOrigin } = require('../utils/webOrigin');
+
 // 30 días en ms — debe coincidir con JWT_EXPIRES_IN (backend/.env)
 const COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
-// Responde login/registro de dos formas distintas según el cliente:
-//  - Flutter Web (petición con header Origin, viene de un navegador):
-//    el JWT se guarda en una cookie HttpOnly + Secure + SameSite=Strict,
-//    invisible para JavaScript — protege contra robo de token vía XSS.
-//    El body NO incluye el token.
-//  - APK (sin header Origin): el JWT va en el body JSON, como siempre;
-//    la app lo guarda cifrado con flutter_secure_storage.
+// Responde login/registro de forma distinta según el cliente:
+//  - App Flutter Web de consumo (dominio distinto al de esta API, ej.
+//    mbolamusic.com): el JWT se guarda en una cookie HttpOnly + Secure +
+//    SameSite=Strict, invisible para JavaScript. El body NO incluye el token.
+//  - APK, o panel admin/sitio propio servidos por esta misma API (aunque el
+//    navegador mande Origin, es el mismo dominio): el JWT va en el body JSON
+//    como siempre -- el panel admin y el sitio estático nunca dejaron de
+//    esperar el token ahí.
 function respondWithAuth(req, res, user, statusCode = 200) {
   const token = signToken({ id: user.id, role: user.role });
-  const isWeb = Boolean(req.headers.origin);
+  const isWeb = isConsumerWebOrigin(req);
 
   if (isWeb) {
     res.cookie('token', token, {
