@@ -100,7 +100,8 @@ model User {
   following        Follow[]           @relation("Follower")
   followers        Follow[]           @relation("Following")
   referralsMade    Referral[]         @relation("Referrer")
-  referralUsed     Referral?          @relation("Referred")
+  referralSignup   ReferralSignup?    @relation("ReferredSignup")
+  referralDiscountCredits ReferralDiscountCredit[]
   notifications    Notification[]
   securityQuestions SecurityQuestion[]
   chatMessages     ChatMessage[]
@@ -284,6 +285,11 @@ model Payment {
   artistShare   Int      @default(0)
   platformShare Int      @default(0)
 
+  // Crédito de descuento por referidos reservado para este pago (si lo hay).
+  // Se marca "usado" (ReferralDiscountCredit.usedAt) solo si el pago llega a
+  // COMPLETED; si termina en FAILED queda libre para un intento posterior.
+  discountCreditId String?
+
   createdAt     DateTime @default(now())
   completedAt   DateTime?
 
@@ -392,10 +398,42 @@ model Referral {
   code        String @unique
   referrerId  String
   referrer    User   @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
-  referredId  String? @unique
-  referred    User?   @relation("Referred", fields: [referredId], references: [id])
-  rewardGiven Boolean @default(false)
   createdAt   DateTime @default(now())
+
+  signups ReferralSignup[]
+}
+
+// Un registro por cada usuario nuevo que se une con el código de un referidor
+// (a diferencia del viejo campo Referral.referredId, que solo soportaba UNO
+// por código para siempre). "counted" se marca true quien completa su
+// PRIMERA suscripción de pago (mensual o anual) -- solo esas cuentan para
+// el tope de 5 del descuento; las renovaciones posteriores no se recuentan.
+model ReferralSignup {
+  id             String   @id @default(uuid())
+  referralId     String
+  referral       Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  referrerId     String
+  referredUserId String   @unique
+  referredUser   User     @relation("ReferredSignup", fields: [referredUserId], references: [id], onDelete: Cascade)
+  counted        Boolean  @default(false)
+  countedAt      DateTime?
+  createdAt      DateTime @default(now())
+
+  @@index([referrerId, counted])
+}
+
+// Crédito de 50% de descuento acumulado por un referidor al alcanzar cada
+// múltiplo de 5 referidos que pagaron su primera suscripción. Se consumen
+// de a uno, en orden de creación, en la próxima suscripción que pague el
+// propio referidor.
+model ReferralDiscountCredit {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  usedAt    DateTime?
+
+  @@index([userId, usedAt])
 }
 
 // ------------------------------------------------------------------

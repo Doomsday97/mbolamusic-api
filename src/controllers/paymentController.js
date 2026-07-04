@@ -3,6 +3,7 @@ const business = require('../config/business');
 const { ok, fail } = require('../utils/response');
 const { getProvider } = require('../services/payment');
 const subscriptionService = require('../services/subscriptionService');
+const referralService = require('../services/referralService');
 const notif = require('./notificationController');
 
 // El monedero interno es saldo propio del usuario, no un proveedor externo:
@@ -94,20 +95,36 @@ async function processPayment({ user, amount, method, purpose, trackId = null })
   return { payment, result };
 }
 
+// Reserva (si hay uno disponible) un crédito de descuento por referidos para
+// este pago: descuenta el monto y anota el crédito en el Payment creado, para
+// que _finalizePayment pueda marcarlo usado (o liberarlo si el pago falla).
+async function _chargeWithReferralDiscount({ user, baseAmount, method, purpose }) {
+  const { amount, credit } = await referralService.applyDiscount(user.id, baseAmount);
+  let { payment, result } = await processPayment({ user, amount, method, purpose });
+  if (credit) {
+    payment = await prisma.payment.update({ where: { id: payment.id }, data: { discountCreditId: credit.id } });
+  }
+  if (result.status === 'COMPLETED' && credit) {
+    await referralService.consumeCredit(credit.id);
+  }
+  return { payment, result };
+}
+
 // POST /api/payments/artist-subscription
 async function payArtistSubscription(req, res) {
   if (req.user.role !== 'ARTIST') return fail(res, 'Solo artistas', 403);
   const { method } = req.body;
 
-  const { payment, result } = await processPayment({
+  const { payment, result } = await _chargeWithReferralDiscount({
     user: req.user,
-    amount: business.prices.artistMonthly,
+    baseAmount: business.prices.artistMonthly,
     method,
     purpose: 'ARTIST_SUBSCRIPTION',
   });
 
   if (result.status === 'COMPLETED') {
     await subscriptionService.createSubscription(req.user.id, 'ARTIST_MONTHLY');
+    await referralService.onFirstPaidSubscription(req.user.id);
   }
 
   return ok(res, { payment, result });
@@ -116,9 +133,9 @@ async function payArtistSubscription(req, res) {
 // POST /api/payments/listener-subscription  body: { method, autoRenew? }
 async function payListenerSubscription(req, res) {
   const { method, autoRenew } = req.body;
-  const { payment, result } = await processPayment({
+  const { payment, result } = await _chargeWithReferralDiscount({
     user: req.user,
-    amount: business.prices.listenerMonthly,
+    baseAmount: business.prices.listenerMonthly,
     method,
     purpose: 'LISTENER_SUBSCRIPTION',
   });
@@ -131,6 +148,7 @@ async function payListenerSubscription(req, res) {
         data: { autoRenew: true },
       });
     }
+    await referralService.onFirstPaidSubscription(req.user.id);
   }
 
   return ok(res, { payment, result });
@@ -149,9 +167,9 @@ async function payListenerYearlySubscription(req, res) {
   const { method, autoRenew } = req.body;
   const { amount } = await subscriptionService.listenerYearlyPrice(req.user.id);
 
-  const { payment, result } = await processPayment({
+  const { payment, result } = await _chargeWithReferralDiscount({
     user: req.user,
-    amount,
+    baseAmount: amount,
     method,
     purpose: 'LISTENER_SUBSCRIPTION_YEARLY',
   });
@@ -164,6 +182,7 @@ async function payListenerYearlySubscription(req, res) {
         data: { autoRenew: true },
       });
     }
+    await referralService.onFirstPaidSubscription(req.user.id);
   }
 
   return ok(res, { payment, result });
@@ -664,7 +683,19 @@ async function _finalizePayment(payment, status) {
 
   if (status !== 'COMPLETED') return;
 
+  // El pago tenía un crédito de descuento reservado: al confirmarse, se
+  // marca usado (si terminara en FAILED en vez de COMPLETED, queda libre
+  // automáticamente para un próximo intento -- ver referralService).
+  if (payment.discountCreditId) {
+    await referralService.consumeCredit(payment.discountCreditId);
+  }
+
   // Efectos post-pago
+  const SUBSCRIPTION_PURPOSES = ['ARTIST_SUBSCRIPTION', 'LISTENER_SUBSCRIPTION', 'LISTENER_SUBSCRIPTION_YEARLY'];
+  if (SUBSCRIPTION_PURPOSES.includes(payment.purpose)) {
+    await referralService.onFirstPaidSubscription(payment.userId);
+  }
+
   if (payment.purpose === 'ARTIST_SUBSCRIPTION') {
     await subscriptionService.createSubscription(payment.userId, 'ARTIST_MONTHLY');
   } else if (payment.purpose === 'LISTENER_SUBSCRIPTION') {

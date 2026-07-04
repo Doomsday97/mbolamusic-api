@@ -7,6 +7,8 @@ const { ok, fail } = require('../utils/response');
 const { upload: uploadFile, rewriteUrl, deleteFile } = require('../services/storage');
 const fs = require('fs');
 const subscriptionService = require('../services/subscriptionService');
+const referralService = require('../services/referralService');
+const business = require('../config/business');
 
 function genReferralCode() {
   return crypto.randomBytes(4).toString('hex').toUpperCase(); // ej: A3F7C291
@@ -113,15 +115,11 @@ async function register(req, res) {
     }
   }
 
-  // Referido (icono de regalo)
+  // Referido (icono de regalo): vincula al nuevo usuario con el código usado.
+  // El descuento para el referidor se otorga después, cuando este usuario
+  // pague su primera suscripción (ver referralService.onFirstPaidSubscription).
   if (d.referralCode) {
-    const ref = await prisma.referral.findUnique({ where: { code: d.referralCode } });
-    if (ref && !ref.referredId) {
-      await prisma.referral.update({
-        where: { id: ref.id },
-        data: { referredId: user.id },
-      });
-    }
+    await referralService.linkSignup(d.referralCode, user.id);
   }
 
   return respondWithAuth(req, res, user, 201);
@@ -224,7 +222,22 @@ async function myReferral(req, res) {
       }
     }
   }
-  return ok(res, { code: ref?.code ?? null });
+
+  const payingReferrals = await prisma.referralSignup.count({
+    where: { referrerId: req.user.id, counted: true },
+  });
+  const availableDiscounts = await prisma.referralDiscountCredit.count({
+    where: { userId: req.user.id, usedAt: null },
+  });
+
+  return ok(res, {
+    code: ref?.code ?? null,
+    payingReferrals,
+    progressInCurrentBatch: payingReferrals % business.referral.requiredPayingReferrals,
+    requiredPayingReferrals: business.referral.requiredPayingReferrals,
+    availableDiscounts,
+    discountPercent: business.referral.discountPercent,
+  });
 }
 
 // PUT /api/auth/profile

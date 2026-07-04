@@ -48,7 +48,8 @@ describe('Reglas de negocio', () => {
     expect(business.currency).toBe('FCFA');
   });
 
-  test('recompensa por referido = 15 días', () => {
-    expect(business.referral.rewardDaysForReferrer).toBe(15);
+  test('descuento por referidos: 50% tras 5 referidos pagos', () => {
+    expect(business.referral.requiredPayingReferrals).toBe(5);
+    expect(business.referral.discountPercent).toBe(0.5);
   });
 });

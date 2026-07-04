@@ -27,8 +27,13 @@ module.exports = {
   subscriptionDurationDays: 30,       // duración de un ciclo de suscripción mensual
   subscriptionDurationDaysYearly: 365, // duración de un ciclo de suscripción anual
 
+  // Por cada N referidos que se registran Y pagan su PRIMERA suscripción
+  // (mensual o anual, oyente o artista), el referidor gana un crédito de
+  // 50% de descuento en su próxima suscripción. Las renovaciones de un
+  // mismo referido no cuentan de nuevo.
   referral: {
-    rewardDaysForReferrer: 15, // días gratis que gana quien refiere
+    requiredPayingReferrals: 5,
+    discountPercent: 0.5,
   },
 
   // Reparto mensual de la suscripción de oyente (2.000 FCFA/mes)
