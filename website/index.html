@@ -2075,6 +2075,9 @@ loadTrending();
       </div>
     </div>
 
+    <!-- Historial de transacciones: de solo lectura, no hay forma de borrarlas -->
+    <button onclick="openTxHistory()" style="width:100%;background:rgba(255,255,255,0.04);color:var(--text2);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px;font-size:0.85rem;cursor:pointer;margin-bottom:1.25rem;">📄 Ver mis transacciones</button>
+
     <!-- Suscripción -->
     <div style="margin-bottom:1.25rem;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
@@ -2406,6 +2409,16 @@ loadTrending();
   </div>
 </div>
 
+<!-- Historial de transacciones: de solo lectura -- no hay ningún botón ni
+     endpoint para borrar una transacción, ni aquí ni en la APK. -->
+<div id="tx-history-overlay" onclick="if(event.target===this)closeTxHistory()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:11600;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;position:relative;">
+    <button onclick="closeTxHistory()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;line-height:1;">✕</button>
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.25rem;color:var(--amber);">📄 Mis transacciones</h3>
+    <div id="tx-history-list"><div style="color:var(--text2);font-size:0.85rem;">Cargando…</div></div>
+  </div>
+</div>
+
 <script>
 // ── Panel Mi Cuenta ───────────────────────────────────────────────────────────
 async function openMiCuenta() {
@@ -2575,6 +2588,63 @@ async function openMiCuenta() {
   document.getElementById('mi-cuenta-overlay').style.display = 'flex';
 }
 function closeMiCuenta() { document.getElementById('mi-cuenta-overlay').style.display = 'none'; }
+
+// ── Historial de transacciones (solo lectura) ─────────────────────────────────
+const TX_PURPOSE_LABELS = {
+  ARTIST_SUBSCRIPTION: 'Suscripción de artista',
+  LISTENER_SUBSCRIPTION: 'Suscripción mensual',
+  LISTENER_SUBSCRIPTION_YEARLY: 'Suscripción anual',
+  PER_PLAY: 'Pago por reproducción',
+  PER_DOWNLOAD: 'Pago por descarga',
+  WALLET_TOPUP: 'Recarga de monedero',
+  WALLET_WITHDRAW: 'Retiro de monedero',
+  PLATFORM_WITHDRAW: 'Retiro de plataforma',
+};
+const TX_METHOD_LABELS = {
+  SIM_BALANCE: 'Saldo SIM', BANK_TRANSFER: 'Transferencia bancaria', CARD: 'Tarjeta', WALLET: 'Monedero',
+};
+const TX_STATUS_META = {
+  COMPLETED: { label: 'Completado', color: '#4ade80' },
+  FAILED:    { label: 'Fallido',    color: '#f87171' },
+  VERIFYING: { label: 'Verificando', color: '#fbbf24' },
+  PENDING:   { label: 'Pendiente',  color: '#9ca3af' },
+};
+
+async function openTxHistory() {
+  const token = localStorage.getItem('mbola_token');
+  if (!token) { openModal('login'); return; }
+  document.getElementById('tx-history-overlay').style.display = 'flex';
+  const list = document.getElementById('tx-history-list');
+  list.innerHTML = '<div style="color:var(--text2);font-size:0.85rem;">Cargando…</div>';
+  try {
+    const r = await fetch(API_BASE + '/payments', { headers: { Authorization: 'Bearer ' + token } });
+    const j = await r.json();
+    const txns = (j && j.data && j.data.payments) || [];
+    if (txns.length === 0) {
+      list.innerHTML = '<div style="color:var(--text2);font-size:0.85rem;">Aún no tienes transacciones.</div>';
+      return;
+    }
+    list.innerHTML = txns.map(t => {
+      const meta = TX_STATUS_META[t.status] || TX_STATUS_META.PENDING;
+      const outgoing = t.purpose === 'WALLET_WITHDRAW' || t.purpose === 'PLATFORM_WITHDRAW';
+      const date = t.createdAt ? new Date(t.createdAt).toLocaleDateString() : '';
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;">${escHtml(TX_PURPOSE_LABELS[t.purpose] || t.purpose)}</div>
+            <div style="font-size:0.75rem;color:var(--text2);">${escHtml(TX_METHOD_LABELS[t.method] || t.method)} · ${escHtml(date)}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:700;color:${outgoing ? '#f87171' : 'var(--amber)'};">${outgoing ? '-' : ''}${t.amount} FCFA</div>
+            <span style="font-size:0.7rem;padding:2px 8px;border-radius:20px;background:${meta.color}22;color:${meta.color};font-weight:700;">${meta.label}</span>
+          </div>
+        </div>`;
+    }).join('');
+  } catch (e) {
+    list.innerHTML = '<div style="color:#f87171;font-size:0.85rem;">No se pudo cargar el historial.</div>';
+  }
+}
+function closeTxHistory() { document.getElementById('tx-history-overlay').style.display = 'none'; }
 
 // ── Cambiar contraseña (web) ──────────────────────────────────────────────────
 function _currentT() {
