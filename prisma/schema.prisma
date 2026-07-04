@@ -105,6 +105,7 @@ model User {
   securityQuestions SecurityQuestion[]
   chatMessages     ChatMessage[]
   monthlyDistributions MonthlyDistribution[]
+  copyrightClaimsReported CopyrightClaim[]
 
   @@index([role])
 }
@@ -218,6 +219,12 @@ model CopyrightClaim {
   id            String   @id @default(uuid())
   trackId       String
   track         Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  // Usuario logueado que envió el formulario (artista u oyente desde Ajustes,
+  // o el propio admin al registrarla manualmente). Null si el usuario borra
+  // su cuenta después -- la reclamación se conserva igual.
+  reporterId    String?
+  reporter      User?    @relation(fields: [reporterId], references: [id], onDelete: SetNull)
 
   claimantName  String
   claimantEmail String

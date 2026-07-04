@@ -8,6 +8,7 @@ router.use('/admin',     require('./adminRoutes'));
 router.use('/playlists',      require('./playlistRoutes'));
 router.use('/notifications',  require('./notificationRoutes'));
 router.use('/chat',           require('./chatRoutes'));
+router.use('/copyright-claims', require('./copyrightRoutes'));
 
 // Llamado por el workflow de CI tras publicar una nueva APK (ver nota de
 // seguridad en adminController.broadcastUpdate: usa secreto compartido, no JWT).

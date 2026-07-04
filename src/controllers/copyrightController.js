@@ -2,19 +2,22 @@ const prisma = require('../config/prisma');
 const { ok, fail } = require('../utils/response');
 const { sendAdminMessage } = require('./chatController');
 
+const CLAIM_INCLUDE = {
+  track: {
+    select: {
+      id: true, title: true, deletedAt: true,
+      artist: { select: { artistName: true, userId: true } },
+    },
+  },
+  reporter: { select: { id: true, username: true, role: true } },
+};
+
 // GET /api/admin/copyright-claims
 async function listClaims(req, res) {
   try {
     const claims = await prisma.copyrightClaim.findMany({
       orderBy: { createdAt: 'desc' },
-      include: {
-        track: {
-          select: {
-            id: true, title: true, deletedAt: true,
-            artist: { select: { artistName: true, userId: true } },
-          },
-        },
-      },
+      include: CLAIM_INCLUDE,
     });
     return ok(res, { claims });
   } catch (e) {
@@ -23,7 +26,24 @@ async function listClaims(req, res) {
   }
 }
 
-// POST /api/admin/copyright-claims   body: { trackId, claimantName, claimantEmail, reason }
+// GET /api/copyright-claims/mine
+// El usuario logueado ve el estado de las reclamaciones que él mismo envió.
+async function listMyClaims(req, res) {
+  try {
+    const claims = await prisma.copyrightClaim.findMany({
+      where: { reporterId: req.user.id },
+      orderBy: { createdAt: 'desc' },
+      include: CLAIM_INCLUDE,
+    });
+    return ok(res, { claims });
+  } catch (e) {
+    console.error('[copyright]', e);
+    return fail(res, 'Error al obtener tus reclamaciones', 500);
+  }
+}
+
+// POST /api/admin/copyright-claims   (o POST /api/copyright-claims, desde Ajustes)
+// body: { trackId, claimantName, claimantEmail, reason }
 async function createClaim(req, res) {
   const { trackId, claimantName, claimantEmail, reason } = req.body;
   if (!trackId || !claimantName || !claimantEmail || !reason) {
@@ -34,15 +54,8 @@ async function createClaim(req, res) {
     if (!track) return fail(res, 'Canción no encontrada', 404);
 
     const claim = await prisma.copyrightClaim.create({
-      data: { trackId, claimantName, claimantEmail, reason },
-      include: {
-        track: {
-          select: {
-            id: true, title: true, deletedAt: true,
-            artist: { select: { artistName: true, userId: true } },
-          },
-        },
-      },
+      data: { trackId, claimantName, claimantEmail, reason, reporterId: req.user.id },
+      include: CLAIM_INCLUDE,
     });
     return ok(res, { claim });
   } catch (e) {
@@ -104,4 +117,4 @@ async function contactClaim(req, res) {
   }
 }
 
-module.exports = { listClaims, createClaim, updateClaim, contactClaim };
+module.exports = { listClaims, listMyClaims, createClaim, updateClaim, contactClaim };
