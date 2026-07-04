@@ -2438,7 +2438,13 @@ async function openMiCuenta() {
     wrap.textContent = (user.username || '?')[0].toUpperCase();
   }
   document.getElementById('mc-username').textContent = user.username || '';
-  document.getElementById('mc-role-label').textContent = user.role === 'ARTIST' ? '🎤 Artista' : '🎧 Oyente';
+  // El admin principal es "CEO ADMINISTRADOR", nunca oyente/artista. Los
+  // admins designados por él muestran "Admin" (recuperan su rol original si
+  // se les degrada).
+  document.getElementById('mc-role-label').textContent =
+    user.isSuperAdmin ? '👑 CEO ADMINISTRADOR' :
+    user.role === 'ADMIN' ? '🛡️ Admin' :
+    user.role === 'ARTIST' ? '🎤 Artista' : '🎧 Oyente';
   document.getElementById('mc-balance-val').textContent = (user.walletBalance != null ? user.walletBalance : 0) + ' FCFA';
 
   // Suscripción

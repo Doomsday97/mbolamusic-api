@@ -649,7 +649,7 @@ async function loadUsers(page = 1) {
       <tr>
         <td>${esc(u.username)} ${u.isSuperAdmin ? `<span title="${i18n('superAdminLabel','Admin principal')}">👑</span>` : ''} ${u.deletedAt ? `<span class="badge badge-failed" title="${esc(u.deletionReason || '')}">${i18n('deletedAccountLabel','Eliminada')}</span>` : ''}</td>
         <td>${esc(u.email || u.phone || '—')}</td>
-        <td><span class="badge badge-${u.role.toLowerCase()}">${u.role}</span></td>
+        <td><span class="badge badge-${u.role.toLowerCase()}">${u.isSuperAdmin ? 'CEO ADMIN' : u.role}</span></td>
         <td>${esc((u.artistProfile && u.artistProfile.artistName) || '—')}</td>
         <td>${subBadge(u)}</td>
         <td>${fmt(u.walletBalance)} FCFA</td>
@@ -737,7 +737,7 @@ async function viewUser(id) {
       artistSec.style.display = 'none';
     }
     document.getElementById('mu-stats').textContent =
-      `${i18n('roleLabel','Rol')}: ${u.role} · Plays: ${(u._count && u._count.plays) || 0} · ${i18n('downloadsShortLabel','Descargas')}: ${(u._count && u._count.downloads) || 0} · ${i18n('registeredLabel','Registro')}: ${new Date(u.createdAt).toLocaleDateString(_lang)}`;
+      `${i18n('roleLabel','Rol')}: ${u.isSuperAdmin ? 'CEO ADMINISTRADOR' : u.role} · Plays: ${(u._count && u._count.plays) || 0} · ${i18n('downloadsShortLabel','Descargas')}: ${(u._count && u._count.downloads) || 0} · ${i18n('registeredLabel','Registro')}: ${new Date(u.createdAt).toLocaleDateString(_lang)}`;
     const txns = u.payments || [];
     if (!txns.length) {
       document.getElementById('mu-txns').innerHTML = `<div style="color:var(--muted);font-size:13px;">${i18n('noTransactionsLabel','Sin transacciones')}</div>`;
