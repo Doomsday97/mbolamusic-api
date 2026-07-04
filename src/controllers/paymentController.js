@@ -110,10 +110,19 @@ async function _chargeWithReferralDiscount({ user, baseAmount, method, purpose }
   return { payment, result };
 }
 
+// Mensaje común para cuando ya hay una suscripción de pago activa: no se
+// permite volver a pagar hasta que venza (o activar autoRenew, que cobra
+// automáticamente del wallet en cuanto haya fondos al vencer).
+const ALREADY_SUBSCRIBED_MSG = 'Ya tienes una suscripción activa. Espera a que venza o activa el pago automático (autoRenew) para renovarla desde tu monedero.';
+
 // POST /api/payments/artist-subscription
 async function payArtistSubscription(req, res) {
   if (req.user.role !== 'ARTIST') return fail(res, 'Solo artistas', 403);
   const { method } = req.body;
+
+  if (await subscriptionService.hasActivePaidArtistSubscription(req.user.id)) {
+    return fail(res, ALREADY_SUBSCRIBED_MSG, 409);
+  }
 
   const { payment, result } = await _chargeWithReferralDiscount({
     user: req.user,
@@ -133,6 +142,11 @@ async function payArtistSubscription(req, res) {
 // POST /api/payments/listener-subscription  body: { method, autoRenew? }
 async function payListenerSubscription(req, res) {
   const { method, autoRenew } = req.body;
+
+  if (await subscriptionService.hasActivePaidListenerSubscription(req.user.id)) {
+    return fail(res, ALREADY_SUBSCRIBED_MSG, 409);
+  }
+
   const { payment, result } = await _chargeWithReferralDiscount({
     user: req.user,
     baseAmount: business.prices.listenerMonthly,
@@ -165,6 +179,11 @@ async function getListenerYearlyPrice(req, res) {
 // POST /api/payments/listener-subscription-yearly  body: { method, autoRenew? }
 async function payListenerYearlySubscription(req, res) {
   const { method, autoRenew } = req.body;
+
+  if (await subscriptionService.hasActivePaidListenerSubscription(req.user.id)) {
+    return fail(res, ALREADY_SUBSCRIBED_MSG, 409);
+  }
+
   const { amount } = await subscriptionService.listenerYearlyPrice(req.user.id);
 
   const { payment, result } = await _chargeWithReferralDiscount({

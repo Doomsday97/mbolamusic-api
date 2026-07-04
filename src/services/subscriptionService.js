@@ -161,6 +161,27 @@ async function hasActiveListenerSubscription(userId) {
   return !!(await getActiveListenerSubscription(userId));
 }
 
+// ¿Tiene el oyente una suscripción de PAGO (mensual o anual) activa y
+// vigente? A diferencia de hasActiveListenerSubscription, esto EXCLUYE la
+// prueba gratis: se usa para bloquear un nuevo pago mientras ya hay uno
+// pagado vigente (debe esperar a que venza o activar autoRenew), sin
+// impedir que quien está en la prueba gratis pueda suscribirse.
+async function hasActivePaidListenerSubscription(userId) {
+  const subs = await prisma.subscription.findMany({
+    where: { userId, status: 'ACTIVE', type: { in: ['LISTENER_MONTHLY', 'LISTENER_YEARLY'] } },
+  });
+  return subs.some((s) => !isExpired(s.endDate));
+}
+
+// ¿Tiene el artista una suscripción de PAGO (mensual) activa y vigente?
+// (excluye ARTIST_FREE, mismo motivo que arriba)
+async function hasActivePaidArtistSubscription(userId) {
+  const subs = await prisma.subscription.findMany({
+    where: { userId, status: 'ACTIVE', type: 'ARTIST_MONTHLY' },
+  });
+  return subs.some((s) => !isExpired(s.endDate));
+}
+
 // ¿Ya tuvo el oyente alguna vez una suscripción anual (activa, expirada o cancelada)?
 // Determina si le corresponde el precio de primera vez (10.000 FCFA) o el precio normal (12.000 FCFA).
 async function hasEverHadYearlySubscription(userId) {
@@ -186,6 +207,8 @@ module.exports = {
   listenerHasAccess,
   hasActiveArtistSubscription,
   hasActiveListenerSubscription,
+  hasActivePaidListenerSubscription,
+  hasActivePaidArtistSubscription,
   getActiveListenerSubscription,
   hasEverHadYearlySubscription,
   listenerYearlyPrice,
