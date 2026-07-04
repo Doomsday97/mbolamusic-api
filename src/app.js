@@ -62,31 +62,16 @@ app.use((req, res, next) => {
 });
 
 // ── 2. CORS estricto ──────────────────────────────────────────────────────────
-const rawOrigins = process.env.ALLOWED_ORIGINS || '';
-const allowedOrigins = rawOrigins
-  .split(',')
-  .map(o => o.trim())
-  .filter(Boolean);
-
-// Dominios propios siempre permitidos aunque ALLOWED_ORIGINS esté vacía.
-// La APK no envía Origin y también está permitida (ver `if (!origin)` abajo).
-const OWN_DOMAINS = [
-  'https://mbolamusic-apionrender.com',
-  'https://www.mbolamusic-apionrender.com',
-  'https://mbolamusic.com',
-  'https://www.mbolamusic.com',
-];
-const ALL_ORIGINS = [...new Set([...OWN_DOMAINS, ...allowedOrigins])];
+const { isKnownOrigin } = require('./utils/webOrigin');
 
 app.use(cors({
   origin: (origin, cb) => {
     // Sin origen = petición móvil nativa o curl → permitir
     if (!origin) return cb(null, true);
-    // Comparación EXACTA: usar startsWith() aquí permitiría que un origen como
-    // "https://mbolamusic.com.attacker.com" pasara el filtro por tener el
-    // dominio propio como prefijo.
-    const ok = ALL_ORIGINS.includes(origin);
-    if (ok) return cb(null, true);
+    // Comparación EXACTA (dentro de isKnownOrigin): usar startsWith() aquí
+    // permitiría que un origen como "https://mbolamusic.com.attacker.com"
+    // pasara el filtro por tener el dominio propio como prefijo.
+    if (isKnownOrigin(origin)) return cb(null, true);
     cb(Object.assign(new Error('CORS no permitido'), { status: 403 }));
   },
   credentials: true,

@@ -135,7 +135,16 @@ const COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 // Responde login/registro de forma distinta según el cliente:
 //  - App Flutter Web de consumo (dominio distinto al de esta API, ej.
 //    mbolamusic.com): el JWT se guarda en una cookie HttpOnly + Secure +
-//    SameSite=Strict, invisible para JavaScript. El body NO incluye el token.
+//    SameSite=None, invisible para JavaScript. El body NO incluye el token.
+//
+//    SameSite=None (no Strict/Lax) es OBLIGATORIO aquí: el sitio (mbolamusic.com)
+//    y la API (mbolamusic-apionrender.com) son dominios DISTINTOS, así que toda
+//    petición desde la app Web hacia la API es "cross-site" para el navegador.
+//    Con Strict o Lax, el navegador simplemente nunca habría enviado la cookie
+//    de vuelta y el login se habría "perdido" en cada petición. SameSite=None
+//    exige Secure=true (ya está) y, para compensar la protección CSRF que se
+//    pierde, el middleware authenticate exige un Origin conocido en toda
+//    petición autenticada por cookie (ver middleware/auth.js).
 //  - APK, o panel admin/sitio propio servidos por esta misma API (aunque el
 //    navegador mande Origin, es el mismo dominio): el JWT va en el body JSON
 //    como siempre -- el panel admin y el sitio estático nunca dejaron de
@@ -148,7 +157,7 @@ function respondWithAuth(req, res, user, statusCode = 200) {
     res.cookie('token', token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: COOKIE_MAX_AGE_MS,
       path: '/',
     });
@@ -161,7 +170,7 @@ function respondWithAuth(req, res, user, statusCode = 200) {
 // POST /api/auth/logout — solo relevante para Flutter Web (borra la cookie);
 // la APK simplemente descarta el token guardado localmente.
 async function logout(req, res) {
-  res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'strict', path: '/' });
+  res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'none', path: '/' });
   return ok(res, { loggedOut: true });
 }
 
