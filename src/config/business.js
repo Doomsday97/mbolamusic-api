@@ -40,11 +40,13 @@ module.exports = {
   // Umbral mínimo de ganancias acumuladas para efectuar el pago al artista
   payoutThreshold: 5000, // FCFA
 
-  // Descargas gratis incluidas en la suscripción de oyente (mensual/anual/
-  // prueba gratis): tope mensual, no cuentan como "compradas" (no son
-  // permanentes: se bloquean si la suscripción vence, aunque el archivo no
-  // se borra del teléfono).
-  subscriptionDownloadsPerMonth: 250,
+  // Descargas gratis incluidas en la suscripción de oyente: tope mensual,
+  // no cuentan como "compradas" (no son permanentes: se bloquean si la
+  // suscripción vence, aunque el archivo no se borra del teléfono).
+  // El tope es distinto para suscriptores de PAGO (mensual/anual) que para
+  // quienes están en la prueba gratis de 1 mes.
+  subscriptionDownloadsPerMonth: 250,        // LISTENER_MONTHLY / LISTENER_YEARLY
+  subscriptionDownloadsPerMonthTrial: 5,     // LISTENER_FREE (prueba gratis)
 
   // Monto mínimo permitido para recargar o retirar el monedero
   minTransferAmount: 50, // FCFA

@@ -137,16 +137,28 @@ async function hasActiveArtistSubscription(userId) {
   return subs.some((s) => !isExpired(s.endDate));
 }
 
-// ¿Tiene el usuario una suscripción de OYENTE activa y vigente? (mensual,
-// anual o prueba gratis). A diferencia de listenerHasAccess/getActiveSubscription
-// -- que no filtran por tipo y podrían confundirse con una suscripción de
-// ARTISTA -- esta se usa para gatear beneficios exclusivos de oyente, como
-// las descargas gratis incluidas en la suscripción.
-async function hasActiveListenerSubscription(userId) {
+// Devuelve la suscripción de OYENTE activa y vigente del usuario (mensual,
+// anual o prueba gratis), o null. A diferencia de
+// listenerHasAccess/getActiveSubscription -- que no filtran por tipo y
+// podrían confundirse con una suscripción de ARTISTA -- esta se usa para
+// gatear beneficios exclusivos de oyente, como las descargas gratis
+// incluidas en la suscripción (y para distinguir prueba gratis de pago,
+// que tienen topes distintos).
+async function getActiveListenerSubscription(userId) {
   const subs = await prisma.subscription.findMany({
     where: { userId, status: 'ACTIVE', type: { in: ['LISTENER_MONTHLY', 'LISTENER_YEARLY', 'LISTENER_FREE'] } },
+    orderBy: { endDate: 'desc' },
   });
-  return subs.some((s) => !isExpired(s.endDate));
+  const valid = subs.filter((s) => !isExpired(s.endDate));
+  if (valid.length === 0) return null;
+  // Si por alguna razón el usuario tiene la prueba gratis Y un plan de pago
+  // activos a la vez (ej. se suscribió sin que la prueba hubiese expirado
+  // antes), el plan de pago siempre prevalece para efectos de topes/beneficios.
+  return valid.find((s) => s.type !== 'LISTENER_FREE') || valid[0];
+}
+
+async function hasActiveListenerSubscription(userId) {
+  return !!(await getActiveListenerSubscription(userId));
 }
 
 // ¿Ya tuvo el oyente alguna vez una suscripción anual (activa, expirada o cancelada)?
@@ -174,6 +186,7 @@ module.exports = {
   listenerHasAccess,
   hasActiveArtistSubscription,
   hasActiveListenerSubscription,
+  getActiveListenerSubscription,
   hasEverHadYearlySubscription,
   listenerYearlyPrice,
   tryAutoRenew,

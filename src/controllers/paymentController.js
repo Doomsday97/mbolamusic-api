@@ -287,6 +287,14 @@ async function _subscriptionDownloadsThisMonth(userId) {
   });
 }
 
+// La prueba gratis (LISTENER_FREE) tiene un tope de descargas mucho menor
+// que un suscriptor de pago (mensual/anual).
+function _downloadLimitFor(sub) {
+  return sub && sub.type === 'LISTENER_FREE'
+    ? business.subscriptionDownloadsPerMonthTrial
+    : business.subscriptionDownloadsPerMonth;
+}
+
 // GET /api/payments/subscription-download-status
 // Le dice al cliente si el oyente tiene suscripción activa y cuántas
 // descargas gratis le quedan este mes, para decidir si ofrecer la descarga
@@ -295,17 +303,18 @@ async function subscriptionDownloadStatus(req, res) {
   if (req.user.role !== 'LISTENER') {
     return ok(res, { isSubscribed: false, usedThisMonth: 0, limit: business.subscriptionDownloadsPerMonth, remaining: 0 });
   }
-  const isSubscribed = await subscriptionService.hasActiveListenerSubscription(req.user.id);
+  const sub = await subscriptionService.getActiveListenerSubscription(req.user.id);
+  const isSubscribed = !!sub;
   const usedThisMonth = isSubscribed ? await _subscriptionDownloadsThisMonth(req.user.id) : 0;
-  const limit = business.subscriptionDownloadsPerMonth;
+  const limit = _downloadLimitFor(sub);
   return ok(res, { isSubscribed, usedThisMonth, limit, remaining: Math.max(0, limit - usedThisMonth) });
 }
 
 // POST /api/payments/subscription-download   body: { trackId }
 // Descarga gratis incluida en la suscripción de oyente (mensual/anual/prueba
-// gratis), con tope mensual. No crea Payment (es gratis) ni cuenta como
-// "comprada": se bloquea si la suscripción vence (ver DownloadService en la
-// app, que revalida antes de reproducir un archivo de este tipo offline).
+// gratis), con tope mensual distinto según el tipo. No crea Payment (es
+// gratis) ni cuenta como "comprada": se bloquea si la suscripción vence (ver
+// DownloadService en la app, que revalida antes de reproducir offline).
 async function subscriptionDownload(req, res) {
   const { trackId } = req.body;
   if (!trackId) return fail(res, 'Falta trackId');
@@ -316,12 +325,11 @@ async function subscriptionDownload(req, res) {
     const track = await prisma.track.findUnique({ where: { id: trackId } });
     if (!track) return fail(res, 'Canción no encontrada', 404);
 
-    const sub = await subscriptionService.getActiveSubscription(req.user.id);
-    const isSubscribed = sub && await subscriptionService.hasActiveListenerSubscription(req.user.id);
-    if (!isSubscribed) return fail(res, 'Necesitas una suscripción activa para descargar gratis', 403);
+    const sub = await subscriptionService.getActiveListenerSubscription(req.user.id);
+    if (!sub) return fail(res, 'Necesitas una suscripción activa para descargar gratis', 403);
 
     const usedThisMonth = await _subscriptionDownloadsThisMonth(req.user.id);
-    const limit = business.subscriptionDownloadsPerMonth;
+    const limit = _downloadLimitFor(sub);
     if (usedThisMonth >= limit) {
       return fail(res, `Alcanzaste el límite de ${limit} descargas gratis este mes`, 403);
     }
