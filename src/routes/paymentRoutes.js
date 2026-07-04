@@ -14,6 +14,7 @@ router.get('/listener-subscription-yearly/price', pay.getListenerYearlyPrice);
 router.post('/listener-subscription-yearly',       pay.payListenerYearlySubscription);
 router.post('/per-play',             pay.payPerPlay);
 router.post('/per-download',         pay.payPerDownload);
+router.get('/download-status/:trackId', pay.downloadStatus);
 router.post('/wallet-topup',             pay.walletTopup);
 router.post('/wallet-withdraw',          pay.walletWithdraw);
 router.post('/artist-earnings-withdraw', pay.artistEarningsWithdraw);

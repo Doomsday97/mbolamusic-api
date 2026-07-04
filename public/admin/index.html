@@ -177,6 +177,7 @@
     <button onclick="showTab('online', this)" id="online-tab-btn">🟢 <span data-i18n="tabOnline">En línea</span> <span id="online-badge" style="background:var(--success);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
     <button onclick="showTab('chat', this)" id="chat-tab-btn">💬 <span data-i18n="tabChat">Soporte</span> <span id="chat-badge" style="display:none;background:var(--error);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
     <button onclick="showTab('ads', this)">📢 <span data-i18n="tabAds">Publicidad</span></button>
+    <button onclick="showTab('copyright', this)">©️ <span data-i18n="tabCopyright">Copyright</span></button>
     <button onclick="showTab('tools', this)">🛠️ <span data-i18n="tabTools">Herramientas</span></button>
   </nav>
   <main>
@@ -187,6 +188,7 @@
     <div id="tab-online" style="display:none"></div>
     <div id="tab-chat" style="display:none"></div>
     <div id="tab-ads" style="display:none"></div>
+    <div id="tab-copyright" style="display:none"></div>
     <div id="tab-tools" style="display:none">
       <h2 style="margin-bottom:24px;font-size:18px;">🛠️ <span data-i18n="toolsTitle">Herramientas de mantenimiento</span></h2>
 
@@ -307,6 +309,25 @@
       <button class="btn-secondary" onclick="closePlatformWithdraw()" data-i18n="cancelBtn">Cancelar</button>
     </div>
     <div id="pw-msg" style="font-size:13px;margin-top:8px;"></div>
+  </div>
+</div>
+
+<!-- Contact copyright claim modal -->
+<div id="contact-claim-modal" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width:480px">
+    <h3>©️ <span data-i18n="contactUserBtn">Contactar usuario</span></h3>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+      <span data-i18n="artistLabel">Artista</span>: <span id="cm-target"></span>
+    </div>
+    <div class="mfield">
+      <label data-i18n="claimMessageLabel">Mensaje</label>
+      <textarea id="cm-message" style="min-height:120px;"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="submitContactClaim()" data-i18n="sendBtn">Enviar</button>
+      <button class="btn-secondary" onclick="closeContactClaimModal()" data-i18n="cancelBtn">Cancelar</button>
+    </div>
+    <div id="cm-msg" style="font-size:13px;margin-top:8px;"></div>
   </div>
 </div>
 
@@ -450,18 +471,19 @@ async function apiFetch(path, method = 'GET', body = null, auth = true) {
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 function showTab(name, btn) {
-  ['stats','users','payments','tracks','online','chat','ads','tools'].forEach(t => {
+  ['stats','users','payments','tracks','online','chat','ads','copyright','tools'].forEach(t => {
     document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
   });
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  if (name === 'stats')    loadStats();
-  if (name === 'users')    loadUsers(1);
-  if (name === 'payments') loadPayments(1);
-  if (name === 'tracks')   loadTracks();
-  if (name === 'online')   loadOnlineUsers();
-  if (name === 'chat')     loadChat();
-  if (name === 'ads')      loadAds();
+  if (name === 'stats')     loadStats();
+  if (name === 'users')     loadUsers(1);
+  if (name === 'payments')  loadPayments(1);
+  if (name === 'tracks')    loadTracks();
+  if (name === 'online')    loadOnlineUsers();
+  if (name === 'chat')      loadChat();
+  if (name === 'ads')       loadAds();
+  if (name === 'copyright') loadCopyrightClaims();
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
@@ -1517,6 +1539,162 @@ async function submitPlatformWithdraw() {
   }
 }
 
+// ── Copyright ─────────────────────────────────────────────────────────────────
+let _copyrightTracks = [];
+let _contactClaimId = null;
+
+async function loadCopyrightClaims() {
+  const el = document.getElementById('tab-copyright');
+  el.innerHTML = `<div class="loading">${i18n('loadingLabel','Cargando…')}</div>`;
+  try {
+    const [claimsData, tracksData] = await Promise.all([
+      apiFetch('/admin/copyright-claims'),
+      apiFetch('/admin/tracks'),
+    ]);
+    _copyrightTracks = tracksData.tracks || [];
+    renderCopyrightTab(el, claimsData.claims || []);
+  } catch (e) {
+    el.innerHTML = `<div class="empty">Error: ${esc(e.message)}</div>`;
+  }
+}
+
+function renderCopyrightTab(el, claims) {
+  const trackOptions = _copyrightTracks.map(t =>
+    `<option value="${esc(t.id)}">${esc(t.title)} — ${esc(t.artist?.artistName || '')}</option>`
+  ).join('');
+
+  const statusMeta = {
+    OPEN:       { label: i18n('claimStatusOpen','Abierta'),            color: 'var(--error)'   },
+    CONTACTED:  { label: i18n('claimStatusContacted','Usuario contactado'), color: 'var(--accent)' },
+    RESOLVED:   { label: i18n('claimStatusResolved','Resuelta'),        color: 'var(--success)' },
+    DISMISSED:  { label: i18n('claimStatusDismissed','Descartada'),     color: 'var(--muted)'   },
+  };
+
+  const rows = claims.length === 0
+    ? `<div class="empty">${i18n('noCopyrightClaims','No hay reclamaciones registradas.')}</div>`
+    : claims.map(c => {
+        const meta = statusMeta[c.status] || { label: c.status, color: 'var(--muted)' };
+        const artistName = c.track?.artist?.artistName || '';
+        return `
+        <div style="background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <div>
+              <div style="font-weight:600;">${esc(c.track?.title || i18n('trackDeletedLabel','(canción eliminada)'))}</div>
+              <div style="font-size:12px;color:var(--muted);">${i18n('artistLabel','Artista')}: ${esc(artistName || '—')}</div>
+            </div>
+            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:${meta.color}22;color:${meta.color};height:fit-content;">${esc(meta.label)}</span>
+          </div>
+          <div style="margin-top:8px;font-size:13px;">
+            <div><b>${i18n('claimantLabel','Reclamante')}:</b> ${esc(c.claimantName)} (${esc(c.claimantEmail)})</div>
+            <div style="margin-top:4px;color:var(--muted);white-space:pre-wrap;">${esc(c.reason)}</div>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--muted);">${new Date(c.createdAt).toLocaleString()}</div>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;">
+            <button class="btn-sm btn-primary" ${!c.track ? 'disabled' : ''}
+              onclick="openContactClaimModal('${c.id}', ${esc(JSON.stringify(artistName))})">${i18n('contactUserBtn','Contactar usuario')}</button>
+            <select onchange="updateClaimStatus('${c.id}', this.value); this.value='';" style="width:auto;font-size:12px;padding:4px 8px;">
+              <option value="">${i18n('changeStatusLabel','Cambiar estado…')}</option>
+              <option value="OPEN">${i18n('claimStatusOpen','Abierta')}</option>
+              <option value="CONTACTED">${i18n('claimStatusContacted','Usuario contactado')}</option>
+              <option value="RESOLVED">${i18n('claimStatusResolved','Resuelta')}</option>
+              <option value="DISMISSED">${i18n('claimStatusDismissed','Descartada')}</option>
+            </select>
+          </div>
+        </div>`;
+      }).join('');
+
+  el.innerHTML = `
+    <h2 style="margin-bottom:24px;font-size:18px;">©️ ${i18n('copyrightTitle','Reclamaciones de copyright')}</h2>
+    <div style="background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:24px;">
+      <h3 style="margin-bottom:12px;">${i18n('newClaimTitle','Registrar nueva reclamación')}</h3>
+      <div class="mfield" style="max-width:480px;">
+        <label>${i18n('trackLabel','Canción')}</label>
+        <select id="cc-track" style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid #333;border-radius:8px;color:var(--text);font-size:14px;">${trackOptions}</select>
+      </div>
+      <div class="mfield" style="max-width:480px;">
+        <label>${i18n('claimantNameLabel','Nombre del reclamante')}</label>
+        <input id="cc-claimant-name" type="text" style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid #333;border-radius:8px;color:var(--text);font-size:14px;" />
+      </div>
+      <div class="mfield" style="max-width:480px;">
+        <label>${i18n('claimantEmailLabel','Email del reclamante')}</label>
+        <input id="cc-claimant-email" type="email" style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid #333;border-radius:8px;color:var(--text);font-size:14px;" />
+      </div>
+      <div class="mfield" style="max-width:480px;">
+        <label>${i18n('claimReasonLabel','Motivo de la reclamación')}</label>
+        <textarea id="cc-reason" style="width:100%;min-height:80px;padding:10px 12px;background:var(--surface2);border:1px solid #333;border-radius:8px;color:var(--text);font-size:14px;resize:vertical;"></textarea>
+      </div>
+      <button class="btn-primary" style="width:auto;padding:10px 24px;" onclick="submitCopyrightClaim()">${i18n('registerClaimBtn','Registrar reclamación')}</button>
+      <div id="cc-msg" style="font-size:13px;margin-top:8px;"></div>
+    </div>
+    <h3 style="margin-bottom:12px;">${i18n('claimsListTitle','Reclamaciones registradas')}</h3>
+    ${rows}
+  `;
+}
+
+async function submitCopyrightClaim() {
+  const trackId = document.getElementById('cc-track').value;
+  const claimantName = document.getElementById('cc-claimant-name').value.trim();
+  const claimantEmail = document.getElementById('cc-claimant-email').value.trim();
+  const reason = document.getElementById('cc-reason').value.trim();
+  const msg = document.getElementById('cc-msg');
+  if (!trackId || !claimantName || !claimantEmail || !reason) {
+    msg.style.color = 'var(--error)';
+    msg.textContent = i18n('claimFieldsRequired','Completa todos los campos.');
+    return;
+  }
+  msg.style.color = 'var(--muted)';
+  msg.textContent = i18n('savingBtn','Guardando…');
+  try {
+    await apiFetch('/admin/copyright-claims', 'POST', { trackId, claimantName, claimantEmail, reason });
+    loadCopyrightClaims();
+  } catch (e) {
+    msg.style.color = 'var(--error)';
+    msg.textContent = '❌ ' + e.message;
+  }
+}
+
+async function updateClaimStatus(id, status) {
+  if (!status) return;
+  try {
+    await apiFetch(`/admin/copyright-claims/${id}`, 'PATCH', { status });
+    loadCopyrightClaims();
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+function openContactClaimModal(claimId, artistName) {
+  _contactClaimId = claimId;
+  document.getElementById('cm-target').textContent = artistName || '';
+  document.getElementById('cm-message').value = i18n('claimContactTemplate',
+    'Hola, nos pusimos en contacto contigo porque hemos recibido una reclamación de copyright sobre una canción que subiste a MbôláMusic. Por favor, ponte en contacto con nosotros para resolver este asunto lo antes posible.');
+  document.getElementById('cm-msg').textContent = '';
+  document.getElementById('contact-claim-modal').classList.remove('hidden');
+}
+function closeContactClaimModal() {
+  document.getElementById('contact-claim-modal').classList.add('hidden');
+  _contactClaimId = null;
+}
+async function submitContactClaim() {
+  const message = document.getElementById('cm-message').value.trim();
+  const msg = document.getElementById('cm-msg');
+  if (!message) {
+    msg.style.color = 'var(--error)';
+    msg.textContent = i18n('claimMessageRequired','Escribe un mensaje.');
+    return;
+  }
+  msg.style.color = 'var(--muted)';
+  msg.textContent = i18n('sendingLabel','Enviando…');
+  try {
+    await apiFetch(`/admin/copyright-claims/${_contactClaimId}/contact`, 'POST', { message });
+    closeContactClaimModal();
+    loadCopyrightClaims();
+  } catch (e) {
+    msg.style.color = 'var(--error)';
+    msg.textContent = '❌ ' + e.message;
+  }
+}
+
 // ── Cambio de idioma ──────────────────────────────────────────────────────────
 const _translations = {
   fr: {
@@ -1955,13 +2133,14 @@ function _reloadActiveTab() {
   const fn = active.getAttribute('onclick') || '';
   const match = fn.match(/showTab\('(\w+)'/);
   const name = match ? match[1] : null;
-  if (name === 'stats')    loadStats();
-  if (name === 'users')    loadUsers(_uPage);
-  if (name === 'payments') loadPayments(_pPage);
-  if (name === 'tracks')   loadTracks();
-  if (name === 'online')   loadOnlineUsers();
-  if (name === 'chat')     loadChat();
-  if (name === 'ads')      loadAds();
+  if (name === 'stats')     loadStats();
+  if (name === 'users')     loadUsers(_uPage);
+  if (name === 'payments')  loadPayments(_pPage);
+  if (name === 'tracks')    loadTracks();
+  if (name === 'online')    loadOnlineUsers();
+  if (name === 'chat')      loadChat();
+  if (name === 'ads')       loadAds();
+  if (name === 'copyright') loadCopyrightClaims();
 }
 
 function toggleLang() {

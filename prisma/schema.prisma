@@ -205,9 +205,34 @@ model Track {
 
   createdAt     DateTime @default(now())
 
+  copyrightClaims CopyrightClaim[]
+
   @@index([genre])
   @@index([isPublished])
   @@index([deletedAt])
+}
+
+// Registro de reclamaciones de copyright recibidas sobre una canción, y su
+// seguimiento (contactar al artista/usuario que la subió, resolver, etc.).
+model CopyrightClaim {
+  id            String   @id @default(uuid())
+  trackId       String
+  track         Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  claimantName  String
+  claimantEmail String
+  reason        String
+
+  status        String   @default("OPEN") // OPEN, CONTACTED, RESOLVED, DISMISSED
+  adminNotes    String?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  contactedAt   DateTime?
+  resolvedAt    DateTime?
+
+  @@index([trackId])
+  @@index([status])
 }
 
 // ------------------------------------------------------------------

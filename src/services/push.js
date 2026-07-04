@@ -71,4 +71,35 @@ async function broadcastUpdate({ versionName, apkUrl, releaseNotes }) {
   return { sent: res.successCount, failed: res.failureCount };
 }
 
-module.exports = { broadcastUpdate };
+// Envía una notificación push a un único usuario (ej. nuevo mensaje de chat
+// de soporte). No falla el flujo que la llama si el push no se pudo enviar:
+// el usuario no tiene fcmToken, tiene las notis desactivadas, etc. son casos
+// normales, no errores a propagar.
+async function sendToUser(userId, { title, body, data = {} }) {
+  if (!_init()) return { sent: false, disabled: true };
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { fcmToken: true },
+  });
+  if (!user?.fcmToken) return { sent: false, noToken: true };
+
+  const message = {
+    notification: { title, body },
+    data,
+    token: user.fcmToken,
+  };
+
+  try {
+    await getMessaging(_app).send(message);
+    return { sent: true };
+  } catch (e) {
+    const code = e.errorInfo?.code;
+    if (code === 'messaging/invalid-registration-token' || code === 'messaging/registration-token-not-registered') {
+      await prisma.user.update({ where: { id: userId }, data: { fcmToken: null } });
+    }
+    return { sent: false, error: e.message };
+  }
+}
+
+module.exports = { broadcastUpdate, sendToUser };

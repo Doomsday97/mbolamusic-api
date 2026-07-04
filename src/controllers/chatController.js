@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const push = require('../services/push');
 
 // ── Usuario: obtener su conversación con admin ──────────────────────────────
 async function getMyMessages(req, res) {
@@ -131,6 +132,53 @@ async function adminGetMessages(req, res) {
   }
 }
 
+// Crea un mensaje del admin hacia un usuario + notificación en BD + push,
+// compartido entre el chat de soporte normal y otros flujos que necesitan
+// avisar a un usuario en su nombre (ej. contactar por una reclamación de
+// copyright). Lanza si el usuario no existe o el mensaje está vacío.
+async function sendAdminMessage(userId, { body = '', mediaUrl = null, mediaType = null } = {}) {
+  const trimmedBody = (body || '').trim();
+  if (!trimmedBody && !mediaUrl) {
+    const err = new Error('El mensaje no puede estar vacío');
+    err.status = 400;
+    throw err;
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    const err = new Error('Usuario no encontrado');
+    err.status = 404;
+    throw err;
+  }
+
+  const msg = await prisma.chatMessage.create({
+    data: { userId, fromAdmin: true, body: trimmedBody, mediaUrl, mediaType },
+  });
+
+  const notifBody = trimmedBody
+    ? (trimmedBody.length > 80 ? trimmedBody.slice(0, 80) + '…' : trimmedBody)
+    : (mediaType === 'video' ? '📹 Video' : '📷 Imagen');
+  await prisma.notification.create({
+    data: {
+      userId,
+      type:  'ADMIN_MESSAGE',
+      title: 'Mensaje del administrador',
+      body:  notifBody,
+    },
+  });
+
+  // Push real (barra de notificaciones) además de la notificación en BD.
+  // No debe romper el flujo que la llama si falla (usuario sin fcmToken,
+  // Firebase no configurado, etc.).
+  push.sendToUser(userId, {
+    title: 'Tienes un nuevo mensaje',
+    body: notifBody,
+    data: { type: 'ADMIN_MESSAGE' },
+  }).catch((e) => console.error('[chat] push falló:', e));
+
+  return msg;
+}
+
 // ── Admin: responder a un usuario ─────────────────────────────────────────
 async function adminSendMessage(req, res) {
   const { userId } = req.params;
@@ -139,36 +187,11 @@ async function adminSendMessage(req, res) {
     return res.status(400).json({ success: false, data: null, error: 'El mensaje no puede estar vacío' });
   }
   try {
-    // Verificar que el usuario existe
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) return res.status(404).json({ success: false, data: null, error: 'Usuario no encontrado' });
-
     const { mediaUrl, mediaType } = await _uploadAttachment(req.file);
-    const msg = await prisma.chatMessage.create({
-      data: {
-        userId,
-        fromAdmin: true,
-        body,
-        mediaUrl,
-        mediaType,
-      },
-    });
-
-    // Crear notificación para el usuario
-    const notifBody = body
-      ? (body.length > 80 ? body.slice(0, 80) + '…' : body)
-      : (mediaType === 'video' ? '📹 Video' : '📷 Imagen');
-    await prisma.notification.create({
-      data: {
-        userId,
-        type:  'ADMIN_MESSAGE',
-        title: 'Mensaje del administrador',
-        body:  notifBody,
-      },
-    });
-
+    const msg = await sendAdminMessage(userId, { body, mediaUrl, mediaType });
     res.json({ success: true, data: msg, error: null });
   } catch (e) {
+    if (e.status) return res.status(e.status).json({ success: false, data: null, error: e.message });
     console.error('[chat]', e);
     res.status(500).json({ success: false, data: null, error: 'Error interno del servidor' });
   }
@@ -214,4 +237,5 @@ module.exports = {
   adminGetMessages,
   adminSendMessage,
   translateMessage,
+  sendAdminMessage,
 };

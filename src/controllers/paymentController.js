@@ -198,12 +198,40 @@ async function payPerPlay(req, res) {
   }
 }
 
+// GET /api/payments/download-status/:trackId
+// Permite al cliente saber, ANTES de mostrar el selector de método de pago,
+// si el usuario ya compró esta descarga (p. ej. en otra sesión, o si borró
+// el archivo local/cambió de cuenta y volvió), para saltar directo a
+// descargar en vez de volver a pedirle que pague.
+async function downloadStatus(req, res) {
+  const { trackId } = req.params;
+  const existingDownload = await prisma.download.findFirst({
+    where: { userId: req.user.id, trackId },
+  });
+  return ok(res, { alreadyPurchased: !!existingDownload });
+}
+
 // POST /api/payments/per-download   body: { trackId, method }
 async function payPerDownload(req, res) {
   const { trackId, method } = req.body;
   try {
   const track = await prisma.track.findUnique({ where: { id: trackId } });
   if (!track) return fail(res, 'Canción no encontrada', 404);
+
+  // Si el usuario ya compró esta descarga antes (existe un Download suyo para
+  // esta pista), no se le vuelve a cobrar: solo se le reenvía el audioUrl para
+  // que pueda volver a descargarla (p. ej. tras cambiar de cuenta en el mismo
+  // dispositivo y volver, o tras borrar el archivo local).
+  const existingDownload = await prisma.download.findFirst({
+    where: { userId: req.user.id, trackId },
+  });
+  if (existingDownload) {
+    return ok(res, {
+      payment: null,
+      result: { status: 'COMPLETED' },
+      audioUrl: track.audioUrl,
+    });
+  }
 
   // El administrador gestiona la plataforma, no es un usuario de pago-por-uso:
   // tiene acceso completo sin cargo, igual que ya ocurre con la reproducción.
@@ -660,6 +688,7 @@ module.exports = {
   getListenerYearlyPrice,
   payPerPlay,
   payPerDownload,
+  downloadStatus,
   walletTopup,
   walletWithdraw,
   artistEarningsWithdraw,

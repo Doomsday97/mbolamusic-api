@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const admin = require('../controllers/adminController');
 const pay = require('../controllers/paymentController');
+const copyright = require('../controllers/copyrightController');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { upload, uploadMemory } = require('../config/upload');
 
@@ -58,6 +59,12 @@ router.delete('/ads/:id',                  admin.deleteAd);
 router.post('/ads/:id/toggle',             admin.toggleAd);
 router.post('/ads/:id/media',              uploadMemory.single('media'), admin.uploadAdMedia);
 router.delete('/ads/:id/media',            admin.removeAdMedia);
+
+// Reclamaciones de copyright
+router.get('/copyright-claims',            copyright.listClaims);
+router.post('/copyright-claims',           copyright.createClaim);
+router.patch('/copyright-claims/:id',      copyright.updateClaim);
+router.post('/copyright-claims/:id/contact', copyright.contactClaim);
 
 // Usuarios conectados
 router.get('/online',                      admin.onlineUsers);
