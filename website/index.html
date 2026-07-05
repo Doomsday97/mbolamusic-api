@@ -166,6 +166,8 @@
   .price-btn:hover { background: var(--amber-light); }
   .price-btn.outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
   .price-btn.outline:hover { border-color: var(--amber); color: var(--amber); }
+  .sm-plan-btn { flex: 1; padding: 0.6rem; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: var(--text2); font-weight: 700; font-size: 0.85rem; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+  .sm-plan-btn.active { background: var(--amber); color: #000; border-color: var(--amber); }
 
   /* ARTISTS */
   .artists { background: var(--bg2); }
@@ -2347,7 +2349,11 @@ loadTrending();
   <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:420px;position:relative;">
     <button onclick="closeSubscribeModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;line-height:1;">✕</button>
     <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.4rem;color:var(--amber);">Suscripción Oyente</h3>
-    <p style="font-size:0.85rem;color:var(--text2);margin-bottom:0.2rem;">2.000 FCFA/mes · Todo incluido · Sin anuncios</p>
+    <div id="sm-plan-toggle" style="display:flex;gap:8px;margin-bottom:0.9rem;">
+      <button type="button" class="sm-plan-btn active" id="sm-plan-monthly" onclick="selectSmPlan('MONTHLY')">Mensual</button>
+      <button type="button" class="sm-plan-btn" id="sm-plan-yearly" onclick="selectSmPlan('YEARLY')">Anual</button>
+    </div>
+    <p id="sm-plan-desc" style="font-size:0.85rem;color:var(--text2);margin-bottom:0.2rem;">2.000 FCFA/mes · Todo incluido · Sin anuncios</p>
     <p id="sm-fx" style="font-size:0.76rem;color:var(--text2);opacity:0.7;margin-bottom:1.3rem;"></p>
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem;">
       <label id="sm-method-label" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Método de pago</label>
@@ -3000,12 +3006,48 @@ async function fxLine(amountFcfa) {
   return `≈ ${eur} € / $${usd} (referencial)`;
 }
 
+let _smPlan = 'MONTHLY';
+let _smYearlyPrice = null;
+
+async function selectSmPlan(plan) {
+  _smPlan = plan;
+  document.getElementById('sm-plan-monthly').classList.toggle('active', plan === 'MONTHLY');
+  document.getElementById('sm-plan-yearly').classList.toggle('active', plan === 'YEARLY');
+  const desc = document.getElementById('sm-plan-desc');
+  const btn  = document.getElementById('sm-btn');
+  if (plan === 'MONTHLY') {
+    desc.textContent = '2.000 FCFA/mes · Todo incluido · Sin anuncios';
+    btn.textContent = 'Confirmar suscripción →';
+    fxLine(2000).then(t => { document.getElementById('sm-fx').textContent = t; });
+    return;
+  }
+  desc.textContent = 'Cargando precio…';
+  const token = localStorage.getItem('mbola_token');
+  try {
+    if (!_smYearlyPrice) {
+      const r = await fetch(API_BASE + '/payments/listener-subscription-yearly/price', {
+        headers: { Authorization: 'Bearer ' + token },
+      });
+      const j = await r.json();
+      if (j.success) _smYearlyPrice = j.data;
+    }
+    const amount = _smYearlyPrice ? _smYearlyPrice.amount : 12000;
+    const firstTime = _smYearlyPrice ? _smYearlyPrice.isFirstTime : false;
+    desc.textContent = `${amount.toLocaleString('es-ES')} FCFA/año${firstTime ? ' (precio de bienvenida)' : ''} · Todo incluido · Sin anuncios`;
+    btn.textContent = `Confirmar suscripción — ${amount.toLocaleString('es-ES')} FCFA →`;
+    fxLine(amount).then(t => { document.getElementById('sm-fx').textContent = t; });
+  } catch (e) {
+    desc.textContent = '12.000 FCFA/año (10.000 la primera vez) · Todo incluido · Sin anuncios';
+  }
+}
+
 function openSubscribeModal() {
   const token = localStorage.getItem('mbola_token');
   if (!token) { openModal('login'); return; }
   document.getElementById('sm-result').style.display = 'none';
   document.getElementById('subscribe-overlay').style.display = 'flex';
-  fxLine(2000).then(t => { document.getElementById('sm-fx').textContent = t; });
+  _smYearlyPrice = null;
+  selectSmPlan('MONTHLY');
 }
 function closeSubscribeModal() { document.getElementById('subscribe-overlay').style.display = 'none'; }
 
@@ -3068,10 +3110,12 @@ async function doSubscribeWeb() {
   const method = _subChecked ? _subChecked.value : 'BANK_TRANSFER';
   const res    = document.getElementById('sm-result');
   const btn    = document.getElementById('sm-btn');
+  const endpoint = _smPlan === 'YEARLY' ? '/payments/listener-subscription-yearly' : '/payments/listener-subscription';
+  const restoreLabel = btn.textContent;
   btn.disabled = true; btn.textContent = 'Procesando…';
   res.style.display = 'none';
   try {
-    const r = await fetch(API_BASE + '/payments/listener-subscription', {
+    const r = await fetch(API_BASE + endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
       body: JSON.stringify({ method }),
@@ -3099,7 +3143,7 @@ async function doSubscribeWeb() {
   } catch(e) {
     res.style.display = ''; res.style.background = 'rgba(248,113,113,0.1)'; res.style.color = '#f87171';
     res.textContent = '❌ ' + e.message;
-  } finally { btn.disabled = false; btn.textContent = 'Confirmar suscripción →'; }
+  } finally { btn.disabled = false; btn.textContent = restoreLabel; }
 }
 
 // Activa/desactiva el pago automático de la suscripción activa (se cobra del
