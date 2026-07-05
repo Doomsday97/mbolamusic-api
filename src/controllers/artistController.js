@@ -61,6 +61,7 @@ async function dashboard(req, res) {
     subscriptionActive: !!sub,
     subscriptionEndsAt: sub?.endDate || null,
     subscriptionType: sub?.type || null,
+    autoRenew: sub?.autoRenew ?? false,
     followerCount,
     monthlyListeners: monthlyListenerRows.length,
     yearlyListeners:  yearlyListenerRows.length,
