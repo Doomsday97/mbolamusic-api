@@ -65,7 +65,7 @@
   <span class="badge" id="l-badge">RGPD / GDPR · CCPA Compliant</span>
   <h1 id="l-h1">Política de Privacidad</h1>
   <p class="subtitle" id="l-subtitle">
-    Última actualización: 30 de junio de 2026 · Versión 1.1<br>
+    Última actualización: 5 de julio de 2026 · Versión 1.2<br>
     Aplicable a la plataforma web y la aplicación móvil MbôláMusic
   </p>
 
@@ -88,6 +88,7 @@
       <tr><td id="l-s2-r5c1">Consumo</td><td id="l-s2-r5c2">Canciones reproducidas, descargas</td><td id="l-s2-r5c3">Uso del servicio</td></tr>
       <tr><td id="l-s2-r6c1">Técnico</td><td id="l-s2-r6c2">Dirección IP, navegador, sistema operativo</td><td id="l-s2-r6c3">Automático</td></tr>
       <tr><td id="l-s2-r7c1">Artístico</td><td id="l-s2-r7c2">Música subida, nombre artístico, biografía (solo artistas)</td><td id="l-s2-r7c3">Uso del servicio</td></tr>
+      <tr><td id="l-s2-r8c1">Referidos</td><td id="l-s2-r8c2">Código de referido propio, código usado al registrarte, identificador de quién te refirió</td><td id="l-s2-r8c3">Registro</td></tr>
     </tbody>
   </table>
   <p id="l-s2-p1">No tratamos datos de categorías especiales (salud, origen racial, opiniones políticas, etc.).</p>
@@ -121,6 +122,7 @@
     <li><strong>Neon.tech</strong> <span id="l-s5-li2">(EE.&nbsp;UU.) — Base de datos PostgreSQL. Cláusulas Contractuales Tipo CE.</span></li>
     <li><strong>Cloudflare R2</strong> <span id="l-s5-li3">— Almacenamiento de archivos de audio. Certificado EU-U.S. Data Privacy Framework.</span></li>
     <li><strong>Flutterwave</strong> <span id="l-s5-li4">— Procesador de pagos. Datos mínimos necesarios para la transacción.</span></li>
+    <li><strong>Firebase Cloud Messaging</strong> <span id="l-s5-li5">(Google) — Envío de notificaciones push. Certificado EU-U.S. Data Privacy Framework.</span></li>
   </ul>
   <h3 id="l-s5-h3b">5.2 Transferencias internacionales</h3>
   <p id="l-s5-p1">Cuando transferimos datos fuera del Espacio Económico Europeo, aplicamos las salvaguardas exigidas por el RGPD (Cláusulas Contractuales Tipo o decisiones de adecuación de la Comisión Europea).</p>
@@ -206,7 +208,7 @@ const LANGS = {
 const T = {
   es: {
     back:'← Inicio', badge:'RGPD / GDPR · CCPA Compliant', h1:'Política de Privacidad',
-    subtitle:'Última actualización: 30 de junio de 2026 · Versión 1.1<br>Aplicable a la plataforma web y la aplicación móvil MbôláMusic',
+    subtitle:'Última actualización: 5 de julio de 2026 · Versión 1.2<br>Aplicable a la plataforma web y la aplicación móvil MbôláMusic',
     s1h2:'1. Responsable del Tratamiento', s1correo:'Correo', s1dpo:'Delegado de Protección de Datos (DPO)',
     s2h2:'2. Datos Personales que Recogemos',
     s2th1:'Categoría', s2th2:'Datos específicos', s2th3:'Fuente',
@@ -217,6 +219,7 @@ const T = {
     s2r5c1:'Consumo', s2r5c2:'Canciones reproducidas, descargas', s2r5c3:'Uso del servicio',
     s2r6c1:'Técnico', s2r6c2:'Dirección IP, navegador, sistema operativo', s2r6c3:'Automático',
     s2r7c1:'Artístico', s2r7c2:'Música subida, nombre artístico, biografía (solo artistas)', s2r7c3:'Uso del servicio',
+    s2r8c1:'Referidos', s2r8c2:'Código de referido propio, código usado al registrarte, identificador de quién te refirió', s2r8c3:'Registro',
     s2p1:'No tratamos datos de categorías especiales (salud, origen racial, opiniones políticas, etc.).',
     s3h2:'3. Finalidad y Base Legal del Tratamiento', s3th1:'Finalidad', s3th2:'Base legal (RGPD art. 6)',
     s3r1c1:'Gestionar tu cuenta y autenticación', s3r1c2:'Ejecución de contrato (6.1.b)',
@@ -236,6 +239,7 @@ const T = {
     s5li2:'(EE.&nbsp;UU.) — Base de datos PostgreSQL. Cláusulas Contractuales Tipo CE.',
     s5li3:'— Almacenamiento de archivos de audio. Certificado EU-U.S. Data Privacy Framework.',
     s5li4:'— Procesador de pagos. Datos mínimos necesarios para la transacción.',
+    s5li5:'(Google) — Envío de notificaciones push. Certificado EU-U.S. Data Privacy Framework.',
     s5h3b:'5.2 Transferencias internacionales',
     s5p1:'Cuando transferimos datos fuera del Espacio Económico Europeo, aplicamos las salvaguardas exigidas por el RGPD (Cláusulas Contractuales Tipo o decisiones de adecuación de la Comisión Europea).',
     s5p2:'No vendemos datos personales a terceros.',
@@ -283,7 +287,7 @@ const T = {
   },
   fr: {
     back:'← Accueil', badge:'RGPD / GDPR · Conforme CCPA', h1:'Politique de Confidentialité',
-    subtitle:'Dernière mise à jour : 30 juin 2026 · Version 1.1<br>Applicable à la plateforme web et à l\'application mobile MbôláMusic',
+    subtitle:'Dernière mise à jour : 5 juillet 2026 · Version 1.2<br>Applicable à la plateforme web et à l\'application mobile MbôláMusic',
     s1h2:'1. Responsable du Traitement', s1correo:'E-mail', s1dpo:'Délégué à la Protection des Données (DPO)',
     s2h2:'2. Données Personnelles Collectées',
     s2th1:'Catégorie', s2th2:'Données spécifiques', s2th3:'Source',
@@ -294,6 +298,7 @@ const T = {
     s2r5c1:'Consommation', s2r5c2:'Chansons écoutées, téléchargements', s2r5c3:'Utilisation du service',
     s2r6c1:'Technique', s2r6c2:'Adresse IP, navigateur, système d\'exploitation', s2r6c3:'Automatique',
     s2r7c1:'Artistique', s2r7c2:'Musique mise en ligne, nom artistique, biographie (artistes uniquement)', s2r7c3:'Utilisation du service',
+    s2r8c1:'Parrainage', s2r8c2:'Code de parrainage personnel, code utilisé à l\'inscription, identifiant de la personne qui t\'a parrainé', s2r8c3:'Inscription',
     s2p1:'Nous ne traitons pas de données de catégories particulières (santé, origine raciale, opinions politiques, etc.).',
     s3h2:'3. Finalité et Base Légale du Traitement', s3th1:'Finalité', s3th2:'Base légale (RGPD art. 6)',
     s3r1c1:'Gérer ton compte et l\'authentification', s3r1c2:'Exécution du contrat (6.1.b)',
@@ -313,6 +318,7 @@ const T = {
     s5li2:'(États-Unis) — Base de données PostgreSQL. Clauses Contractuelles Types CE.',
     s5li3:'— Stockage des fichiers audio. Certifié EU-U.S. Data Privacy Framework.',
     s5li4:'— Processeur de paiements. Données minimales nécessaires à la transaction.',
+    s5li5:'(Google) — Envoi de notifications push. Certifié EU-U.S. Data Privacy Framework.',
     s5h3b:'5.2 Transferts internationaux',
     s5p1:'Lorsque nous transférons des données hors de l\'Espace Économique Européen, nous appliquons les garanties exigées par le RGPD (Clauses Contractuelles Types ou décisions d\'adéquation de la Commission Européenne).',
     s5p2:'Nous ne vendons pas de données personnelles à des tiers.',
@@ -360,7 +366,7 @@ const T = {
   },
   pt: {
     back:'← Início', badge:'RGPD / GDPR · Conforme CCPA', h1:'Política de Privacidade',
-    subtitle:'Última atualização: 30 de junho de 2026 · Versão 1.1<br>Aplicável à plataforma web e à aplicação móvel MbôláMusic',
+    subtitle:'Última atualização: 5 de julho de 2026 · Versão 1.2<br>Aplicável à plataforma web e à aplicação móvel MbôláMusic',
     s1h2:'1. Responsável pelo Tratamento', s1correo:'E-mail', s1dpo:'Encarregado de Proteção de Dados (DPO)',
     s2h2:'2. Dados Pessoais que Recolhemos',
     s2th1:'Categoria', s2th2:'Dados específicos', s2th3:'Fonte',
@@ -371,6 +377,7 @@ const T = {
     s2r5c1:'Consumo', s2r5c2:'Músicas reproduzidas, downloads', s2r5c3:'Uso do serviço',
     s2r6c1:'Técnico', s2r6c2:'Endereço IP, navegador, sistema operativo', s2r6c3:'Automático',
     s2r7c1:'Artístico', s2r7c2:'Música carregada, nome artístico, biografia (apenas artistas)', s2r7c3:'Uso do serviço',
+    s2r8c1:'Referências', s2r8c2:'Código de referência próprio, código utilizado no registo, identificador de quem te referiu', s2r8c3:'Registo',
     s2p1:'Não tratamos dados de categorias especiais (saúde, origem racial, opiniões políticas, etc.).',
     s3h2:'3. Finalidade e Base Legal do Tratamento', s3th1:'Finalidade', s3th2:'Base legal (RGPD art. 6)',
     s3r1c1:'Gerir a tua conta e autenticação', s3r1c2:'Execução de contrato (6.1.b)',
@@ -390,6 +397,7 @@ const T = {
     s5li2:'(EUA) — Base de dados PostgreSQL. Cláusulas Contratuais-Tipo CE.',
     s5li3:'— Armazenamento de ficheiros de áudio. Certificado EU-U.S. Data Privacy Framework.',
     s5li4:'— Processador de pagamentos. Dados mínimos necessários para a transação.',
+    s5li5:'(Google) — Envio de notificações push. Certificado EU-U.S. Data Privacy Framework.',
     s5h3b:'5.2 Transferências internacionais',
     s5p1:'Quando transferimos dados para fora do Espaço Económico Europeu, aplicamos as salvaguardas exigidas pelo RGPD (Cláusulas Contratuais-Tipo ou decisões de adequação da Comissão Europeia).',
     s5p2:'Não vendemos dados pessoais a terceiros.',
@@ -437,7 +445,7 @@ const T = {
   },
   en: {
     back:'← Home', badge:'GDPR · CCPA Compliant', h1:'Privacy Policy',
-    subtitle:'Last updated: June 30, 2026 · Version 1.1<br>Applicable to the MbôláMusic web platform and mobile app',
+    subtitle:'Last updated: July 5, 2026 · Version 1.2<br>Applicable to the MbôláMusic web platform and mobile app',
     s1h2:'1. Data Controller', s1correo:'Email', s1dpo:'Data Protection Officer (DPO)',
     s2h2:'2. Personal Data We Collect',
     s2th1:'Category', s2th2:'Specific data', s2th3:'Source',
@@ -448,6 +456,7 @@ const T = {
     s2r5c1:'Consumption', s2r5c2:'Songs played, downloads', s2r5c3:'Service use',
     s2r6c1:'Technical', s2r6c2:'IP address, browser, operating system', s2r6c3:'Automatic',
     s2r7c1:'Artistic', s2r7c2:'Uploaded music, artist name, biography (artists only)', s2r7c3:'Service use',
+    s2r8c1:'Referrals', s2r8c2:'Your own referral code, code used at signup, identifier of who referred you', s2r8c3:'Registration',
     s2p1:'We do not process special-category data (health, racial origin, political opinions, etc.).',
     s3h2:'3. Purpose and Legal Basis for Processing', s3th1:'Purpose', s3th2:'Legal basis (GDPR art. 6)',
     s3r1c1:'Manage your account and authentication', s3r1c2:'Contract performance (6.1.b)',
@@ -467,6 +476,7 @@ const T = {
     s5li2:'(U.S.) — PostgreSQL database. EU Standard Contractual Clauses.',
     s5li3:'— Audio file storage. EU-U.S. Data Privacy Framework certified.',
     s5li4:'— Payment processor. Minimum data necessary for the transaction.',
+    s5li5:'(Google) — Sending push notifications. EU-U.S. Data Privacy Framework certified.',
     s5h3b:'5.2 International transfers',
     s5p1:'When we transfer data outside the European Economic Area, we apply the safeguards required by the GDPR (Standard Contractual Clauses or European Commission adequacy decisions).',
     s5p2:'We do not sell personal data to third parties.',
@@ -541,6 +551,7 @@ function setLang(code, save = true) {
   setText('l-s2-r5c1', t.s2r5c1); setText('l-s2-r5c2', t.s2r5c2); setText('l-s2-r5c3', t.s2r5c3);
   setText('l-s2-r6c1', t.s2r6c1); setText('l-s2-r6c2', t.s2r6c2); setText('l-s2-r6c3', t.s2r6c3);
   setText('l-s2-r7c1', t.s2r7c1); setText('l-s2-r7c2', t.s2r7c2); setText('l-s2-r7c3', t.s2r7c3);
+  setText('l-s2-r8c1', t.s2r8c1); setText('l-s2-r8c2', t.s2r8c2); setText('l-s2-r8c3', t.s2r8c3);
   setText('l-s2-p1', t.s2p1);
   setText('l-s3-h2', t.s3h2); setText('l-s3-th1', t.s3th1); setText('l-s3-th2', t.s3th2);
   setText('l-s3-r1c1', t.s3r1c1); setText('l-s3-r1c2', t.s3r1c2);
@@ -556,7 +567,7 @@ function setLang(code, save = true) {
   setText('l-s4-li4-strong', t.s4li4strong); setText('l-s4-li4-text', t.s4li4text);
   setText('l-s4-li5-strong', t.s4li5strong); setText('l-s4-li5-text', t.s4li5text);
   setText('l-s5-h2', t.s5h2); setText('l-s5-h3a', t.s5h3a);
-  setHTML('l-s5-li1', t.s5li1); setHTML('l-s5-li2', t.s5li2); setHTML('l-s5-li3', t.s5li3); setHTML('l-s5-li4', t.s5li4);
+  setHTML('l-s5-li1', t.s5li1); setHTML('l-s5-li2', t.s5li2); setHTML('l-s5-li3', t.s5li3); setHTML('l-s5-li4', t.s5li4); setHTML('l-s5-li5', t.s5li5);
   setText('l-s5-h3b', t.s5h3b); setText('l-s5-p1', t.s5p1); setText('l-s5-p2', t.s5p2);
   setText('l-s6-h2', t.s6h2);
   setText('l-s6-h4-1', t.s6h41); setText('l-s6-p-1', t.s6p1);

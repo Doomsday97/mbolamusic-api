@@ -56,10 +56,10 @@
 </nav>
 
 <div class="page">
-  <span class="badge" id="l-badge">Versión 1.1 — Junio 2026</span>
+  <span class="badge" id="l-badge">Versión 1.2 — Julio 2026</span>
   <h1 id="l-h1">Términos de Uso</h1>
   <p class="subtitle" id="l-subtitle">
-    Última actualización: 30 de junio de 2026 · Aplicable a todos los usuarios de la plataforma MbôláMusic
+    Última actualización: 5 de julio de 2026 · Aplicable a todos los usuarios de la plataforma MbôláMusic
     (web y aplicación móvil).
   </p>
 
@@ -99,9 +99,11 @@
     <thead><tr><th id="l-s4-th1">Concepto</th><th id="l-s4-th2">Importe</th><th id="l-s4-th3">Notas</th></tr></thead>
     <tbody>
       <tr><td id="l-s4-r1c1">Periodo gratuito inicial (oyentes)</td><td>0 FCFA</td><td id="l-s4-r1c3">1 mes desde el registro</td></tr>
-      <tr><td id="l-s4-r2c1">Suscripción mensual (oyente)</td><td>2.000 FCFA/mes</td><td id="l-s4-r2c3">Renovación automática</td></tr>
+      <tr><td id="l-s4-r2c1">Suscripción mensual (oyente)</td><td>2.000 FCFA/mes</td><td id="l-s4-r2c3">Renovación automática opcional</td></tr>
+      <tr><td id="l-s4-r6c1">Suscripción anual (oyente)</td><td id="l-s4-r6c2">12.000 FCFA/año (10.000 FCFA la primera vez)</td><td id="l-s4-r6c3">Renovación automática opcional</td></tr>
       <tr><td id="l-s4-r3c1">Reproducción por uso (sin suscripción)</td><td>50 FCFA/canción</td><td id="l-s4-r3c3">Descontado del monedero</td></tr>
-      <tr><td id="l-s4-r4c1">Descarga para uso offline</td><td>200 FCFA/canción</td><td id="l-s4-r4c3">Solo desde la app</td></tr>
+      <tr><td id="l-s4-r4c1">Descarga para uso offline (pago único)</td><td>200 FCFA/canción</td><td id="l-s4-r4c3">Solo desde la app · queda descargada permanentemente</td></tr>
+      <tr><td id="l-s4-r7c1">Descargas incluidas en la suscripción</td><td id="l-s4-r7c2">Sin coste adicional</td><td id="l-s4-r7c3">250/mes (plan de pago) o 5/mes (prueba gratis) · no cuentan como compradas</td></tr>
       <tr><td id="l-s4-r5c1">Suscripción mensual (artista)</td><td>10.000 FCFA/mes</td><td id="l-s4-r5c3">Necesaria para publicar música</td></tr>
     </tbody>
   </table>
@@ -111,6 +113,10 @@
   <div class="warn">
     <p id="l-s4-warn">Los pagos de suscripción no son reembolsables una vez activados, salvo error técnico imputable a MbôláMusic demostrable. Los recargas de monedero no utilizadas pueden solicitarse como reembolso dentro de los 14 días naturales siguientes a la recarga, conforme al derecho de desistimiento europeo (Directiva 2011/83/UE) cuando aplique.</p>
   </div>
+  <h3 id="l-s4-h3d">4.4 Renovación y límite de una suscripción activa</h3>
+  <p id="l-s4-p2">No es posible contratar una nueva suscripción de pago (oyente o artista) mientras ya tengas una vigente del mismo tipo. Debes esperar a que venza o activar el pago automático ("autoRenew"), que renovará tu suscripción cobrando del saldo de tu monedero en la fecha de vencimiento, siempre que haya fondos suficientes. Puedes activar o desactivar el pago automático en cualquier momento desde tu cuenta.</p>
+  <h3 id="l-s4-h3e">4.5 Programa de referidos</h3>
+  <p id="l-s4-p3">Cada usuario dispone de un código de referido único. Por cada 5 nuevos usuarios que se registren usando tu código y paguen su primera suscripción (mensual o anual, de oyente o artista), obtienes un crédito de <strong>50&nbsp;% de descuento</strong> aplicable a tu próxima suscripción. Solo cuenta la primera suscripción de pago de cada usuario referido; las renovaciones posteriores no generan nuevos créditos. Los créditos se consumen en orden de antigüedad y no son transferibles ni canjeables por dinero.</p>
 
   <h2 id="l-s5-h2">5. Obligaciones del Usuario Oyente</h2>
   <ul>
@@ -225,8 +231,8 @@ const LANGS = {
 
 const T = {
   es: {
-    back:'← Inicio', badge:'Versión 1.1 — Junio 2026', h1:'Términos de Uso',
-    subtitle:'Última actualización: 30 de junio de 2026 · Aplicable a todos los usuarios de la plataforma MbôláMusic (web y aplicación móvil).',
+    back:'← Inicio', badge:'Versión 1.2 — Julio 2026', h1:'Términos de Uso',
+    subtitle:'Última actualización: 5 de julio de 2026 · Aplicable a todos los usuarios de la plataforma MbôláMusic (web y aplicación móvil).',
     s1h2:'1. Partes del Contrato',
     s1p1:'Estos Términos de Uso ("Términos") constituyen un contrato vinculante entre <strong>MbôláMusic SARL</strong> ("MbôláMusic", "nosotros", "la plataforma") y cualquier persona que acceda o utilice los servicios ("Usuario", "tú").',
     s1p2:'Al crear una cuenta, descargar la aplicación o usar la web, aceptas estos Términos en su totalidad. Si no estás de acuerdo, no utilices el servicio.',
@@ -247,14 +253,20 @@ const T = {
     s4h2:'4. Precios, Pagos y Reembolsos', s4h3a:'4.1 Tarifas vigentes',
     s4th1:'Concepto', s4th2:'Importe', s4th3:'Notas',
     s4r1c1:'Periodo gratuito inicial (oyentes)', s4r1c3:'1 mes desde el registro',
-    s4r2c1:'Suscripción mensual (oyente)', s4r2c3:'Renovación automática',
+    s4r2c1:'Suscripción mensual (oyente)', s4r2c3:'Renovación automática opcional',
+    s4r6c1:'Suscripción anual (oyente)', s4r6c2:'12.000 FCFA/año (10.000 FCFA la primera vez)', s4r6c3:'Renovación automática opcional',
     s4r3c1:'Reproducción por uso (sin suscripción)', s4r3c3:'Descontado del monedero',
-    s4r4c1:'Descarga para uso offline', s4r4c3:'Solo desde la app',
+    s4r4c1:'Descarga para uso offline (pago único)', s4r4c3:'Solo desde la app · queda descargada permanentemente',
+    s4r7c1:'Descargas incluidas en la suscripción', s4r7c2:'Sin coste adicional', s4r7c3:'250/mes (plan de pago) o 5/mes (prueba gratis) · no cuentan como compradas',
     s4r5c1:'Suscripción mensual (artista)', s4r5c3:'Necesaria para publicar música',
     s4h3b:'4.2 Regalías de artistas',
     s4p1:'El artista recibe el <strong>70&nbsp;% del importe de cada reproducción de pago o descarga</strong>; el 30&nbsp;% restante corresponde a la comisión de la plataforma. Las ganancias se acreditan al perfil del artista y pueden retirarse mediante solicitud al administrador.',
     s4h3c:'4.3 Política de reembolsos',
     s4warn:'Los pagos de suscripción no son reembolsables una vez activados, salvo error técnico imputable a MbôláMusic demostrable. Los recargas de monedero no utilizadas pueden solicitarse como reembolso dentro de los 14 días naturales siguientes a la recarga, conforme al derecho de desistimiento europeo (Directiva 2011/83/UE) cuando aplique.',
+    s4h3d:'4.4 Renovación y límite de una suscripción activa',
+    s4p2:'No es posible contratar una nueva suscripción de pago (oyente o artista) mientras ya tengas una vigente del mismo tipo. Debes esperar a que venza o activar el pago automático ("autoRenew"), que renovará tu suscripción cobrando del saldo de tu monedero en la fecha de vencimiento, siempre que haya fondos suficientes. Puedes activar o desactivar el pago automático en cualquier momento desde tu cuenta.',
+    s4h3e:'4.5 Programa de referidos',
+    s4p3:'Cada usuario dispone de un código de referido único. Por cada 5 nuevos usuarios que se registren usando tu código y paguen su primera suscripción (mensual o anual, de oyente o artista), obtienes un crédito de <strong>50&nbsp;% de descuento</strong> aplicable a tu próxima suscripción. Solo cuenta la primera suscripción de pago de cada usuario referido; las renovaciones posteriores no generan nuevos créditos. Los créditos se consumen en orden de antigüedad y no son transferibles ni canjeables por dinero.',
     s5h2:'5. Obligaciones del Usuario Oyente',
     s5li1:'Usar el servicio exclusivamente para uso personal, no comercial.',
     s5li2:'No redistribuir, retransmitir ni compartir públicamente el contenido descargado.',
@@ -317,8 +329,8 @@ const T = {
     footerPrivacy:'Política de Privacidad', footerHome:'Volver al inicio',
   },
   fr: {
-    back:"← Accueil", badge:'Version 1.1 — Juin 2026', h1:"Conditions d'utilisation",
-    subtitle:"Dernière mise à jour : 30 juin 2026 · Applicable à tous les utilisateurs de la plateforme MbôláMusic (web et application mobile).",
+    back:"← Accueil", badge:'Version 1.2 — Juillet 2026', h1:"Conditions d'utilisation",
+    subtitle:"Dernière mise à jour : 5 juillet 2026 · Applicable à tous les utilisateurs de la plateforme MbôláMusic (web et application mobile).",
     s1h2:'1. Parties au contrat',
     s1p1:'Les présentes Conditions d\'utilisation (« Conditions ») constituent un contrat contraignant entre <strong>MbôláMusic SARL</strong> (« MbôláMusic », « nous », « la plateforme ») et toute personne accédant aux services ou les utilisant (« Utilisateur », « toi »).',
     s1p2:"En créant un compte, en téléchargeant l'application ou en utilisant le site web, tu acceptes ces Conditions dans leur intégralité. Si tu n'es pas d'accord, n'utilise pas le service.",
@@ -339,14 +351,20 @@ const T = {
     s4h2:'4. Tarifs, paiements et remboursements', s4h3a:'4.1 Tarifs en vigueur',
     s4th1:'Concept', s4th2:'Montant', s4th3:'Notes',
     s4r1c1:'Période gratuite initiale (auditeurs)', s4r1c3:"1 mois à partir de l'inscription",
-    s4r2c1:'Abonnement mensuel (auditeur)', s4r2c3:'Renouvellement automatique',
+    s4r2c1:'Abonnement mensuel (auditeur)', s4r2c3:'Renouvellement automatique facultatif',
+    s4r6c1:'Abonnement annuel (auditeur)', s4r6c2:'12 000 FCFA/an (10 000 FCFA la première fois)', s4r6c3:'Renouvellement automatique facultatif',
     s4r3c1:'Écoute à la demande (sans abonnement)', s4r3c3:'Débité du portefeuille',
-    s4r4c1:'Téléchargement pour usage hors ligne', s4r4c3:"Uniquement depuis l'application",
+    s4r4c1:'Téléchargement pour usage hors ligne (paiement unique)', s4r4c3:"Uniquement depuis l'application · reste téléchargé de façon permanente",
+    s4r7c1:"Téléchargements inclus dans l'abonnement", s4r7c2:'Sans coût supplémentaire', s4r7c3:"250/mois (forfait payant) ou 5/mois (essai gratuit) · ne comptent pas comme achetés",
     s4r5c1:'Abonnement mensuel (artiste)', s4r5c3:'Nécessaire pour publier de la musique',
     s4h3b:'4.2 Redevances des artistes',
     s4p1:"L'artiste reçoit <strong>70&nbsp;% du montant de chaque écoute payante ou téléchargement</strong> ; les 30&nbsp;% restants correspondent à la commission de la plateforme. Les gains sont crédités sur le profil de l'artiste et peuvent être retirés sur demande auprès de l'administrateur.",
     s4h3c:'4.3 Politique de remboursement',
     s4warn:"Les paiements d'abonnement ne sont pas remboursables une fois activés, sauf erreur technique imputable et démontrable à MbôláMusic. Les recharges de portefeuille non utilisées peuvent faire l'objet d'une demande de remboursement dans les 14 jours calendaires suivant la recharge, conformément au droit de rétractation européen (Directive 2011/83/UE) le cas échéant.",
+    s4h3d:"4.4 Renouvellement et limite d'un abonnement actif",
+    s4p2:"Il n'est pas possible de souscrire un nouvel abonnement payant (auditeur ou artiste) tant que tu en as déjà un actif du même type. Tu dois attendre son expiration ou activer le paiement automatique (« autoRenew »), qui renouvellera ton abonnement en débitant le solde de ton portefeuille à la date d'expiration, à condition que les fonds soient suffisants. Tu peux activer ou désactiver le paiement automatique à tout moment depuis ton compte.",
+    s4h3e:'4.5 Programme de parrainage',
+    s4p3:"Chaque utilisateur dispose d'un code de parrainage unique. Pour chaque 5 nouveaux utilisateurs qui s'inscrivent avec ton code et paient leur premier abonnement (mensuel ou annuel, auditeur ou artiste), tu obtiens un crédit de <strong>50&nbsp;% de réduction</strong> applicable à ton prochain abonnement. Seul le premier abonnement payant de chaque utilisateur parrainé compte ; les renouvellements ultérieurs ne génèrent pas de nouveaux crédits. Les crédits sont utilisés par ordre d'ancienneté et ne sont ni transférables ni échangeables contre de l'argent.",
     s5h2:"5. Obligations de l'utilisateur auditeur",
     s5li1:'Utiliser le service exclusivement à des fins personnelles, non commerciales.',
     s5li2:'Ne pas redistribuer, retransmettre ni partager publiquement le contenu téléchargé.',
@@ -409,8 +427,8 @@ const T = {
     footerPrivacy:'Politique de confidentialité', footerHome:"Retour à l'accueil",
   },
   pt: {
-    back:'← Início', badge:'Versão 1.1 — Junho de 2026', h1:'Termos de Uso',
-    subtitle:'Última atualização: 30 de junho de 2026 · Aplicável a todos os utilizadores da plataforma MbôláMusic (web e aplicação móvel).',
+    back:'← Início', badge:'Versão 1.2 — Julho de 2026', h1:'Termos de Uso',
+    subtitle:'Última atualização: 5 de julho de 2026 · Aplicável a todos os utilizadores da plataforma MbôláMusic (web e aplicação móvel).',
     s1h2:'1. Partes do Contrato',
     s1p1:'Estes Termos de Uso ("Termos") constituem um contrato vinculativo entre a <strong>MbôláMusic SARL</strong> ("MbôláMusic", "nós", "a plataforma") e qualquer pessoa que aceda ou utilize os serviços ("Utilizador", "tu").',
     s1p2:'Ao criar uma conta, descarregar a aplicação ou usar o site, aceitas estes Termos na íntegra. Se não concordares, não utilizes o serviço.',
@@ -431,14 +449,20 @@ const T = {
     s4h2:'4. Preços, Pagamentos e Reembolsos', s4h3a:'4.1 Tarifas em vigor',
     s4th1:'Conceito', s4th2:'Valor', s4th3:'Notas',
     s4r1c1:'Período gratuito inicial (ouvintes)', s4r1c3:'1 mês a partir do registo',
-    s4r2c1:'Subscrição mensal (ouvinte)', s4r2c3:'Renovação automática',
+    s4r2c1:'Subscrição mensal (ouvinte)', s4r2c3:'Renovação automática opcional',
+    s4r6c1:'Subscrição anual (ouvinte)', s4r6c2:'12.000 FCFA/ano (10.000 FCFA na primeira vez)', s4r6c3:'Renovação automática opcional',
     s4r3c1:'Reprodução por uso (sem subscrição)', s4r3c3:'Descontado da carteira',
-    s4r4c1:'Download para uso offline', s4r4c3:'Apenas a partir da aplicação',
+    s4r4c1:'Download para uso offline (pagamento único)', s4r4c3:'Apenas a partir da aplicação · fica descarregado permanentemente',
+    s4r7c1:'Downloads incluídos na subscrição', s4r7c2:'Sem custo adicional', s4r7c3:'250/mês (plano pago) ou 5/mês (teste grátis) · não contam como comprados',
     s4r5c1:'Subscrição mensal (artista)', s4r5c3:'Necessária para publicar música',
     s4h3b:'4.2 Royalties dos artistas',
     s4p1:'O artista recebe <strong>70&nbsp;% do valor de cada reprodução paga ou download</strong>; os restantes 30&nbsp;% correspondem à comissão da plataforma. Os ganhos são creditados no perfil do artista e podem ser levantados mediante pedido ao administrador.',
     s4h3c:'4.3 Política de reembolsos',
     s4warn:'Os pagamentos de subscrição não são reembolsáveis depois de ativados, salvo erro técnico imputável e demonstrável à MbôláMusic. As recargas de carteira não utilizadas podem ser solicitadas como reembolso dentro dos 14 dias seguintes à recarga, em conformidade com o direito de desistência europeu (Diretiva 2011/83/UE), quando aplicável.',
+    s4h3d:'4.4 Renovação e limite de uma subscrição ativa',
+    s4p2:'Não é possível subscrever uma nova subscrição paga (ouvinte ou artista) enquanto já tiveres uma vigente do mesmo tipo. Deves aguardar que expire ou ativar o pagamento automático ("autoRenew"), que renovará a tua subscrição debitando o saldo da tua carteira na data de vencimento, desde que haja fundos suficientes. Podes ativar ou desativar o pagamento automático a qualquer momento a partir da tua conta.',
+    s4h3e:'4.5 Programa de referências',
+    s4p3:'Cada utilizador dispõe de um código de referência único. A cada 5 novos utilizadores que se registarem com o teu código e pagarem a sua primeira subscrição (mensal ou anual, de ouvinte ou artista), obténs um crédito de <strong>50&nbsp;% de desconto</strong> aplicável à tua próxima subscrição. Só conta a primeira subscrição paga de cada utilizador referido; as renovações posteriores não geram novos créditos. Os créditos são consumidos por ordem de antiguidade e não são transferíveis nem trocáveis por dinheiro.',
     s5h2:'5. Obrigações do Utilizador Ouvinte',
     s5li1:'Usar o serviço exclusivamente para fins pessoais, não comerciais.',
     s5li2:'Não redistribuir, retransmitir nem partilhar publicamente o conteúdo descarregado.',
@@ -501,8 +525,8 @@ const T = {
     footerPrivacy:'Política de Privacidade', footerHome:'Voltar ao início',
   },
   en: {
-    back:'← Home', badge:'Version 1.1 — June 2026', h1:'Terms of Use',
-    subtitle:'Last updated: June 30, 2026 · Applicable to all users of the MbôláMusic platform (web and mobile app).',
+    back:'← Home', badge:'Version 1.2 — July 2026', h1:'Terms of Use',
+    subtitle:'Last updated: July 5, 2026 · Applicable to all users of the MbôláMusic platform (web and mobile app).',
     s1h2:'1. Parties to the Contract',
     s1p1:'These Terms of Use ("Terms") constitute a binding agreement between <strong>MbôláMusic SARL</strong> ("MbôláMusic", "we", "the platform") and any person who accesses or uses the services ("User", "you").',
     s1p2:'By creating an account, downloading the app, or using the website, you accept these Terms in full. If you do not agree, do not use the service.',
@@ -523,14 +547,20 @@ const T = {
     s4h2:'4. Prices, Payments and Refunds', s4h3a:'4.1 Current rates',
     s4th1:'Item', s4th2:'Amount', s4th3:'Notes',
     s4r1c1:'Initial free period (listeners)', s4r1c3:'1 month from registration',
-    s4r2c1:'Monthly subscription (listener)', s4r2c3:'Automatic renewal',
+    s4r2c1:'Monthly subscription (listener)', s4r2c3:'Optional automatic renewal',
+    s4r6c1:'Annual subscription (listener)', s4r6c2:'12,000 FCFA/year (10,000 FCFA the first time)', s4r6c3:'Optional automatic renewal',
     s4r3c1:'Pay-per-play (no subscription)', s4r3c3:'Deducted from wallet',
-    s4r4c1:'Download for offline use', s4r4c3:'App only',
+    s4r4c1:'Download for offline use (one-time payment)', s4r4c3:'App only · stays downloaded permanently',
+    s4r7c1:'Downloads included with subscription', s4r7c2:'No additional cost', s4r7c3:'250/month (paid plan) or 5/month (free trial) · do not count as purchased',
     s4r5c1:'Monthly subscription (artist)', s4r5c3:'Required to publish music',
     s4h3b:'4.2 Artist royalties',
     s4p1:'The artist receives <strong>70% of the amount from each paid play or download</strong>; the remaining 30% corresponds to the platform commission. Earnings are credited to the artist\'s profile and can be withdrawn by requesting it from the administrator.',
     s4h3c:'4.3 Refund policy',
     s4warn:'Subscription payments are non-refundable once activated, except for a demonstrable technical error attributable to MbôláMusic. Unused wallet top-ups may be requested as a refund within 14 calendar days of the top-up, in accordance with European withdrawal rights (Directive 2011/83/EU) where applicable.',
+    s4h3d:'4.4 Renewal and limit of one active subscription',
+    s4p2:'You cannot take out a new paid subscription (listener or artist) while you already have an active one of the same type. You must wait for it to expire or enable automatic renewal ("autoRenew"), which will renew your subscription by charging your wallet balance on the expiration date, provided there are sufficient funds. You can enable or disable automatic renewal at any time from your account.',
+    s4h3e:'4.5 Referral program',
+    s4p3:'Every user has a unique referral code. For every 5 new users who register using your code and pay for their first subscription (monthly or annual, listener or artist), you earn a <strong>50% discount credit</strong> applicable to your next subscription. Only each referred user\'s first paid subscription counts; subsequent renewals do not generate new credits. Credits are consumed in order of age and are not transferable or redeemable for cash.',
     s5h2:'5. Listener User Obligations',
     s5li1:'Use the service exclusively for personal, non-commercial use.',
     s5li2:'Not redistribute, retransmit, or publicly share downloaded content.',
@@ -625,11 +655,15 @@ function setLang(code, save = true) {
   setText('l-s4-th1', t.s4th1); setText('l-s4-th2', t.s4th2); setText('l-s4-th3', t.s4th3);
   setText('l-s4-r1c1', t.s4r1c1); setText('l-s4-r1c3', t.s4r1c3);
   setText('l-s4-r2c1', t.s4r2c1); setText('l-s4-r2c3', t.s4r2c3);
+  setText('l-s4-r6c1', t.s4r6c1); setText('l-s4-r6c2', t.s4r6c2); setText('l-s4-r6c3', t.s4r6c3);
   setText('l-s4-r3c1', t.s4r3c1); setText('l-s4-r3c3', t.s4r3c3);
   setText('l-s4-r4c1', t.s4r4c1); setText('l-s4-r4c3', t.s4r4c3);
+  setText('l-s4-r7c1', t.s4r7c1); setText('l-s4-r7c2', t.s4r7c2); setText('l-s4-r7c3', t.s4r7c3);
   setText('l-s4-r5c1', t.s4r5c1); setText('l-s4-r5c3', t.s4r5c3);
   setText('l-s4-h3b', t.s4h3b); setHTML('l-s4-p1', t.s4p1);
   setText('l-s4-h3c', t.s4h3c); setText('l-s4-warn', t.s4warn);
+  setText('l-s4-h3d', t.s4h3d); setHTML('l-s4-p2', t.s4p2);
+  setText('l-s4-h3e', t.s4h3e); setHTML('l-s4-p3', t.s4p3);
   setText('l-s5-h2', t.s5h2);
   setText('l-s5-li1', t.s5li1); setText('l-s5-li2', t.s5li2); setText('l-s5-li3', t.s5li3); setText('l-s5-li4', t.s5li4);
   setText('l-s6-h2', t.s6h2);
