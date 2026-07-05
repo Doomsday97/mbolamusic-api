@@ -8,6 +8,26 @@ const paymentController = require('./paymentController');
 const AUDIO_EXTS = new Set(['.mp3', '.wav', '.ogg', '.flac', '.aac', '.m4a', '.opus', '.wma', '.mp4', '.webm']);
 const notif = require('./notificationController');
 
+// Duración real del audio en segundos, leída de los metadatos del propio
+// archivo -- nunca nos fiamos del "durationSec" que mande el cliente (la
+// app móvil de hecho nunca lo envía, así que sin esto quedaba siempre en 0).
+// Sin una duración real, la notificación/pantalla bloqueada del reproductor
+// no tiene longitud de pista contra la cual dibujar la barra de progreso
+// hasta que el propio reproductor la resuelve por red, lo cual puede ser
+// lento o fallar en conexiones móviles inestables.
+async function _extractDurationSec(filePath) {
+  try {
+    // music-metadata es ESM-only (a partir de v8) -- import() dinámico
+    // funciona desde CommonJS en Node.js moderno.
+    const mm = await import('music-metadata');
+    const meta = await mm.parseFile(filePath);
+    const seconds = meta.format.duration;
+    return seconds ? Math.round(seconds) : 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
 // Reescribe audioUrl y coverUrl de cualquier track al CDN actual
 function rw(track) {
   if (!track) return track;
@@ -62,6 +82,8 @@ async function uploadTrack(req, res) {
     return fail(res, 'El archivo no es de audio válido (.mp3, .wav, .ogg, .flac, .aac, .m4a…)');
   }
 
+  const realDurationSec = await _extractDurationSec(audioFile.path);
+
   const track = await prisma.track.create({
     data: {
       artistId: artistProfileId,
@@ -69,7 +91,7 @@ async function uploadTrack(req, res) {
       genre,
       lyrics,
       album,
-      durationSec: parseInt(durationSec) || 0,
+      durationSec: realDurationSec || parseInt(durationSec) || 0,
       audioUrl: await storage.upload(audioFile),
       coverUrl: coverFile ? await storage.upload(coverFile) : null,
       isPublished: true,
