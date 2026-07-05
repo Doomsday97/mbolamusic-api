@@ -161,6 +161,23 @@ async function hasActiveListenerSubscription(userId) {
   return !!(await getActiveListenerSubscription(userId));
 }
 
+// Devuelve la suscripción de ARTISTA activa y vigente del usuario (mensual
+// o prueba gratis), o null. Igual que getActiveListenerSubscription, existe
+// porque getActiveSubscription() NO filtra por tipo: un usuario ARTIST que
+// además tiene una suscripción de OYENTE activa con vencimiento más lejano
+// (caso real observado) haría que getActiveSubscription() devolviera esa
+// suscripción de oyente en vez de la de artista, mostrando datos
+// incorrectos en las pantallas de suscripción/panel de artista.
+async function getActiveArtistSubscription(userId) {
+  const subs = await prisma.subscription.findMany({
+    where: { userId, status: 'ACTIVE', type: { in: ['ARTIST_MONTHLY', 'ARTIST_FREE'] } },
+    orderBy: { endDate: 'desc' },
+  });
+  const valid = subs.filter((s) => !isExpired(s.endDate));
+  if (valid.length === 0) return null;
+  return valid.find((s) => s.type !== 'ARTIST_FREE') || valid[0];
+}
+
 // ¿Tiene el oyente una suscripción de PAGO (mensual o anual) activa y
 // vigente? A diferencia de hasActiveListenerSubscription, esto EXCLUYE la
 // prueba gratis: se usa para bloquear un nuevo pago mientras ya hay uno
@@ -210,6 +227,7 @@ module.exports = {
   hasActivePaidListenerSubscription,
   hasActivePaidArtistSubscription,
   getActiveListenerSubscription,
+  getActiveArtistSubscription,
   hasEverHadYearlySubscription,
   listenerYearlyPrice,
   tryAutoRenew,

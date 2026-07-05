@@ -61,10 +61,13 @@ async function listUsers(req, res) {
         walletBalance: true, isVerified: true, createdAt: true,
         deletedAt: true, deletionReason: true,
         artistProfile: { select: { artistName: true, idVerified: true, totalEarnings: true } },
+        // Sin "take: 1": un usuario puede tener a la vez una suscripción de
+        // OYENTE y una de ARTISTA activas (ej. un artista que también paga
+        // suscripción de oyente); el frontend elige la relevante según el
+        // rol del usuario, no la de vencimiento más lejano.
         subscriptions: {
           where: { status: 'ACTIVE' },
           orderBy: { endDate: 'desc' },
-          take: 1,
           select: { type: true, status: true, endDate: true },
         },
       },

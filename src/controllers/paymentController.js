@@ -535,18 +535,28 @@ async function walletWithdraw(req, res) {
 // (now also handles the autoRenew flag)
 // (already defined above, we patch it via subscriptionService)
 
+// Devuelve la suscripción relevante para el ROL del usuario autenticado
+// (artista → tipos ARTIST_*, oyente/otros → tipos LISTENER_*). Nunca usar
+// subscriptionService.getActiveSubscription() aquí: no filtra por tipo, así
+// que un usuario ARTIST que también tenga una suscripción de OYENTE activa
+// con vencimiento más lejano vería (o modificaría) la suscripción
+// equivocada -- caso real observado con un artista suscrito además como
+// oyente de pago.
+function _getActiveSubscriptionForRole(userId, role) {
+  return role === 'ARTIST'
+    ? subscriptionService.getActiveArtistSubscription(userId)
+    : subscriptionService.getActiveListenerSubscription(userId);
+}
+
 // GET /api/subscriptions/current  → estado de suscripción actual
 async function currentSubscription(req, res) {
-  const sub = await subscriptionService.getActiveSubscription(req.user.id);
+  const sub = await _getActiveSubscriptionForRole(req.user.id, req.user.role);
   return ok(res, { subscription: sub });
 }
 
 // POST /api/subscriptions/cancel  → cancela auto-renovación, deja activa hasta endDate
 async function cancelSubscription(req, res) {
-  const sub = await prisma.subscription.findFirst({
-    where: { userId: req.user.id, status: 'ACTIVE' },
-    orderBy: { endDate: 'desc' },
-  });
+  const sub = await _getActiveSubscriptionForRole(req.user.id, req.user.role);
   if (!sub) return fail(res, 'No tienes una suscripción activa');
 
   await prisma.subscription.update({
@@ -563,10 +573,7 @@ async function cancelSubscription(req, res) {
 
 // POST /api/subscriptions/enable-auto-renew  → activa pago automático desde wallet
 async function enableAutoRenew(req, res) {
-  const sub = await prisma.subscription.findFirst({
-    where: { userId: req.user.id, status: 'ACTIVE' },
-    orderBy: { endDate: 'desc' },
-  });
+  const sub = await _getActiveSubscriptionForRole(req.user.id, req.user.role);
   if (!sub) return fail(res, 'No tienes una suscripción activa');
 
   await prisma.subscription.update({

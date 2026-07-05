@@ -19,7 +19,7 @@ async function dashboard(req, res) {
         where: { artistId },
         _sum: { playCount: true, downloadCount: true, likeCount: true },
       }),
-      subscriptionService.getActiveSubscription(userId),
+      subscriptionService.getActiveArtistSubscription(userId),
       prisma.follow.count({ where: { followingId: userId } }),
       // Oyentes únicos este mes
       prisma.play.findMany({

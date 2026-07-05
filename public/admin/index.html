@@ -700,7 +700,16 @@ async function loadUsers(page = 1) {
 function filterUsers(role) { _uRole = role; loadUsers(1); }
 
 function subBadge(u) {
-  const sub = u.subscriptions && u.subscriptions[0];
+  // Un usuario puede tener a la vez una suscripción de OYENTE y una de
+  // ARTISTA activas -- filtrar por las relevantes a su rol (no tomar
+  // simplemente la de vencimiento más lejano, que podría ser la del otro
+  // rol y mostrar datos incorrectos, ej. un artista suscrito también como
+  // oyente apareciendo con "Sin suscripción" o el plan equivocado).
+  const relevantTypes = u.role === 'ARTIST'
+    ? ['ARTIST_MONTHLY', 'ARTIST_FREE']
+    : ['LISTENER_MONTHLY', 'LISTENER_YEARLY', 'LISTENER_FREE'];
+  const subs = (u.subscriptions || []).filter(s => relevantTypes.includes(s.type));
+  const sub = subs.find(s => s.type !== 'LISTENER_FREE' && s.type !== 'ARTIST_FREE') || subs[0];
   if (!sub) return `<span style="background:rgba(248,113,113,0.12);color:var(--error);padding:2px 8px;border-radius:99px;font-size:11px;">${i18n('noSubscriptionLabel','Sin suscripción')}</span>`;
   const label = {
     LISTENER_MONTHLY: i18n('listenerMonthlyLabel','Oyente mensual'),
