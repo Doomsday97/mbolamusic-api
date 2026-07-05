@@ -281,11 +281,9 @@
           <div class="lang-opt" onclick="setLang('en')">🇬🇧 English</div>
         </div>
       </div>
-      <div id="nav-user" style="display:none;align-items:center;gap:10px;">
-        <span id="nav-username" style="font-size:0.85rem;color:var(--text2);"></span>
-        <button id="nav-profile-btn" onclick="openEditProfileWeb()" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);color:var(--amber);padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;">✏ Editar perfil</button>
-        <button id="nav-panel-btn" onclick="goToMyPage()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text2);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;font-size:0.82rem;">Mi panel</button>
-        <button id="nav-logout-btn" onclick="logoutWeb()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text2);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;font-size:0.82rem;">Salir</button>
+      <div id="nav-user" style="display:none;align-items:center;gap:10px;min-width:0;">
+        <span id="nav-username" onclick="goToMyPage()" style="font-size:0.85rem;color:var(--text2);cursor:pointer;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Mi cuenta"></span>
+        <button id="nav-logout-btn" onclick="logoutWeb()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text2);padding:0.4rem 0.75rem;border-radius:8px;cursor:pointer;font-size:0.82rem;flex-shrink:0;">Salir</button>
       </div>
       <button id="nav-login-btn" onclick="openModal('login')" class="nav-cta" style="display:none;">Iniciar sesión</button>
       <a class="nav-cta" href="#descargar" id="nav-download-btn">Descargar APK</a>
@@ -573,11 +571,17 @@ function updateNavAuth() {
   const navLogin = document.getElementById('nav-login-btn');
   const navDownload = document.getElementById('nav-download-btn');
   const mobileAuthLink = document.getElementById('mobile-menu-auth');
+  // El menú de anclas (Características, Precios, etc.) es para visitantes;
+  // con sesión iniciada compite por espacio con los controles de cuenta y
+  // podía desbordar la barra en pantallas de escritorio no muy anchas,
+  // empujando "Salir" fuera del viewport -- se oculta al iniciar sesión.
+  const navLinks = document.querySelector('.nav-links');
 
   if (token && user.username) {
     navUser.style.display = 'flex';
     navLogin.style.display = 'none';
     navDownload.style.display = 'none';
+    if (navLinks) navLinks.style.display = 'none';
     document.getElementById('nav-username').textContent = user.username;
     // Avatar en nav
     let navAv = document.getElementById('nav-avatar-circle');
@@ -585,7 +589,7 @@ function updateNavAuth() {
       navAv = document.createElement('div');
       navAv.id = 'nav-avatar-circle';
       navAv.style.cssText = 'width:32px;height:32px;border-radius:50%;background:rgba(245,158,11,0.18);border:1.5px solid var(--amber);display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:800;color:var(--amber);overflow:hidden;flex-shrink:0;cursor:pointer;';
-      navAv.onclick = () => openMiCuenta();
+      navAv.onclick = () => goToMyPage();
       navUser.insertBefore(navAv, navUser.firstChild);
     }
     if (user.avatarUrl) {
@@ -609,6 +613,7 @@ function updateNavAuth() {
     navUser.style.display = 'none';
     navLogin.style.display = '';
     navDownload.style.display = '';
+    if (navLinks) navLinks.style.display = '';
     // Menú móvil: mostrar botón de login
     if (mobileAuthLink) {
       mobileAuthLink.textContent = '🔑 Iniciar sesión';
@@ -739,7 +744,7 @@ const T = {
     footerSupport:'Soporte', footerBusiness:'Empresas',
     footerCopy:'© 2025 MbôláMusic. Todos los derechos reservados.',
     // Auth
-    profileBtn:'✏ Editar perfil', panelBtn:'Mi panel', logoutBtn:'Salir',
+    logoutBtn:'Salir',
     epTitle:'✏ Editar perfil', epUserLbl:'Usuario', epCountryLbl:'País', epCityLbl:'Ciudad',
     epArtnameLbl:'Nombre artístico', epBioLbl:'Biografía',
     epSave:'Guardar cambios', epSaving:'Guardando…', epSaved:'✅ Perfil actualizado',
@@ -826,7 +831,7 @@ const T = {
     footerPrivacy:'Confidentialité', footerTerms:'Conditions', footerCookies:'Cookies',
     footerSupport:'Support', footerBusiness:'Entreprises',
     footerCopy:'© 2025 MbôláMusic. Tous droits réservés.',
-    profileBtn:'✏ Modifier le profil', panelBtn:'Mon espace', logoutBtn:'Quitter',
+    logoutBtn:'Quitter',
     epTitle:'✏ Modifier le profil', epUserLbl:'Utilisateur', epCountryLbl:'Pays', epCityLbl:'Ville',
     epArtnameLbl:'Nom d\'artiste', epBioLbl:'Biographie',
     epSave:'Enregistrer', epSaving:'Enregistrement…', epSaved:'✅ Profil mis à jour',
@@ -913,7 +918,7 @@ const T = {
     footerPrivacy:'Privacidade', footerTerms:'Termos', footerCookies:'Cookies',
     footerSupport:'Suporte', footerBusiness:'Empresas',
     footerCopy:'© 2025 MbôláMusic. Todos os direitos reservados.',
-    profileBtn:'✏ Editar perfil', panelBtn:'O meu painel', logoutBtn:'Sair',
+    logoutBtn:'Sair',
     epTitle:'✏ Editar perfil', epUserLbl:'Utilizador', epCountryLbl:'País', epCityLbl:'Cidade',
     epArtnameLbl:'Nome artístico', epBioLbl:'Biografia',
     epSave:'Guardar alterações', epSaving:'A guardar…', epSaved:'✅ Perfil atualizado',
@@ -1000,7 +1005,7 @@ const T = {
     footerPrivacy:'Privacy', footerTerms:'Terms', footerCookies:'Cookies',
     footerSupport:'Support', footerBusiness:'Business',
     footerCopy:'© 2025 MbôláMusic. All rights reserved.',
-    profileBtn:'✏ Edit profile', panelBtn:'My panel', logoutBtn:'Log out',
+    logoutBtn:'Log out',
     epTitle:'✏ Edit profile', epUserLbl:'Username', epCountryLbl:'Country', epCityLbl:'City',
     epArtnameLbl:'Artist name', epBioLbl:'Biography',
     epSave:'Save changes', epSaving:'Saving…', epSaved:'✅ Profile updated',
@@ -1072,8 +1077,6 @@ function setLang(code, save = true) {
   setText('rg-submit-btn', t.registerBtn);
   setText('rg-note', t.registerNote);
   // Nav user buttons
-  setText('nav-profile-btn', t.profileBtn);
-  setText('nav-panel-btn',   t.panelBtn);
   setText('nav-logout-btn',  t.logoutBtn);
   // Edit profile modal labels
   setText('ep-modal-title',  t.epTitle);
