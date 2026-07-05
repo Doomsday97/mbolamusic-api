@@ -7,8 +7,8 @@ module.exports = {
   prices: {
     artistMonthly: 10000,        // suscripción artista / mes
     listenerMonthly: 2000,       // suscripción oyente / mes
-    listenerYearly: 12000,       // suscripción anual oyente
-    listenerYearlyFirstTime: 10000, // precio de la primera suscripción anual del oyente
+    listenerYearly: 24000,       // suscripción anual oyente
+    listenerYearlyFirstTime: 20000, // precio de la primera suscripción anual del oyente
     perPlay: 50,                 // pago por reproducción
     perDownload: 200,            // pago por descarga
   },

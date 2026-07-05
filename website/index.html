@@ -714,7 +714,7 @@ const T = {
     plan1f1:'Streaming ilimitado', plan1f2:'5 descargas/mes incluidas', plan1f3:'Feed personalizado', plan1f4:'Sin anuncios',
     plan1cta:'Empezar gratis',
     planBadge:'Más popular',
-    plan2name:'Suscripción', plan2period:'por mes, todo incluido', plan2annual:'o 12.000 FCFA/año (10.000 la primera vez)',
+    plan2name:'Suscripción', plan2period:'por mes, todo incluido', plan2annual:'o 24.000 FCFA/año (20.000 la primera vez)',
     plan2f1:'Streaming ilimitado', plan2f2:'250 descargas/mes incluidas', plan2f3:'Feed personalizado', plan2f4:'Sin anuncios', plan2f5:'Calidad de audio alta',
     plan2cta:'Suscribirse',
     plan3name:'Por uso', plan3period:'por reproducción',
@@ -810,7 +810,7 @@ const T = {
     plan1f1:'Streaming illimité', plan1f2:'5 téléchargements/mois inclus', plan1f3:'Feed personnalisé', plan1f4:'Sans publicités',
     plan1cta:'Commencer gratuitement',
     planBadge:'Plus populaire',
-    plan2name:'Abonnement', plan2period:'par mois, tout inclus', plan2annual:'ou 12 000 FCFA/an (10 000 la première fois)',
+    plan2name:'Abonnement', plan2period:'par mois, tout inclus', plan2annual:'ou 24 000 FCFA/an (20 000 la première fois)',
     plan2f1:'Streaming illimité', plan2f2:'250 téléchargements/mois inclus', plan2f3:'Feed personnalisé', plan2f4:'Sans publicités', plan2f5:'Qualité audio élevée',
     plan2cta:'S\'abonner',
     plan3name:'À l\'usage', plan3period:'par écoute',
@@ -897,7 +897,7 @@ const T = {
     plan1f1:'Streaming ilimitado', plan1f2:'5 downloads/mês incluídos', plan1f3:'Feed personalizado', plan1f4:'Sem anúncios',
     plan1cta:'Começar de graça',
     planBadge:'Mais popular',
-    plan2name:'Subscrição', plan2period:'por mês, tudo incluído', plan2annual:'ou 12.000 FCFA/ano (10.000 na primeira vez)',
+    plan2name:'Subscrição', plan2period:'por mês, tudo incluído', plan2annual:'ou 24.000 FCFA/ano (20.000 na primeira vez)',
     plan2f1:'Streaming ilimitado', plan2f2:'250 downloads/mês incluídos', plan2f3:'Feed personalizado', plan2f4:'Sem anúncios', plan2f5:'Qualidade de áudio alta',
     plan2cta:'Subscrever',
     plan3name:'Por uso', plan3period:'por reprodução',
@@ -984,7 +984,7 @@ const T = {
     plan1f1:'Unlimited streaming', plan1f2:'5 downloads/month included', plan1f3:'Personalised feed', plan1f4:'No ads',
     plan1cta:'Start for free',
     planBadge:'Most popular',
-    plan2name:'Subscription', plan2period:'per month, all-inclusive', plan2annual:'or 12,000 FCFA/year (10,000 the first time)',
+    plan2name:'Subscription', plan2period:'per month, all-inclusive', plan2annual:'or 24,000 FCFA/year (20,000 the first time)',
     plan2f1:'Unlimited streaming', plan2f2:'250 downloads/month included', plan2f3:'Personalised feed', plan2f4:'No ads', plan2f5:'High audio quality',
     plan2cta:'Subscribe',
     plan3name:'Pay-as-you-go', plan3period:'per play',
@@ -1333,7 +1333,7 @@ function setLang(code, save = true) {
         <p class="price-name" id="plan2-name">Suscripción</p>
         <div class="price-amount">2.000 <span>FCFA</span></div>
         <p class="price-period" id="plan2-period">por mes, todo incluido</p>
-        <p class="price-period" id="plan2-annual-note" style="font-size:0.75rem;margin-top:-8px;">o 12.000 FCFA/año (10.000 la primera vez)</p>
+        <p class="price-period" id="plan2-annual-note" style="font-size:0.75rem;margin-top:-8px;">o 24.000 FCFA/año (20.000 la primera vez)</p>
         <ul class="price-features">
           <li id="plan2-f1">Streaming ilimitado</li>
           <li id="plan2-f2">250 descargas/mes incluidas</li>
@@ -3031,13 +3031,13 @@ async function selectSmPlan(plan) {
       const j = await r.json();
       if (j.success) _smYearlyPrice = j.data;
     }
-    const amount = _smYearlyPrice ? _smYearlyPrice.amount : 12000;
+    const amount = _smYearlyPrice ? _smYearlyPrice.amount : 24000;
     const firstTime = _smYearlyPrice ? _smYearlyPrice.isFirstTime : false;
     desc.textContent = `${amount.toLocaleString('es-ES')} FCFA/año${firstTime ? ' (precio de bienvenida)' : ''} · Todo incluido · Sin anuncios`;
     btn.textContent = `Confirmar suscripción — ${amount.toLocaleString('es-ES')} FCFA →`;
     fxLine(amount).then(t => { document.getElementById('sm-fx').textContent = t; });
   } catch (e) {
-    desc.textContent = '12.000 FCFA/año (10.000 la primera vez) · Todo incluido · Sin anuncios';
+    desc.textContent = '24.000 FCFA/año (20.000 la primera vez) · Todo incluido · Sin anuncios';
   }
 }
 
