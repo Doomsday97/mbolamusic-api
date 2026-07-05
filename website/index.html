@@ -2499,6 +2499,7 @@ async function openMiCuenta() {
       const artistBadge  = document.getElementById('mc-artist-sub-badge');
       const artistExpiry = document.getElementById('mc-artist-sub-expiry');
       const artistPayBtn = document.getElementById('mc-artist-pay-btn');
+      const artistAutoRow = document.getElementById('mc-artist-autorenew-row');
       if (sub && sub.status === 'ACTIVE' && sub.type === 'ARTIST_MONTHLY') {
         // Ya tiene un plan de PAGO vigente: el backend ahora rechaza un
         // nuevo pago mientras no venza (o se active autoRenew), así que el
@@ -2512,11 +2513,27 @@ async function openMiCuenta() {
         artistExpiry.style.color = diff <= 7 ? 'var(--amber)' : '#4ade80';
         info.textContent = 'Plan artista activo · Vence el ' + endsAt.toLocaleDateString();
         artistPayBtn.style.display = 'none';
-        const artistAutoRow = document.getElementById('mc-artist-autorenew-row');
         artistAutoRow.style.display = 'flex';
         document.getElementById('mc-artist-autorenew-toggle').checked = sub.autoRenew === true;
+      } else if (sub && sub.status === 'ACTIVE' && sub.type === 'ARTIST_FREE') {
+        // Prueba gratuita de 30 días: TAMBIÉN es una suscripción activa (la
+        // música se publica igual), no debe mostrarse como "Sin plan". El
+        // pago SÍ se permite durante la prueba (el bloqueo de "ya tienes una
+        // activa" solo aplica a ARTIST_MONTHLY, no a la prueba gratis).
+        badge.textContent = '🎁 Prueba'; badge.style.background = 'rgba(245,158,11,0.12)'; badge.style.color = 'var(--amber)';
+        artistBadge.textContent = 'PRUEBA GRATIS'; artistBadge.style.background = 'rgba(245,158,11,0.15)'; artistBadge.style.color = 'var(--amber)';
+        const endsAt = new Date(sub.endDate);
+        const diff = Math.ceil((endsAt - new Date()) / 86400000);
+        artistExpiry.style.display = '';
+        artistExpiry.textContent = diff > 0 ? '🎁 Prueba gratuita: ' + diff + ' días restantes' : '⚠ Vence hoy';
+        artistExpiry.style.color = diff <= 7 ? 'var(--amber)' : '#4ade80';
+        info.textContent = 'Prueba gratuita activa · tu música está publicada · Vence el ' + endsAt.toLocaleDateString();
+        artistPayBtn.style.display = '';
+        artistPayBtn.textContent = '✅ Activar plan de pago — 10.000 FCFA →';
+        artistPayBtn.style.background = 'var(--amber)';
+        artistAutoRow.style.display = 'none';
       } else {
-        document.getElementById('mc-artist-autorenew-row').style.display = 'none';
+        artistAutoRow.style.display = 'none';
         artistPayBtn.style.display = '';
         badge.textContent = '⚠ Sin plan'; badge.style.background = 'rgba(251,191,36,0.12)'; badge.style.color = 'var(--amber)';
         artistBadge.textContent = 'INACTIVO'; artistBadge.style.background = 'rgba(248,113,113,0.15)'; artistBadge.style.color = '#f87171';
@@ -2611,22 +2628,9 @@ async function openMiCuenta() {
             }).join('');
         }
       }
-      // Mostrar "Período de prueba" si es ARTIST_FREE
-      const subType = d.subscriptionType;
-      const artistPayBtn = document.getElementById('mc-artist-pay-btn');
-      if (subType === 'ARTIST_FREE' && artistPayBtn) {
-        artistPayBtn.textContent = '✅ Activar plan de pago — 10.000 FCFA →';
-        const trialBadge = document.getElementById('mc-artist-sub-badge');
-        if (trialBadge) { trialBadge.textContent = 'PRUEBA GRATIS'; trialBadge.style.background = 'rgba(245,158,11,0.15)'; trialBadge.style.color = 'var(--amber)'; }
-        const expiry = document.getElementById('mc-artist-sub-expiry');
-        if (expiry && pj.data.subscriptionEndsAt) {
-          const d = new Date(pj.data.subscriptionEndsAt);
-          const diff = Math.ceil((d - new Date()) / 86400000);
-          expiry.textContent = '🎁 Prueba gratuita: ' + (diff > 0 ? diff + ' días restantes' : 'vence hoy');
-          expiry.style.color = diff <= 7 ? 'var(--amber)' : '#4ade80';
-          expiry.style.display = '';
-        }
-      }
+      // (El estado de prueba gratuita / plan de pago ya se determina arriba
+      // a partir de /payments/subscription/current -- no hace falta
+      // duplicarlo aquí con /artist/dashboard.)
     } catch(_) { document.getElementById('mc-earnings-val').textContent = '— FCFA'; }
   } else {
     uploadSec.style.display = 'none';
