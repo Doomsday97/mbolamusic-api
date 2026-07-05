@@ -4,6 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>MbôláMusic · Admin</title>
+<link rel="icon" type="image/png" href="/logo.png">
+<link rel="apple-touch-icon" href="/logo.png">
 <style>
   :root {
     --bg: #0a0a0a; --surface: #1a1a1a; --surface2: #262626;
@@ -17,7 +19,9 @@
   /* ── Login ── */
   #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
   .login-card { background: var(--surface); padding: 40px; border-radius: var(--radius); width: 340px; }
-  .login-card h1 { color: var(--accent); font-size: 22px; margin-bottom: 4px; }
+  .login-card h1 { color: var(--accent); font-size: 22px; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+  .app-logo-icon { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  header h1 .app-logo-icon { width: 24px; height: 24px; }
   .login-card p { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
   input { width: 100%; padding: 12px; background: var(--surface2); border: none; border-radius: 8px;
           color: var(--text); font-size: 15px; margin-bottom: 12px; }
@@ -30,7 +34,7 @@
   /* ── Shell ── */
   #app { display: none; }
   header { background: var(--surface); padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
-  header h1 { color: var(--accent); font-size: 18px; flex: 1; }
+  header h1 { color: var(--accent); font-size: 18px; flex: 1; display: flex; align-items: center; gap: 8px; }
   header span { color: var(--muted); font-size: 13px; }
   .lang-btn { width:auto;padding:5px 12px;background:var(--surface2);color:var(--muted);border-radius:6px;font-size:13px; }
   nav { display: flex; gap: 4px; background: var(--surface); padding: 0 24px; border-bottom: 1px solid var(--surface2); }
@@ -150,7 +154,7 @@
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
-    <h1>MbôláMusic</h1>
+    <h1><img src="/logo.png" alt="" class="app-logo-icon">MbôláMusic</h1>
     <p data-i18n="loginPanelTitle">Panel de administración</p>
     <input id="login-id" type="text" placeholder="Email, teléfono o usuario" data-i18n-placeholder="loginIdPlaceholder" />
     <input id="login-pw" type="password" placeholder="Contraseña" data-i18n-placeholder="loginPwPlaceholder" />
@@ -162,7 +166,7 @@
 <!-- APP -->
 <div id="app">
   <header>
-    <h1>🎵 MbôláMusic Admin</h1>
+    <h1><img src="/logo.png" alt="" class="app-logo-icon">MbôláMusic Admin</h1>
     <span id="admin-name"></span>
     <button class="lang-btn" onclick="toggleLang()" id="lang-toggle-btn">ES</button>
     <button id="silence-btn" onclick="openSilenceModal()" style="display:none;width:auto;padding:6px 14px;background:var(--surface2);color:var(--muted);border-radius:6px;"></button>
@@ -312,12 +316,13 @@
   </div>
 </div>
 
-<!-- Contact copyright claim modal -->
+<!-- Contact copyright claim modal (se reutiliza para "contactar usuario" acusado
+     y para "responder al reclamante"; ver _contactClaimMode) -->
 <div id="contact-claim-modal" class="modal-overlay hidden">
   <div class="modal-box" style="max-width:480px">
-    <h3>©️ <span data-i18n="contactUserBtn">Contactar usuario</span></h3>
+    <h3>©️ <span id="cm-title" data-i18n="contactUserBtn">Contactar usuario</span></h3>
     <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">
-      <span data-i18n="artistLabel">Artista</span>: <span id="cm-target"></span>
+      <span id="cm-target-label" data-i18n="artistLabel">Artista</span>: <span id="cm-target"></span>
     </div>
     <div class="mfield">
       <label data-i18n="claimMessageLabel">Mensaje</label>
@@ -1614,6 +1619,8 @@ function renderCopyrightTab(el, claims) {
           <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;">
             <button class="btn-sm btn-primary" ${!c.track ? 'disabled' : ''}
               onclick="openContactClaimModal('${c.id}', ${esc(JSON.stringify(artistName))})">${i18n('contactUserBtn','Contactar usuario')}</button>
+            ${c.reporter ? `<button class="btn-sm btn-secondary"
+              onclick="openReplyReporterModal('${c.id}', ${esc(JSON.stringify(c.reporter.username))})">${i18n('replyReporterBtn','Responder al reclamante')}</button>` : ''}
             <select onchange="updateClaimStatus('${c.id}', this.value); this.value='';" style="width:auto;font-size:12px;padding:4px 8px;">
               <option value="">${i18n('changeStatusLabel','Cambiar estado…')}</option>
               <option value="OPEN">${i18n('claimStatusOpen','Abierta')}</option>
@@ -1685,11 +1692,27 @@ async function updateClaimStatus(id, status) {
   }
 }
 
+let _contactClaimMode = 'artist'; // 'artist' (contactar al acusado) | 'reporter' (responder a quien reclamó)
+
 function openContactClaimModal(claimId, artistName) {
   _contactClaimId = claimId;
+  _contactClaimMode = 'artist';
+  document.getElementById('cm-title').textContent = i18n('contactUserBtn','Contactar usuario');
+  document.getElementById('cm-target-label').textContent = i18n('artistLabel','Artista');
   document.getElementById('cm-target').textContent = artistName || '';
   document.getElementById('cm-message').value = i18n('claimContactTemplate',
     'Hola, nos pusimos en contacto contigo porque hemos recibido una reclamación de copyright sobre una canción que subiste a MbôláMusic. Por favor, ponte en contacto con nosotros para resolver este asunto lo antes posible.');
+  document.getElementById('cm-msg').textContent = '';
+  document.getElementById('contact-claim-modal').classList.remove('hidden');
+}
+function openReplyReporterModal(claimId, reporterUsername) {
+  _contactClaimId = claimId;
+  _contactClaimMode = 'reporter';
+  document.getElementById('cm-title').textContent = i18n('replyReporterBtn','Responder al reclamante');
+  document.getElementById('cm-target-label').textContent = i18n('reporterLabel','Reclamante');
+  document.getElementById('cm-target').textContent = reporterUsername || '';
+  document.getElementById('cm-message').value = i18n('claimReplyReporterTemplate',
+    'Hola, te escribimos sobre la reclamación de copyright que enviaste en MbôláMusic. Te contamos cómo va el caso:');
   document.getElementById('cm-msg').textContent = '';
   document.getElementById('contact-claim-modal').classList.remove('hidden');
 }
@@ -1708,7 +1731,8 @@ async function submitContactClaim() {
   msg.style.color = 'var(--muted)';
   msg.textContent = i18n('sendingLabel','Enviando…');
   try {
-    await apiFetch(`/admin/copyright-claims/${_contactClaimId}/contact`, 'POST', { message });
+    const endpoint = _contactClaimMode === 'reporter' ? 'reply-reporter' : 'contact';
+    await apiFetch(`/admin/copyright-claims/${_contactClaimId}/${endpoint}`, 'POST', { message });
     closeContactClaimModal();
     loadCopyrightClaims();
   } catch (e) {

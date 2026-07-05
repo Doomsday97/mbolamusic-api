@@ -65,6 +65,7 @@ router.get('/copyright-claims',            copyright.listClaims);
 router.post('/copyright-claims',           copyright.createClaim);
 router.patch('/copyright-claims/:id',      copyright.updateClaim);
 router.post('/copyright-claims/:id/contact', copyright.contactClaim);
+router.post('/copyright-claims/:id/reply-reporter', copyright.replyReporter);
 
 // Usuarios conectados
 router.get('/online',                      admin.onlineUsers);

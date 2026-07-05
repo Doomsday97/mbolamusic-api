@@ -119,4 +119,32 @@ async function contactClaim(req, res) {
   }
 }
 
-module.exports = { listClaims, listMyClaims, createClaim, updateClaim, contactClaim };
+// POST /api/admin/copyright-claims/:id/reply-reporter   body: { message }
+// Igual que contactClaim, pero dirigido a quien PRESENTÓ la reclamación desde
+// la app (reporterId), no al artista acusado. Solo disponible cuando la
+// reclamación fue enviada por un usuario registrado (no aplica a las
+// registradas manualmente por el admin en nombre de un reclamante externo).
+async function replyReporter(req, res) {
+  const { id } = req.params;
+  const message = (req.body.message || '').trim();
+  if (!message) return fail(res, 'El mensaje no puede estar vacío');
+  try {
+    const claim = await prisma.copyrightClaim.findUnique({ where: { id } });
+    if (!claim) return fail(res, 'Reclamación no encontrada', 404);
+    if (!claim.reporterId) {
+      return fail(res, 'Esta reclamación no fue enviada por un usuario registrado; no hay a quién responder dentro de la app.');
+    }
+
+    await sendAdminMessage(claim.reporterId, { body: message });
+
+    // No se cambia el status: CONTACTED se refiere a haber contactado al
+    // artista acusado (ver contactClaim), no al reclamante.
+    return ok(res, { claim });
+  } catch (e) {
+    if (e.status) return fail(res, e.message, e.status);
+    console.error('[copyright]', e);
+    return fail(res, 'Error al responder al reclamante', 500);
+  }
+}
+
+module.exports = { listClaims, listMyClaims, createClaim, updateClaim, contactClaim, replyReporter };
