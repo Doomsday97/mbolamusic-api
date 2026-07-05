@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Política de Privacidad — MbôláMusic</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root { --amber: #F59E0B; --bg: #080808; --bg2: #111; --text: #F0F0F0; --text2: #A0A0A0; --border: rgba(255,255,255,0.08); }
@@ -11,7 +13,8 @@
   nav { background: rgba(8,8,8,0.95); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
   .nav-inner { max-width: 900px; margin: 0 auto; padding: 0 1.5rem; height: 60px; display: flex; align-items: center; gap: 12px; }
   .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 700; }
-  .logo-icon { width: 34px; height: 34px; background: var(--amber); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+  .logo-icon { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .logo-icon img { width: 100%; height: 100%; object-fit: cover; }
   .back { color: var(--text2); text-decoration: none; font-size: 0.85rem; }
   .page { max-width: 800px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
   .badge { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: var(--amber); border-radius: 6px; padding: 3px 10px; font-size: 0.78rem; font-weight: 600; display: inline-block; margin-bottom: 1rem; }
@@ -48,7 +51,7 @@
 <nav>
   <div class="nav-inner">
     <a class="back" href="/" id="l-back">← Inicio</a>
-    <a class="logo" href="/"><div class="logo-icon">🎵</div> MbôláMusic</a>
+    <a class="logo" href="/"><div class="logo-icon"><img src="logo.png" alt="MbôláMusic"></div> MbôláMusic</a>
     <div class="lang-switcher" id="lang-switcher">
       <button class="lang-btn" id="lang-current" onclick="toggleLangDropdown(event)">🌐 ES</button>
       <div class="lang-dropdown">

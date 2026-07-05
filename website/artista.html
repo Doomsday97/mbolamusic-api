@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MbôláMusic — Mi perfil artista</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -18,7 +20,8 @@
   nav { background: rgba(8,8,8,0.95); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
   .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 60px; }
   .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 700; }
-  .logo-icon { width: 34px; height: 34px; background: var(--amber); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+  .logo-icon { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .logo-icon img { width: 100%; height: 100%; object-fit: cover; }
   .nav-actions { display: flex; align-items: center; gap: 10px; }
   .btn-outline { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--text2); padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
 
@@ -87,7 +90,7 @@
 
 <nav>
   <div class="nav-inner">
-    <a class="logo" href="/"><div class="logo-icon">🎵</div> MbôláMusic</a>
+    <a class="logo" href="/"><div class="logo-icon"><img src="logo.png" alt="MbôláMusic"></div> MbôláMusic</a>
     <div class="nav-actions">
       <div class="lang-sel">
         <div class="lang-opt" onclick="setLang('es')">ES</div>
