@@ -41,11 +41,12 @@
 
   /* NAV */
   nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(8,8,8,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
-  .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 2.5rem; height: 64px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
-  .nav-inner::-webkit-scrollbar { display: none; }
-  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-size: 1.2rem; font-weight: 700; }
+  .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 2.5rem; height: 64px; }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-size: 1.2rem; font-weight: 700; flex-shrink: 0; }
   .logo-icon { width: 36px; height: 36px; background: var(--amber); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; overflow-x: auto; overflow-y: hidden; min-width: 0; scrollbar-width: none; }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links li { flex-shrink: 0; }
   .nav-links a { color: var(--text2); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
   .nav-links a:hover { color: var(--amber); }
   .nav-cta { background: var(--amber); color: #000; padding: 0.5rem 1.25rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: background 0.2s; }
