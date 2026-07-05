@@ -351,6 +351,8 @@
           <input id="rg-artist" type="text" placeholder="Tu nombre artístico" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;"></div>
         <div><label id="rg-pw-label" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Contraseña *</label>
           <input id="rg-pw" type="password" placeholder="mínimo 6 caracteres" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;"></div>
+        <div><label id="rg-referral-label" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Código de referido (opcional)</label>
+          <input id="rg-referral" type="text" placeholder="Ej: A3F7C291" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;text-transform:uppercase;"></div>
         <div id="rg-err" style="color:#f87171;font-size:0.85rem;display:none;"></div>
         <button id="rg-submit-btn" onclick="doRegisterWeb()" style="background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;">Crear cuenta →</button>
         <p id="rg-note" style="font-size:0.78rem;color:var(--text2);text-align:center;">Oyentes: 1 mes gratis · Artistas: 10.000 FCFA/mes</p>
@@ -426,10 +428,12 @@ async function doRegisterWeb() {
   const password   = document.getElementById('rg-pw').value;
   const role       = document.getElementById('rg-role').value;
   const artistName = document.getElementById('rg-artist').value.trim();
+  const referralCode = document.getElementById('rg-referral').value.trim();
   const err = document.getElementById('rg-err');
   err.style.display = 'none';
   const body = { username, email, password, role };
   if (role === 'ARTIST') body.artistName = artistName;
+  if (referralCode) body.referralCode = referralCode;
   try {
     const r = await fetch(API_BASE + '/auth/register', {
       method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
@@ -2076,7 +2080,10 @@ loadTrending();
     </div>
 
     <!-- Historial de transacciones: de solo lectura, no hay forma de borrarlas -->
-    <button onclick="openTxHistory()" style="width:100%;background:rgba(255,255,255,0.04);color:var(--text2);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px;font-size:0.85rem;cursor:pointer;margin-bottom:1.25rem;">📄 Ver mis transacciones</button>
+    <button onclick="openTxHistory()" style="width:100%;background:rgba(255,255,255,0.04);color:var(--text2);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px;font-size:0.85rem;cursor:pointer;margin-bottom:0.6rem;">📄 Ver mis transacciones</button>
+
+    <!-- Código de referido: 50% de descuento por cada 5 referidos que pagan su primera suscripción -->
+    <button onclick="openReferralModal()" style="width:100%;background:rgba(255,255,255,0.04);color:var(--text2);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px;font-size:0.85rem;cursor:pointer;margin-bottom:1.25rem;">🎁 Mi código de referido</button>
 
     <!-- Suscripción -->
     <div style="margin-bottom:1.25rem;">
@@ -2085,6 +2092,10 @@ loadTrending();
         <span id="mc-sub-badge" style="font-size:0.72rem;padding:2px 10px;border-radius:20px;font-weight:700;"></span>
       </div>
       <div id="mc-sub-info" style="padding:12px;background:rgba(255,255,255,0.04);border-radius:10px;font-size:0.85rem;color:var(--text2);margin-bottom:10px;"></div>
+      <label id="mc-autorenew-row" style="display:none;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,0.04);border-radius:10px;margin-bottom:10px;cursor:pointer;font-size:0.82rem;color:var(--text2);">
+        <input type="checkbox" id="mc-autorenew-toggle" onchange="toggleAutoRenewWeb(this)" style="width:16px;height:16px;accent-color:var(--amber);">
+        🔄 Pago automático (se cobra del monedero al vencer)
+      </label>
       <button id="mc-subscribe-btn" onclick="closeMiCuenta();openSubscribeModal();" style="display:none;width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.9rem;cursor:pointer;">Suscribirme — 2.000 FCFA/mes</button>
     </div>
 
@@ -2105,6 +2116,10 @@ loadTrending();
         </div>
         <div style="font-size:0.78rem;color:var(--text2);margin-bottom:10px;">31 días · Subida de música ilimitada · 70% de ganancias</div>
         <div id="mc-artist-sub-expiry" style="font-size:0.8rem;color:#4ade80;margin-bottom:14px;display:none;"></div>
+        <label id="mc-artist-autorenew-row" style="display:none;align-items:center;gap:8px;padding:10px 12px;background:rgba(0,0,0,0.2);border-radius:10px;margin-bottom:12px;cursor:pointer;font-size:0.8rem;color:var(--text2);">
+          <input type="checkbox" id="mc-artist-autorenew-toggle" onchange="toggleAutoRenewWeb(this)" style="width:16px;height:16px;accent-color:var(--amber);">
+          🔄 Pago automático (se cobra del monedero al vencer)
+        </label>
         <button onclick="closeMiCuenta();openArtistSubscribeModal();" style="width:100%;background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.88rem;cursor:pointer;" id="mc-artist-pay-btn">Pagar suscripción — 10.000 FCFA →</button>
       </div>
     </div>
@@ -2419,6 +2434,26 @@ loadTrending();
   </div>
 </div>
 
+<!-- ════════════════════════════════════════════════════════════
+     CÓDIGO DE REFERIDO
+════════════════════════════════════════════════════════════ -->
+<div id="referral-overlay" onclick="if(event.target===this)closeReferralModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:11600;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#151515;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem;width:100%;max-width:420px;position:relative;text-align:center;">
+    <button onclick="closeReferralModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;line-height:1;">✕</button>
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.75rem;color:var(--amber);">🎁 Tu código de referido</h3>
+    <p style="font-size:0.85rem;color:var(--text2);margin-bottom:1.25rem;">Comparte este código con amigos. Por cada 5 que se registren y paguen su suscripción con tu código, ganas 50% de descuento en tu próxima suscripción.</p>
+    <div id="referral-code-val" style="background:rgba(245,158,11,0.12);color:var(--amber);font-size:1.6rem;font-weight:800;letter-spacing:6px;border-radius:12px;padding:14px;margin-bottom:1.25rem;">— — — —</div>
+    <div style="display:flex;justify-content:space-between;padding:10px 12px;background:rgba(255,255,255,0.04);border-radius:10px;margin-bottom:8px;font-size:0.85rem;">
+      <span style="color:var(--text2);">Referidos con suscripción paga</span>
+      <span id="referral-progress-val" style="color:var(--text);font-weight:700;">—</span>
+    </div>
+    <div id="referral-discounts-row" style="display:none;justify-content:space-between;padding:10px 12px;background:rgba(74,222,128,0.1);border-radius:10px;font-size:0.85rem;">
+      <span style="color:#4ade80;">Descuentos disponibles</span>
+      <span id="referral-discounts-val" style="color:#4ade80;font-weight:700;">—</span>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── Panel Mi Cuenta ───────────────────────────────────────────────────────────
 async function openMiCuenta() {
@@ -2464,7 +2499,10 @@ async function openMiCuenta() {
       const artistBadge  = document.getElementById('mc-artist-sub-badge');
       const artistExpiry = document.getElementById('mc-artist-sub-expiry');
       const artistPayBtn = document.getElementById('mc-artist-pay-btn');
-      if (sub && sub.status === 'ACTIVE') {
+      if (sub && sub.status === 'ACTIVE' && sub.type === 'ARTIST_MONTHLY') {
+        // Ya tiene un plan de PAGO vigente: el backend ahora rechaza un
+        // nuevo pago mientras no venza (o se active autoRenew), así que el
+        // botón de pago se oculta -- igual que ya se hacía para oyentes.
         badge.textContent = '✅ Activa'; badge.style.background = 'rgba(74,222,128,0.15)'; badge.style.color = '#4ade80';
         artistBadge.textContent = 'ACTIVO'; artistBadge.style.background = 'rgba(74,222,128,0.15)'; artistBadge.style.color = '#4ade80';
         const endsAt = new Date(sub.endDate);
@@ -2473,9 +2511,13 @@ async function openMiCuenta() {
         artistExpiry.textContent = diff > 0 ? '⏰ Vence en ' + diff + ' días (' + endsAt.toLocaleDateString() + ')' : '⚠ Vence hoy';
         artistExpiry.style.color = diff <= 7 ? 'var(--amber)' : '#4ade80';
         info.textContent = 'Plan artista activo · Vence el ' + endsAt.toLocaleDateString();
-        artistPayBtn.textContent = '🔄 Renovar plan — 10.000 FCFA →';
-        artistPayBtn.style.background = 'rgba(245,158,11,0.7)';
+        artistPayBtn.style.display = 'none';
+        const artistAutoRow = document.getElementById('mc-artist-autorenew-row');
+        artistAutoRow.style.display = 'flex';
+        document.getElementById('mc-artist-autorenew-toggle').checked = sub.autoRenew === true;
       } else {
+        document.getElementById('mc-artist-autorenew-row').style.display = 'none';
+        artistPayBtn.style.display = '';
         badge.textContent = '⚠ Sin plan'; badge.style.background = 'rgba(251,191,36,0.12)'; badge.style.color = 'var(--amber)';
         artistBadge.textContent = 'INACTIVO'; artistBadge.style.background = 'rgba(248,113,113,0.15)'; artistBadge.style.color = '#f87171';
         artistExpiry.style.display = 'none';
@@ -2502,6 +2544,13 @@ async function openMiCuenta() {
           (isFreeTrial ? `<div style="margin-top:10px;padding:8px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;font-size:0.78rem;color:var(--amber);">💡 Al terminar la prueba, elige entre suscripción mensual (2.000 FCFA) o pago por uso (50 FCFA/reproducción).</div>` : '');
         listenerSubBtn.style.display = isFreeTrial ? '' : 'none';
         if (isFreeTrial) listenerSubBtn.textContent = '⭐ Activar suscripción mensual — 2.000 FCFA/mes';
+        const autoRow = document.getElementById('mc-autorenew-row');
+        if (isFreeTrial) {
+          autoRow.style.display = 'none';
+        } else {
+          autoRow.style.display = 'flex';
+          document.getElementById('mc-autorenew-toggle').checked = sub.autoRenew === true;
+        }
       } else {
         badge.textContent = '⚠ Sin plan'; badge.style.background = 'rgba(251,191,36,0.12)'; badge.style.color = 'var(--amber)';
         info.innerHTML =
@@ -2510,12 +2559,15 @@ async function openMiCuenta() {
           `<div style="font-size:0.78rem;color:var(--text2);">Suscríbete para escuchar ilimitado sin interrupciones.</div>`;
         listenerSubBtn.style.display = '';
         listenerSubBtn.textContent = 'Suscribirme — 2.000 FCFA/mes';
+        document.getElementById('mc-autorenew-row').style.display = 'none';
       }
     }
   } catch(_) {
     document.getElementById('mc-sub-info').textContent = 'No se pudo cargar la suscripción.';
     artistSubSec.style.display = user.role === 'ARTIST' ? '' : 'none';
     listenerSubBtn.style.display = user.role === 'LISTENER' ? '' : 'none';
+    document.getElementById('mc-autorenew-row').style.display = 'none';
+    document.getElementById('mc-artist-autorenew-row').style.display = 'none';
   }
 
   // Artista: botón subir + ganancias
@@ -2651,6 +2703,31 @@ async function openTxHistory() {
   }
 }
 function closeTxHistory() { document.getElementById('tx-history-overlay').style.display = 'none'; }
+
+async function openReferralModal() {
+  const token = localStorage.getItem('mbola_token');
+  if (!token) { openModal('login'); return; }
+  document.getElementById('referral-overlay').style.display = 'flex';
+  document.getElementById('referral-code-val').textContent = '— — — —';
+  document.getElementById('referral-progress-val').textContent = '—';
+  document.getElementById('referral-discounts-row').style.display = 'none';
+  try {
+    const r = await fetch(API_BASE + '/auth/my-referral', { headers: { Authorization: 'Bearer ' + token } });
+    const j = await r.json();
+    const d = j && j.data;
+    if (!d) return;
+    document.getElementById('referral-code-val').textContent = d.code || '—';
+    document.getElementById('referral-progress-val').textContent =
+      `${d.progressInCurrentBatch}/${d.requiredPayingReferrals} (${d.payingReferrals} total)`;
+    if (d.availableDiscounts > 0) {
+      document.getElementById('referral-discounts-row').style.display = 'flex';
+      document.getElementById('referral-discounts-val').textContent = d.availableDiscounts;
+    }
+  } catch(_) {
+    document.getElementById('referral-code-val').textContent = 'Error al cargar';
+  }
+}
+function closeReferralModal() { document.getElementById('referral-overlay').style.display = 'none'; }
 
 // ── Cambiar contraseña (web) ──────────────────────────────────────────────────
 function _currentT() {
@@ -3001,6 +3078,28 @@ async function doSubscribeWeb() {
     res.style.display = ''; res.style.background = 'rgba(248,113,113,0.1)'; res.style.color = '#f87171';
     res.textContent = '❌ ' + e.message;
   } finally { btn.disabled = false; btn.textContent = 'Confirmar suscripción →'; }
+}
+
+// Activa/desactiva el pago automático de la suscripción activa (se cobra del
+// monedero al vencer si hay fondos). Mismo endpoint que usa la app móvil.
+async function toggleAutoRenewWeb(checkbox) {
+  const token = localStorage.getItem('mbola_token');
+  const enable = checkbox.checked;
+  checkbox.disabled = true;
+  try {
+    const endpoint = enable ? '/payments/subscription/auto-renew' : '/payments/subscription/cancel';
+    const r = await fetch(API_BASE + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    });
+    const j = await r.json();
+    if (!j.success) throw new Error(j.error || 'Error');
+  } catch(e) {
+    checkbox.checked = !enable; // revertir si falló
+    alert('❌ ' + e.message);
+  } finally {
+    checkbox.disabled = false;
+  }
 }
 
 // ── Topup / Withdraw Wallet ───────────────────────────────────────────────────
