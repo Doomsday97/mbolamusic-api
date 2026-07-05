@@ -122,7 +122,17 @@ async function listTracks(req, res) {
   const { genre, search } = req.query;
   const where = { isPublished: true, deletedAt: null };
   if (genre && genre !== 'all') where.genre = genre;
-  if (search) where.title = { contains: search, mode: 'insensitive' };
+  // Buscar coincidencia en título, género o nombre del artista -- antes solo
+  // comparaba el título, así que buscar por artista o género (escribiendo el
+  // texto en el buscador, no seleccionando el filtro de género) no encontraba
+  // nada salvo que la palabra apareciera también en el título de la canción.
+  if (search) {
+    where.OR = [
+      { title: { contains: search, mode: 'insensitive' } },
+      { genre: { contains: search, mode: 'insensitive' } },
+      { artist: { artistName: { contains: search, mode: 'insensitive' } } },
+    ];
+  }
 
   const tracks = await prisma.track.findMany({
     where,
