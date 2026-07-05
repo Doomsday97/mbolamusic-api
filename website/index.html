@@ -226,7 +226,7 @@
   .lang-btn { display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:0.35rem 0.7rem;cursor:pointer;color:var(--text);font-size:0.82rem;font-weight:600; }
   .lang-btn:hover { border-color:var(--amber); }
   .lang-dropdown { position:absolute;top:calc(100% + 6px);right:0;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:6px;min-width:130px;display:none;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,0.5); }
-  .lang-switcher:hover .lang-dropdown,.lang-switcher:focus-within .lang-dropdown { display:block; }
+  .lang-switcher:hover .lang-dropdown,.lang-switcher:focus-within .lang-dropdown,.lang-switcher.open .lang-dropdown { display:block; }
   .lang-opt { display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:0.85rem;color:var(--text2);transition:background .15s; }
   .lang-opt:hover,.lang-opt.active { background:rgba(245,158,11,0.12);color:var(--amber); }
 
@@ -273,8 +273,8 @@
       <li><a href="#admin">Admin</a></li>
     </ul>
     <div style="display:flex;gap:10px;align-items:center;">
-      <div class="lang-switcher">
-        <button class="lang-btn" id="lang-current">🌐 ES</button>
+      <div class="lang-switcher" id="lang-switcher">
+        <button class="lang-btn" id="lang-current" onclick="toggleLangDropdown(event)">🌐 ES</button>
         <div class="lang-dropdown">
           <div class="lang-opt active" onclick="setLang('es')">🇪🇸 Español</div>
           <div class="lang-opt" onclick="setLang('fr')">🇫🇷 Français</div>
@@ -377,6 +377,20 @@ document.addEventListener('click', function(e) {
   const btn  = document.getElementById('hamburger-btn');
   if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
     closeMobileMenu();
+  }
+});
+
+// El selector de idioma dependía solo de :hover (no funciona con toque en
+// móvil/tablet, donde no existe estado de hover) -- se añade abrir/cerrar
+// por clic/toque como en el resto de menús del sitio.
+function toggleLangDropdown(e) {
+  e.stopPropagation();
+  document.getElementById('lang-switcher').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const sw = document.getElementById('lang-switcher');
+  if (sw && sw.classList.contains('open') && !sw.contains(e.target)) {
+    sw.classList.remove('open');
   }
 });
 </script>
@@ -1031,6 +1045,7 @@ function setLang(code, save = true) {
     const codes = ['es','fr','pt','en'];
     el.classList.toggle('active', codes[i] === code);
   });
+  document.getElementById('lang-switcher')?.classList.remove('open');
   // Hero
   const badge = document.querySelector('.hero-badge');
   if (badge) badge.textContent = t.heroBadge;
