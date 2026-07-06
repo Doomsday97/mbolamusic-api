@@ -1,9 +1,13 @@
 // Verificación de Cloudflare Turnstile (CAPTCHA invisible/de un clic) para
-// los formularios de la app Flutter Web de consumo — register/login. La APK
-// no necesita esto (no hay navegador), y tampoco el panel admin ni el sitio
-// estático propio (mismo dominio que la API, nunca tuvieron el widget).
-
-const { isConsumerWebOrigin } = require('../utils/webOrigin');
+// cualquier formulario de login/registro servido desde un navegador (sitio
+// propio, panel admin, o la futura app Flutter Web de consumo). La APK no
+// necesita esto (no hay navegador, no manda header Origin).
+//
+// Antes solo se exigía a un dominio externo hipotético (isConsumerWebOrigin),
+// dejando sin protección anti-bot real tanto al sitio público como al login
+// del panel admin -- una auditoría de seguridad confirmó con una prueba real
+// que se podía registrar una cuenta sin ninguna verificación anti-bot.
+const { isBrowserRequest } = require('../utils/webOrigin');
 
 const VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
@@ -24,15 +28,14 @@ async function verifyTurnstile(token, remoteip) {
   }
 }
 
-// Middleware para rutas expuestas a formularios de la app Flutter Web.
-// - Peticiones sin header Origin (la APK), o con Origin del propio dominio
-//   de la API (panel admin, sitio estático) pasan sin verificar.
+// Middleware para rutas expuestas a formularios web (cualquier navegador).
+// - Peticiones sin header Origin (la APK) pasan sin verificar.
 // - Si TURNSTILE_SECRET_KEY no está configurado aún, deja pasar (no bloquea
 //   el flujo antes de que Cloudflare esté configurado) pero registra un aviso.
-// - Si está configurado y es la app Flutter Web de consumo, exige y valida el token.
+// - Si está configurado y la petición viene de un navegador, exige y valida el token.
 function requireTurnstile() {
   return async (req, res, next) => {
-    if (!isConsumerWebOrigin(req)) return next();
+    if (!isBrowserRequest(req)) return next();
 
     if (!process.env.TURNSTILE_SECRET_KEY) {
       console.warn('[turnstile] TURNSTILE_SECRET_KEY no configurado — verificación anti-bot omitida');

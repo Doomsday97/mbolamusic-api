@@ -6,6 +6,7 @@
 <title>MbôláMusic · Admin</title>
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
   :root {
     --bg: #0a0a0a; --surface: #1a1a1a; --surface2: #262626;
@@ -158,6 +159,7 @@
     <p data-i18n="loginPanelTitle">Panel de administración</p>
     <input id="login-id" type="text" placeholder="Email, teléfono o usuario" data-i18n-placeholder="loginIdPlaceholder" />
     <input id="login-pw" type="password" placeholder="Contraseña" data-i18n-placeholder="loginPwPlaceholder" />
+    <div class="cf-turnstile" data-sitekey="0x4AAAAAADvO6mrfkV6Je9Lc" data-callback="onTurnstileAdminLogin" data-theme="dark" style="margin-bottom:12px;"></div>
     <button id="login-btn" onclick="doLogin()" data-i18n="loginEnterBtn">Entrar</button>
     <div id="login-err" class="error-msg"></div>
   </div>
@@ -353,6 +355,9 @@ let _user  = null;
 let _silenceChallenge = null;
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
+let _turnstileAdminToken = null;
+function onTurnstileAdminLogin(token) { _turnstileAdminToken = token; }
+
 async function doLogin() {
   const id = document.getElementById('login-id').value.trim();
   const pw = document.getElementById('login-pw').value;
@@ -361,7 +366,7 @@ async function doLogin() {
   err.textContent = '';
   btn.disabled = true;
   try {
-    const r = await apiFetch('/auth/login', 'POST', { identifier: id, password: pw }, false);
+    const r = await apiFetch('/auth/login', 'POST', { identifier: id, password: pw, turnstileToken: _turnstileAdminToken }, false);
     if (r.user.role !== 'ADMIN') throw new Error(i18n('notAdminError', 'No tienes rol de administrador'));
     _token = r.token;
     _user  = r.user;
@@ -369,6 +374,8 @@ async function doLogin() {
     showApp();
   } catch (e) {
     err.textContent = e.message;
+    if (window.turnstile) document.querySelectorAll('.cf-turnstile').forEach(el => turnstile.reset(el));
+    _turnstileAdminToken = null;
   } finally {
     btn.disabled = false;
   }

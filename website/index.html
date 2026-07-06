@@ -6,6 +6,7 @@
 <title>MbôláMusic — Tu música sin límites</title>
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <meta name="description" content="La app de música de Guinea Ecuatorial. Escucha, descarga y apoya a tus artistas locales.">
 <meta property="og:title" content="MbôláMusic">
 <meta property="og:description" content="Streaming y descarga de música para Guinea Ecuatorial">
@@ -334,6 +335,7 @@
           <input id="li-id" type="text" placeholder="tu@email.com" style="width:100%;padding:11px 14px;background:#1f1f1f;border:1px solid #333;border-radius:10px;color:#fff;font-size:0.95rem;"></div>
         <div><label id="li-pw-label" style="font-size:0.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Contraseña</label>
           <input id="li-pw" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')doLoginWeb()" style="width:100%;padding:11px 14px;background:#1f1f1f;border:1px solid #333;border-radius:10px;color:#fff;font-size:0.95rem;"></div>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAADvO6mrfkV6Je9Lc" data-callback="onTurnstileLogin" data-theme="dark"></div>
         <div id="li-err" style="color:#f87171;font-size:0.85rem;display:none;"></div>
         <button id="li-submit-btn" onclick="doLoginWeb()" style="background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;">Entrar →</button>
       </div>
@@ -359,6 +361,7 @@
           <input id="rg-pw" type="password" placeholder="mínimo 6 caracteres" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;"></div>
         <div><label id="rg-referral-label" style="font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Código de referido (opcional)</label>
           <input id="rg-referral" type="text" placeholder="Ej: A3F7C291" style="width:100%;padding:10px 12px;background:#1f1f1f;border:1px solid #333;border-radius:9px;color:#fff;font-size:0.9rem;text-transform:uppercase;"></div>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAADvO6mrfkV6Je9Lc" data-callback="onTurnstileRegister" data-theme="dark"></div>
         <div id="rg-err" style="color:#f87171;font-size:0.85rem;display:none;"></div>
         <button id="rg-submit-btn" onclick="doRegisterWeb()" style="background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;">Crear cuenta →</button>
         <p id="rg-note" style="font-size:0.78rem;color:var(--text2);text-align:center;">Oyentes: 1 mes gratis · Artistas: 10.000 FCFA/mes</p>
@@ -423,6 +426,20 @@ function toggleArtistField() {
   document.getElementById('rg-artist-row').style.display = isArtist ? '' : 'none';
 }
 
+// Turnstile: el callback de cada widget guarda el token aquí; se manda al
+// backend en el body como turnstileToken. Tras un intento fallido, hay que
+// pedirle a Cloudflare un token nuevo (turnstile.reset) porque cada token
+// es de un solo uso.
+let _turnstileLoginToken = null;
+let _turnstileRegisterToken = null;
+function onTurnstileLogin(token) { _turnstileLoginToken = token; }
+function onTurnstileRegister(token) { _turnstileRegisterToken = token; }
+function _resetTurnstile(container) {
+  if (window.turnstile) {
+    document.querySelectorAll(container + ' .cf-turnstile').forEach(el => turnstile.reset(el));
+  }
+}
+
 async function doLoginWeb() {
   const identifier = document.getElementById('li-id').value.trim();
   const password   = document.getElementById('li-pw').value;
@@ -431,10 +448,14 @@ async function doLoginWeb() {
   try {
     const r = await fetch(API_BASE + '/auth/login', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ identifier, password })
+      body: JSON.stringify({ identifier, password, turnstileToken: _turnstileLoginToken })
     });
     const j = await r.json();
-    if (!j.success) { err.textContent = j.error || (T[localStorage.getItem('mbola_lang')||'es']||T.es).errLogin; err.style.display = ''; return; }
+    if (!j.success) {
+      err.textContent = j.error || (T[localStorage.getItem('mbola_lang')||'es']||T.es).errLogin; err.style.display = '';
+      _resetTurnstile('#panel-login'); _turnstileLoginToken = null;
+      return;
+    }
     localStorage.setItem('mbola_token', j.data.token);
     localStorage.setItem('mbola_user',  JSON.stringify(j.data.user));
     closeModal();
@@ -451,7 +472,7 @@ async function doRegisterWeb() {
   const referralCode = document.getElementById('rg-referral').value.trim();
   const err = document.getElementById('rg-err');
   err.style.display = 'none';
-  const body = { username, email, password, role };
+  const body = { username, email, password, role, turnstileToken: _turnstileRegisterToken };
   if (role === 'ARTIST') body.artistName = artistName;
   if (referralCode) body.referralCode = referralCode;
   try {
@@ -459,7 +480,11 @@ async function doRegisterWeb() {
       method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
     });
     const j = await r.json();
-    if (!j.success) { err.textContent = j.error || (T[localStorage.getItem('mbola_lang')||'es']||T.es).errRegister; err.style.display = ''; return; }
+    if (!j.success) {
+      err.textContent = j.error || (T[localStorage.getItem('mbola_lang')||'es']||T.es).errRegister; err.style.display = '';
+      _resetTurnstile('#panel-register'); _turnstileRegisterToken = null;
+      return;
+    }
     localStorage.setItem('mbola_token', j.data.token);
     localStorage.setItem('mbola_user',  JSON.stringify(j.data.user));
     closeModal();

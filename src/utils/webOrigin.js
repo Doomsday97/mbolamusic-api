@@ -41,4 +41,15 @@ function isKnownOrigin(origin) {
   return KNOWN_ORIGINS.has(origin);
 }
 
-module.exports = { isConsumerWebOrigin, isKnownOrigin, KNOWN_ORIGINS, API_OWN_ORIGINS };
+// ¿Esta petición viene de un navegador (sitio propio, panel admin, o la
+// futura app Flutter Web)? Cualquier Origin presente = navegador. Solo la
+// APK y peticiones servidor-a-servidor (sin Origin) devuelven false.
+// Usado por turnstile.js para exigir el anti-bot a CUALQUIER formulario web,
+// no solo a un dominio externo -- antes solo isConsumerWebOrigin (para
+// distinguir cookie vs token en la respuesta de login) exceptuaba por error
+// al sitio propio y al panel admin de la verificación anti-bot.
+function isBrowserRequest(req) {
+  return !!req.headers.origin;
+}
+
+module.exports = { isConsumerWebOrigin, isKnownOrigin, isBrowserRequest, KNOWN_ORIGINS, API_OWN_ORIGINS };
