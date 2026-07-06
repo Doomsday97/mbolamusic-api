@@ -2829,6 +2829,10 @@ async function submitChangePassword() {
     });
     const j = await r.json();
     if (!j.success) throw new Error(j.error || 'Error');
+    // Cambiar la contraseña invalida el token anterior (tokenVersion en el
+    // backend); el servidor devuelve uno nuevo ya válido para no cerrar la
+    // sesión actual de golpe.
+    if (j.data && j.data.token) localStorage.setItem('mbola_token', j.data.token);
     closeChangePasswordModal();
     alert(t.cpSuccess);
   } catch (e) {

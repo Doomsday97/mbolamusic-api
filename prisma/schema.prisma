@@ -69,6 +69,12 @@ model User {
   email         String?   @unique
   phone         String?   @unique
   passwordHash  String
+  // Se incrementa al cambiar contraseña (propia, por admin, o por recuperación).
+  // El JWT lleva la versión con la que se firmó; si no coincide con la actual,
+  // el token se rechaza aunque no haya expirado -- así un token robado antes
+  // del cambio de contraseña deja de servir de inmediato, en vez de seguir
+  // siendo válido hasta sus 30 días de expiración natural.
+  tokenVersion  Int       @default(0)
   role          Role      @default(LISTENER)
   previousRole  Role?     // rol antes de ser designado ADMIN, para restaurarlo al degradar
   isSuperAdmin  Boolean   @default(false) // solo el admin principal puede designar/quitar otros admins

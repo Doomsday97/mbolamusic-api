@@ -231,7 +231,10 @@ async function resetPassword(req, res) {
   const { newPassword } = req.body;
   if (!newPassword || newPassword.length < 6) return fail(res, 'La contraseña debe tener al menos 6 caracteres');
   const hash = await bcrypt.hash(newPassword, 10);
-  await prisma.user.update({ where: { id: req.params.id }, data: { passwordHash: hash } });
+  await prisma.user.update({
+    where: { id: req.params.id },
+    data: { passwordHash: hash, tokenVersion: { increment: 1 } },
+  });
   return ok(res, { reset: true });
 }
 

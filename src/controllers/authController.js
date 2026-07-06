@@ -148,7 +148,7 @@ const COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 //    como siempre -- el panel admin y el sitio estático nunca dejaron de
 //    esperar el token ahí.
 function respondWithAuth(req, res, user, statusCode = 200) {
-  const token = signToken({ id: user.id, role: user.role });
+  const token = signToken({ id: user.id, role: user.role, tokenVersion: user.tokenVersion });
   const isWeb = isConsumerWebOrigin(req);
 
   if (isWeb) {
@@ -305,8 +305,19 @@ async function changePassword(req, res) {
   if (!valid) return fail(res, 'La contraseña actual es incorrecta', 401);
 
   const passwordHash = await bcrypt.hash(newPassword, 10);
-  await prisma.user.update({ where: { id: req.user.id }, data: { passwordHash } });
-  return ok(res, { changed: true });
+  const updated = await prisma.user.update({
+    where: { id: req.user.id },
+    data: { passwordHash, tokenVersion: { increment: 1 } },
+  });
+
+  // El incremento de tokenVersion invalida el propio token con el que se
+  // hizo esta petición (correcto para cualquier OTRA sesión/dispositivo con
+  // un token viejo) -- pero para no cerrar de golpe la sesión actual del
+  // usuario que acaba de demostrar quién es escribiendo su contraseña
+  // actual, se le devuelve un token nuevo ya firmado con la tokenVersion
+  // vigente, para que el cliente lo reemplace inmediatamente.
+  const newToken = signToken({ id: updated.id, role: updated.role, tokenVersion: updated.tokenVersion });
+  return ok(res, { changed: true, token: newToken });
 }
 
 // POST /api/auth/security-questions  — guarda/actualiza las 4 preguntas de seguridad
@@ -366,7 +377,10 @@ async function recoverVerify(req, res) {
   if (!valid) return fail(res, 'Respuesta incorrecta', 401);
 
   const hash = await bcrypt.hash(newPassword, 10);
-  await prisma.user.update({ where: { id: userId }, data: { passwordHash: hash } });
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash: hash, tokenVersion: { increment: 1 } },
+  });
   return ok(res, { reset: true });
 }
 

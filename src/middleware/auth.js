@@ -35,6 +35,16 @@ async function authenticate(req, res, next) {
     });
     if (!user) return fail(res, 'Usuario no encontrado', 401);
     if (user.deletedAt) return fail(res, 'Esta cuenta ha sido eliminada', 403);
+    // Un cambio de contraseña incrementa tokenVersion (ver authController /
+    // adminController): cualquier token firmado ANTES de ese cambio deja de
+    // servir de inmediato, aunque no haya expirado -- así un token robado no
+    // sigue siendo válido 30 días tras el cambio de contraseña. Los tokens
+    // emitidos antes de este campo no traen tokenVersion (undefined); se
+    // tratan como 0 para no invalidar de golpe todas las sesiones activas al
+    // desplegar este cambio.
+    if ((decoded.tokenVersion || 0) !== user.tokenVersion) {
+      return fail(res, 'Tu sesión expiró porque la contraseña cambió. Inicia sesión de nuevo.', 401);
+    }
 
     req.user = user;
     onlineTracker.track(req); // registrar presencia

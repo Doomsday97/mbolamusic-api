@@ -863,10 +863,13 @@ async function submitChangePassword() {
   btn.disabled = true; btn.textContent = i18n('processing', 'Guardando…');
   errEl.style.display = 'none';
   try {
-    await apiFetch('/auth/change-password', 'POST', {
+    const r = await apiFetch('/auth/change-password', 'POST', {
       currentPassword: current,
       newPassword: newPass,
     });
+    // Cambiar la contraseña invalida el token anterior (tokenVersion); el
+    // backend devuelve uno nuevo ya válido para no cerrar esta sesión.
+    if (r && r.token) { _token = r.token; localStorage.setItem('adminToken', _token); }
     closeChangePasswordModal();
     alert(i18n('cpSuccess', '✅ Contraseña actualizada correctamente.'));
   } catch (e) {
