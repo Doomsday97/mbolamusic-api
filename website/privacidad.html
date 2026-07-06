@@ -92,6 +92,7 @@
       <tr><td id="l-s2-r6c1">Técnico</td><td id="l-s2-r6c2">Dirección IP, navegador, sistema operativo</td><td id="l-s2-r6c3">Automático</td></tr>
       <tr><td id="l-s2-r7c1">Artístico</td><td id="l-s2-r7c2">Música subida, nombre artístico, biografía (solo artistas)</td><td id="l-s2-r7c3">Uso del servicio</td></tr>
       <tr><td id="l-s2-r8c1">Referidos</td><td id="l-s2-r8c2">Código de referido propio, código usado al registrarte, identificador de quién te refirió</td><td id="l-s2-r8c3">Registro</td></tr>
+      <tr><td id="l-s2-r9c1">Preferencias</td><td id="l-s2-r9c2">Géneros musicales favoritos (voluntario, elegidos al registrarte)</td><td id="l-s2-r9c3">Registro</td></tr>
     </tbody>
   </table>
   <p id="l-s2-p1">No tratamos datos de categorías especiales (salud, origen racial, opiniones políticas, etc.).</p>
@@ -223,6 +224,7 @@ const T = {
     s2r6c1:'Técnico', s2r6c2:'Dirección IP, navegador, sistema operativo', s2r6c3:'Automático',
     s2r7c1:'Artístico', s2r7c2:'Música subida, nombre artístico, biografía (solo artistas)', s2r7c3:'Uso del servicio',
     s2r8c1:'Referidos', s2r8c2:'Código de referido propio, código usado al registrarte, identificador de quién te refirió', s2r8c3:'Registro',
+    s2r9c1:'Preferencias', s2r9c2:'Géneros musicales favoritos (voluntario, elegidos al registrarte)', s2r9c3:'Registro',
     s2p1:'No tratamos datos de categorías especiales (salud, origen racial, opiniones políticas, etc.).',
     s3h2:'3. Finalidad y Base Legal del Tratamiento', s3th1:'Finalidad', s3th2:'Base legal (RGPD art. 6)',
     s3r1c1:'Gestionar tu cuenta y autenticación', s3r1c2:'Ejecución de contrato (6.1.b)',
@@ -302,6 +304,7 @@ const T = {
     s2r6c1:'Technique', s2r6c2:'Adresse IP, navigateur, système d\'exploitation', s2r6c3:'Automatique',
     s2r7c1:'Artistique', s2r7c2:'Musique mise en ligne, nom artistique, biographie (artistes uniquement)', s2r7c3:'Utilisation du service',
     s2r8c1:'Parrainage', s2r8c2:'Code de parrainage personnel, code utilisé à l\'inscription, identifiant de la personne qui t\'a parrainé', s2r8c3:'Inscription',
+    s2r9c1:'Préférences', s2r9c2:'Genres musicaux préférés (facultatif, choisis à l\'inscription)', s2r9c3:'Inscription',
     s2p1:'Nous ne traitons pas de données de catégories particulières (santé, origine raciale, opinions politiques, etc.).',
     s3h2:'3. Finalité et Base Légale du Traitement', s3th1:'Finalité', s3th2:'Base légale (RGPD art. 6)',
     s3r1c1:'Gérer ton compte et l\'authentification', s3r1c2:'Exécution du contrat (6.1.b)',
@@ -381,6 +384,7 @@ const T = {
     s2r6c1:'Técnico', s2r6c2:'Endereço IP, navegador, sistema operativo', s2r6c3:'Automático',
     s2r7c1:'Artístico', s2r7c2:'Música carregada, nome artístico, biografia (apenas artistas)', s2r7c3:'Uso do serviço',
     s2r8c1:'Referências', s2r8c2:'Código de referência próprio, código utilizado no registo, identificador de quem te referiu', s2r8c3:'Registo',
+    s2r9c1:'Preferências', s2r9c2:'Géneros musicais favoritos (voluntário, escolhidos no registo)', s2r9c3:'Registo',
     s2p1:'Não tratamos dados de categorias especiais (saúde, origem racial, opiniões políticas, etc.).',
     s3h2:'3. Finalidade e Base Legal do Tratamento', s3th1:'Finalidade', s3th2:'Base legal (RGPD art. 6)',
     s3r1c1:'Gerir a tua conta e autenticação', s3r1c2:'Execução de contrato (6.1.b)',
@@ -460,6 +464,7 @@ const T = {
     s2r6c1:'Technical', s2r6c2:'IP address, browser, operating system', s2r6c3:'Automatic',
     s2r7c1:'Artistic', s2r7c2:'Uploaded music, artist name, biography (artists only)', s2r7c3:'Service use',
     s2r8c1:'Referrals', s2r8c2:'Your own referral code, code used at signup, identifier of who referred you', s2r8c3:'Registration',
+    s2r9c1:'Preferences', s2r9c2:'Favorite music genres (optional, chosen at signup)', s2r9c3:'Registration',
     s2p1:'We do not process special-category data (health, racial origin, political opinions, etc.).',
     s3h2:'3. Purpose and Legal Basis for Processing', s3th1:'Purpose', s3th2:'Legal basis (GDPR art. 6)',
     s3r1c1:'Manage your account and authentication', s3r1c2:'Contract performance (6.1.b)',
@@ -569,6 +574,7 @@ function setLang(code, save = true) {
   setText('l-s2-r6c1', t.s2r6c1); setText('l-s2-r6c2', t.s2r6c2); setText('l-s2-r6c3', t.s2r6c3);
   setText('l-s2-r7c1', t.s2r7c1); setText('l-s2-r7c2', t.s2r7c2); setText('l-s2-r7c3', t.s2r7c3);
   setText('l-s2-r8c1', t.s2r8c1); setText('l-s2-r8c2', t.s2r8c2); setText('l-s2-r8c3', t.s2r8c3);
+  setText('l-s2-r9c1', t.s2r9c1); setText('l-s2-r9c2', t.s2r9c2); setText('l-s2-r9c3', t.s2r9c3);
   setText('l-s2-p1', t.s2p1);
   setText('l-s3-h2', t.s3h2); setText('l-s3-th1', t.s3th1); setText('l-s3-th2', t.s3th2);
   setText('l-s3-r1c1', t.s3r1c1); setText('l-s3-r1c2', t.s3r1c2);
