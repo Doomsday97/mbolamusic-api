@@ -760,7 +760,26 @@ async function _finalizePayment(payment, status) {
   }
 }
 
+// Enfriamiento anti-abuso: si el mismo usuario "reproduce" la misma canción
+// de nuevo antes de este intervalo, no se cuenta otra vez (ni suma al
+// contador de reproducciones ni reparte ganancia al artista). Sin esto,
+// cualquiera podía llamar al endpoint de reproducción en bucle para inflar
+// el contador de una canción y, con él, la porción del pool de ganancias
+// compartido que le toca a ese artista -- en perjuicio de los demás.
+const PLAY_COOLDOWN_MS = 30 * 1000;
+
 async function registerPlay(userId, track, bySubscription) {
+  // El enfriamiento solo aplica a reproducciones cubiertas por suscripción
+  // (gratis para quien llama, por eso es lo único que se puede "spammear"
+  // sin costo). El pago directo por reproducción (bySubscription=false) ya
+  // se autolimita: cada repetición exige un Payment nuevo y completado.
+  if (bySubscription) {
+    const recentPlay = await prisma.play.findFirst({
+      where: { userId, trackId: track.id, bySubscription: true, createdAt: { gte: new Date(Date.now() - PLAY_COOLDOWN_MS) } },
+    });
+    if (recentPlay) return; // reproducción duplicada dentro del enfriamiento: no cuenta
+  }
+
   const sub = await subscriptionService.getActiveSubscription(userId);
   const subType = sub ? sub.type : null;
 
