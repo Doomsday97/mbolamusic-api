@@ -28,7 +28,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc:     ["'self'"],
-      scriptSrc:      ["'self'", "'unsafe-inline'"],   // inline JS en admin/web
+      // https://challenges.cloudflare.com: script del widget Turnstile (login/registro
+      // web y panel admin). Sin esto, el <script> se bloquea por CSP, el widget nunca
+      // carga, _turnstileToken queda null para siempre y el login/registro falla con
+      // "Falta la verificación anti-bot" -- bug real detectado por el propio usuario.
+      scriptSrc:      ["'self'", "'unsafe-inline'", 'https://challenges.cloudflare.com'],
       scriptSrcAttr:  ["'unsafe-inline'"],              // onclick= onchange= etc.
       styleSrc:       ["'self'", "'unsafe-inline'"],
       imgSrc:         ["'self'", 'data:', 'blob:', 'https:'],
@@ -36,6 +40,8 @@ app.use(helmet({
       connectSrc:     ["'self'", 'https:'],
       fontSrc:        ["'self'", 'https:', 'data:'],
       objectSrc:      ["'none'"],
+      // Turnstile renderiza su challenge dentro de un iframe de este dominio.
+      frameSrc:       ["'self'", 'https://challenges.cloudflare.com'],
       frameAncestors: ["'none'"],
       upgradeInsecureRequests: [],
     },
