@@ -692,11 +692,19 @@ async function adminRejectPayment(req, res) {
 }
 
 // ----- helpers -----
+// UPDATE atómico condicionado al estado actual: si dos llamadas concurrentes
+// intentan finalizar el mismo pago (un webhook de Flutterwave duplicado, o un
+// admin haciendo doble clic en "confirmar"), solo la primera transiciona el
+// estado; la segunda ve count=0 y no repite ningún efecto (acreditar
+// monedero, crear suscripción, registrar descarga/reproducción...). Antes
+// era un update() simple sin condición -- una carrera real podía duplicar
+// el crédito de un WALLET_TOPUP u otros efectos post-pago.
 async function _finalizePayment(payment, status) {
-  await prisma.payment.update({
-    where: { id: payment.id },
+  const transitioned = await prisma.payment.updateMany({
+    where: { id: payment.id, status: { in: ['PENDING', 'VERIFYING'] } },
     data: { status, completedAt: status === 'COMPLETED' ? new Date() : null },
   });
+  if (transitioned.count === 0) return; // ya finalizado por otra llamada concurrente
 
   // Notificar al usuario según resultado
   const label = { COMPLETED: 'confirmado', FAILED: 'rechazado', VERIFYING: 'en verificación' };
